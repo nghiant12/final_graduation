@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!-- Thay thế toàn bộ trang này bằng trang layout, nhưng trước khi thay thì
+lấy toàn bộ phần body ở trang này truyền vào phần view có ở layout
+ -->
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
+
+<head>
+   <meta charset="utf-8">
+   <title>Trang chủ</title>
+</head>
+
+<body class="main-layout">
+   <div>
+      <img src="/images/home/head-image.png" class="main-banner">
+   </div>
+
+   <div class="home-brand">
+      <a href="#"><img class="thuonghieu" src="/images/home/HM-Logo.png" alt=""></a>
+      <a href="#"><img class="thuonghieu" src="/images/home/R-removebg-preview.png" alt=""></a>
+      <a href="#"><img class="thuonghieu" src="/images/home/Shopify-removebg-preview.png" alt=""></a>
+      <a href="#"><img class="thuonghieu" src="/images/home/Lacoste-Emblem.png" alt=""></a>
+      <a href="#"><img class="thuonghieu" src="/images/home/Levis-Logo-1969-2003.png" alt=""></a>
+      <a href="#"><img class="thuonghieu" src="/images/home/amazonbeauty1000-364179e8c4-removebg-preview.png"
+            alt=""></a>
+   </div>
+
+   <strong class="new-arrival-title">NEW ARRIVALS</strong>
+   <div class="new-arrival">
+      <div>
+         <a href="/product/86" class="top-link">
+            <img src="/images/9e576e84.png" class="card-img-top">
+            <div class="top-card-title">
+               <h5>ChicQuilt</h5>
+            </div>
+         </a>
+      </div>
+      <div>
+         <a href="/product/89" class="top-link">
+            <img src="/images/e8b5ef44.jpg" class="card-img-top">
+            <div class="top-card-title">
+               <h5>Áo Nike Sportswear</h5>
+            </div>
+         </a>
+      </div>
+      <div>
+         <a href="/product/115" class="top-link">
+            <img src="/images/c5fdec24.png" class="card-img-top">
+            <div class="top-card-title">
+               <h5>SmartStrides</h5>
+            </div>
+         </a>
+      </div>
+      <div>
+         <a href="/product/103" class="top-link">
+            <img src="/images/b59d3d2b.jpg" class="card-img-top">
+            <div class="top-card-title">
+               <h5>Quần Nike Sportswear</h5>
+            </div>
+         </a>
+      </div>
+   </div>
+
+   <strong class="new-arrival-title">FEATURED</strong>
+   <div class="new-arrival-container">
+      <div>
+         <a href="/product/list?cid=9" class="top-link">
+            <img src="/images/home/outfit_6.jpg" class="card-img-top">
+            <div class="top-card-title">
+               <h5>Hoodies & Sweetshirt</h5>
+               <p>Thoải mái và phong cách, Hoodies & Sweatshirt là lựa chọn hoàn hảo cho mọi dịp</p>
+            </div>
+         </a>
+      </div>
+      <div>
+         <a href="/product/list?cid=6" class="top-link">
+            <img src="/images/home/outfit_7.jpg" class="card-img-top">
+            <div class="top-card-title">
+               <h5>Coats & Parkas</h5>
+               <p>Sự ấm áp và phóng khoáng đẳng cấp cho phong cách thời trang của bạn</p>
+            </div>
+         </a>
+      </div>
+      <div>
+         <a href="/product/list?cid=5" class="top-link">
+            <img src="/images/home/outfit_4.jpg" class="card-img-top">
+            <div class="top-card-title">
+               <h5>Tees & T-Shirt</h5>
+               <p class="card-text">Phong cách và đa dạng, Tees & T-Shirt là biểu tượng của sự thoải mái và cá nhân</p>
+            </div>
+         </a>
+      </div>
+      <div>
+         <a href="/product/list?cid=7" class="top-link">
+            <img src="/images/pants-image.png" class="card-img-top">
+            <div class="top-card-title">
+               <h5>Jeans & Denim</h5>
+               <p class="card-text">Khám phá phần không thể thiếu của tủ quần áo với sự đa dạng và phóng khoáng của
+                  Jeans & Denim</p>
+            </div>
+         </a>
+      </div>
+   </div>
+
+   <div class="register-container">
+      <h2>ĐĂNG KÍ THÀNH VIÊN, NHẬN VÔ VÀNG ƯU ĐÃI</h2>
+      <h5>Nhận thông tin và các chương trình khuyến mãi sắp tới</h5>
+      <div class="form-register">
+         <input placeholder="Nhập email của bạn ...">
+         <button class="btn btn-outline-dark" type="email" style="width: 100px;">Gửi</button>
+      </div>
+   </div>
+
+</body>
+
+</html>
