@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta name="description" content=""/>
     <meta name="author" content=""/>
-    <title>Sản phẩm</title>
+    <title>Danh mục sản phẩm</title>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
     <link th:href="@{css/styles.css}" rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -16,18 +16,21 @@
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
     <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
+            class="fas fa-bars"></i></button>
     <!-- Navbar Search-->
     <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
         <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch"/>
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
+                   aria-describedby="btnNavbarSearch"/>
             <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
         </div>
     </form>
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="#!">Settings</a></li>
                 <li><a class="dropdown-item" href="#!">Activity Log</a></li>
@@ -39,21 +42,17 @@
         </li>
     </ul>
 </nav>
-
-<!-- Menu Sidebar -->
 <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
-        <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
+            <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
     </div>
-
-    <!-- Nội dung chính -->
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <h1 class="mt-4">Sản phẩm</h1>
+                <h1 class="mt-4">Danh mục sản phẩm</h1>
                 <ol class="breadcrumb mb-4">
                     <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Sản phẩm</li>
+                    <li class="breadcrumb-item active">Danh mục sản phẩm</li>
                 </ol>
                 <div class="card mb-4">
                     <div class="card-body">
@@ -65,34 +64,29 @@
                             <span th:text="${success}">Thành công</span>
                         </div>
                         <button type="button" class="btn btn-success" data-bs-toggle="modal"
-                                data-bs-target="#addProductModal">
-                            Thêm Sản Phẩm
+                                data-bs-target="#addCategoryModal">
+                            Thêm danh mục sản phẩm
                         </button>
 
                         <!-- Modal -->
-                        <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                        <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel"
                              aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm sản phẩm</h1>
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm danh mục sản phẩm</h1>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form action="#" th:action="@{/admin/products/add}" method="post"
-                                              th:object="${product}">
-                                            <input type="hidden" th:field="*{id}"/>
+                                        <!-- Form thêm thương hiệu hoặc chỉnh sửa thương hiệu -->
+                                        <form action="#" th:action="@{/admin/categories/add}" method="post"
+                                              th:object="${category}">
+                                        <input type="hidden" th:field="*{id}"/>
                                             <div class="mb-3">
-                                                <label for="name" class="form-label">Tên sản phẩm</label>
+                                                <label for="name" class="form-label">Tên danh mục sản phẩm</label>
                                                 <input type="text" class="form-control" id="name" th:field="*{name}"
-                                                       placeholder="Nhập tên sản phẩm" maxlength="100" required>
-                                            </div>
-                                            <!-- Checkbox Trạng thái -->
-                                            <div class="mb-3">
-                                                <label for="status" class="form-label">Trạng thái</label>
-                                                <input type="checkbox" class="form-check-input" th:field="*{status}" />
-                                                <label class="form-check-label" for="status">Đang kinh doanh</label>
+                                                       placeholder="Nhập tên danh mục sản phẩm" maxlength="100" required>
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -105,25 +99,21 @@
                             </div>
                         </div>
 
-                        <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+                        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel1"
+                             aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="exampleModalLabel1">Sửa sản phẩm</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel1">Sửa danh mục sản phẩm</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/products/update}" method="post">
+                                        <form th:action="@{/admin/categories/update}" method="post">
                                             <input type="hidden" name="id" />
                                             <div class="mb-3">
-                                                <label for="name" class="form-label">Tên sản phẩm</label>
-                                                <input type="text" class="form-control" name="name" placeholder="Nhập tên sản phẩm  " maxlength="100" required />
-                                            </div>
-                                            <!-- Checkbox Trạng thái -->
-                                            <div class="mb-3">
-                                                <label for="status" class="form-label">Trạng thái</label>
-                                                <input type="checkbox" class="form-check-input" name="status" id="status">
-                                                <label class="form-check-label" for="status">Đang kinh doanh</label>
+                                                <label for="name" class="form-label">Tên danh mục sản phẩm</label>
+                                                <input type="text" class="form-control" name="name" placeholder="Nhập tên danh mục sản phẩm" maxlength="100" required />
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -148,24 +138,20 @@
                             <tr>
                                 <th>STT</th>
                                 <th>Tên</th>
-                                <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="product, stat : ${products}">
+                            <tr th:each="category, stat : ${categories}">
                                 <td th:text="${stat.index+1}"></td>
-                                <td th:text="${product.name}"></td>
-                                <td th:text="${product.status != null && product.status ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}"></td>
+                                <td th:text="${category.name}"></td>
                                 <td>
-                                    <a th:href="@{#}" style="color: black; text-decoration: none; padding-right: 15px;"
+                                    <a href="#"
+                                       style="color: black; text-decoration: none"
                                        data-bs-toggle="modal"
-                                       data-bs-target="#editProductModal"
-                                       th:attr="data-id=${product.id}, data-name=${product.name}, data-status=${product.status}">
+                                       data-bs-target="#editCategoryModal"
+                                       th:attr="data-id=${category.id}, data-name=${category.name}">
                                         <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <a th:href="@{/admin/products/detail(idProduct=${product.id})}" style="color: black; text-decoration: none">
-                                        <i class="fa-solid fa-eye"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -177,7 +163,6 @@
         </main>
     </div>
 </div>
-
 <footer class="py-4 bg-light mt-auto">
     <div class="container-fluid px-4">
         <div class="d-flex align-items-center justify-content-between small">
@@ -185,7 +170,7 @@
             <div>
                 <a href="#">Privacy Policy</a>
                 &middot;
-                <a href="#">Terms & Conditions</a>
+                <a href="#">Terms &amp; Conditions</a>
             </div>
         </div>
     </div>
@@ -193,25 +178,24 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const editProductModal = document.getElementById('editProductModal');
-        editProductModal.addEventListener('show.bs.modal', function (event) {
+        const editCategoryModal = document.getElementById('editCategoryModal');
+        editCategoryModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget; // Lấy nút được click
             const id = button.getAttribute('data-id');
             const name = button.getAttribute('data-name');
-            const status = button.getAttribute('data-status');
 
             // Gán dữ liệu vào các trường trong form
-            const form = editProductModal.querySelector('form');
+            const form = editCategoryModal.querySelector('form');
             form.querySelector('input[name="id"]').value = id;
             form.querySelector('input[name="name"]').value = name;
-            form.querySelector('input[name="status"]').checked = status === 'true';
         });
     });
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
 <script th:src="@{js/scripts.js}"></script>
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
 <script th:src="@{js/datatables-simple-demo.js}"></script>
 </body>
 </html>
