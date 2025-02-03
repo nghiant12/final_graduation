@@ -1,11 +1,14 @@
 package org.example.final_graduation.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Nationalized;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,13 +23,14 @@ public class Account {
     @Size(max = 50)
     @NotNull
     @Nationalized
-    @Column(name = "username", nullable = false, length = 50)
+    @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
 
     @Size(max = 255)
     @NotNull
     @Nationalized
     @Column(name = "password", nullable = false)
+    @NotBlank(groups = Account.class) // Chỉ kiểm tra khi tạo mới
     private String password;
 
     @Size(max = 100)
@@ -38,7 +42,7 @@ public class Account {
     @Size(max = 100)
     @NotNull
     @Nationalized
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
     @Size(max = 100)
@@ -50,5 +54,11 @@ public class Account {
     @Nationalized
     @Column(name = "photo")
     private String photo;
+
+    @Column(name = "created_date", nullable = false)
+    private java.util.Date createdDate = new java.util.Date();
+
+    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+    private List<Authority> authorities;
 
 }
