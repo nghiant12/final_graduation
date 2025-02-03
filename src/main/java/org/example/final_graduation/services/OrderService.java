@@ -33,8 +33,8 @@ public class OrderService {
         newOrder.setType("At the counter");
         newOrder.setStatus("Processing"); // Set default values if necessary
         newOrder.setAddress("At the counter"); // Set default values if necessary
-        Order ordera = orderRepository.save(newOrder);
-        orderRepository.save(ordera);
+        Order order = orderRepository.save(newOrder);
+        orderRepository.save(order);
     }
 
     public Optional<Order> getOrderById(Integer id) {
@@ -52,8 +52,8 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public List<Account> searchCustomers(String email) {
-        return accountRepository.findCustomersByEmail(email);
+    public List<Account> searchCustomers(String email, String fullname) {
+        return accountRepository.findCustomers(email, fullname);
     }
 
     public void deleteOrderById(Integer id) {

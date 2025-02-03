@@ -1,7 +1,7 @@
 package org.example.final_graduation.controllers.admin.products.attributes;
 
 import org.example.final_graduation.entities.Category;
-import org.example.final_graduation.repositories.products.attributes.CategoryRespository;
+import org.example.final_graduation.repositories.products.attributes.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,7 +14,7 @@ import java.util.List;
     @RequestMapping("admin/categories")
     public class CategoryController {
         @Autowired
-        private CategoryRespository categoryRespository;
+        private CategoryRepository categoryRespository;
 
         @GetMapping("")
         public String index(Model model) {

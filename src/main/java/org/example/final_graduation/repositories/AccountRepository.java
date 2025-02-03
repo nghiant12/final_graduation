@@ -28,7 +28,9 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     SELECT acc FROM Account acc
     JOIN Authority aut ON aut.account.id = acc.id
     JOIN Role r ON aut.role.id = r.id
-    WHERE acc.email LIKE CONCAT('%', :email, '%') AND r.id = 1
+    WHERE acc.email LIKE CONCAT('%', :email, '%')
+    and acc.fullname LIKE CONCAT('%', :fullname, '%')
+    AND r.id = 1
 """)
-    List<Account> findCustomersByEmail(@Param("email") String email);
+    List<Account> findCustomers(@Param("email") String email, @Param("fullname") String fullname);
 }
