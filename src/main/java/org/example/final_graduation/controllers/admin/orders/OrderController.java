@@ -101,12 +101,13 @@ public class OrderController {
 
     // Xử lý hủy đơn hàng
     @PostMapping("/cancel/{id}")
-    public String cancelOrder(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+    public String cancelOrder(@PathVariable("id") Integer orderId, RedirectAttributes redirectAttributes) {
         try {
-            orderService.cancelOrder(id); // Hủy hóa đơn
-            redirectAttributes.addFlashAttribute("success", "Hóa đơn đã được hủy thành công!");
+            orderService.cancelOrder(orderId);
+            orderService.deleteOrderById(orderId);
+            redirectAttributes.addFlashAttribute("successMessage", "Hóa đơn đã được hủy thành công.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Không thể hủy hóa đơn!");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể hủy và xóa hóa đơn: " + e.getMessage());
         }
         return "redirect:/admin/orders";
     }
