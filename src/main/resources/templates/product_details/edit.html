@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
+<head>
+    <title>Edit Product Detail</title>
+</head>
+<body>
+<div class="container">
+    <h2 class="mt-4 mb-4">Edit Product Detail</h2>
+    <form th:action="@{/admin/product-details/update/{id}(id=${productDetail.id})}" method="post" th:object="${productDetail}" enctype="multipart/form-data">
+        <input type="hidden" th:field="*{id}">
+        <div class="form-group">
+            <label for="product">Product:</label>
+            <select class="form-control" id="product" th:field="*{product}">
+                <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="price">Price:</label>
+            <input type="number" class="form-control" id="price" th:field="*{price}" placeholder="Enter price">
+        </div>
+        <div class="form-group">
+            <label for="quantity">Quantity:</label>
+            <input type="number" class="form-control" id="quantity" th:field="*{quantity}" placeholder="Enter quantity">
+        </div>
+        <div class="form-group">
+            <label for="createdDate">Created Date:</label>
+            <input type="date" class="form-control" id="createdDate" th:field="*{createdDate}">
+        </div>
+        <div class="form-group">
+            <label for="available">Available:</label>
+            <select class="form-control" id="available" th:field="*{available}">
+                <option th:value="true">Yes</option>
+                <option th:value="false">No</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <select class="form-control" id="category" th:field="*{category}">
+                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="size">Size:</label>
+            <select class="form-control" id="size" th:field="*{size}">
+                <option th:each="size : ${sizes}" th:value="${size.id}" th:text="${size.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="color">Color:</label>
+            <select class="form-control" id="color" th:field="*{color}">
+                <option th:each="color : ${colors}" th:value="${color.id}" th:text="${color.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="brand">Brand:</label>
+            <select class="form-control" id="brand" th:field="*{brand}">
+                <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="imageFile">Image:</label>
+            <input type="file" class="form-control-file" id="imageFile" name="imageFile" accept="image/*">
+        </div>
+        <div class="form-group">
+            <img th:if="${productDetail.image}" th:src="${productDetail.image}" alt="Current Image" style="max-width: 200px;">
+            <img id="previewImage" src="#" alt="Preview Image" style="max-width: 200px; display: none;">
+        </div>
+        <script>
+            document.getElementById('imageFile').addEventListener('change', function(event) {
+                var file = event.target.files[0];
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var previewImage = document.getElementById('previewImage');
+                    previewImage.src = e.target.result;
+                    previewImage.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            });
+        </script>        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+</body>
+</html>
