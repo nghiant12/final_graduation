@@ -1,6 +1,7 @@
 ﻿-- Bảng roles (2 dòng)
 INSERT INTO roles ([name]) VALUES
 ('user'),
+('staff');
 ('admin');
 
 -- Bảng accounts (5 dòng)
