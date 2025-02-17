@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Product Detail</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h2 class="mt-4 mb-4">Add New Product Detail</h2>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <form th:action="@{/admin/product-details/add}" method="post" th:object="${productDetail}" enctype="multipart/form-data">
+        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger">
+            <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="product">Product:</label>
+                    <select class="form-control" id="product" th:field="*{product}" required>
+                        <option value="">-- Select Product --</option>
+                        <option th:each="product : ${products}" th:value="${product.id}" th:text="${product.name}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageFile">Image:</label>
+                    <input type="file" class="form-control-file" id="imageFile" name="imageFile" accept="image/*" onchange="previewImage(this);">
+                    <img id="preview" src="#" alt="Preview" style="max-width: 200px; display: none;">
+                </div>
+                <script>
+                    function previewImage(input) {
+                        var preview = document.getElementById('preview');
+                        if (input.files && input.files[0]) {
+                            var reader = new FileReader();
+                            reader.onload = function(e) {
+                                preview.src = e.target.result;
+                                preview.style.display = 'block';
+                            }
+                            reader.readAsDataURL(input.files[0]);
+                        } else {
+                            preview.src = '#';
+                            preview.style.display = 'none';
+                        }
+                    }
+                </script>
+
+                <div class="form-group">
+                    <label for="price">Price:</label>
+                    <input type="number" class="form-control" id="price" th:field="*{price}" placeholder="Enter price" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" class="form-control" id="quantity" th:field="*{quantity}" placeholder="Enter quantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="createdDate">Created Date:</label>
+                    <input type="date" class="form-control" id="createdDate" th:field="*{createdDate}" required>
+                </div>
+                <div class="form-group">
+                    <label for="available">Available:</label>
+                    <select class="form-control" id="available" th:field="*{available}">
+                        <option value="true">Yes</option>
+                        <option value="false">No</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select class="form-control" id="category" th:field="*{category}" required>
+                        <option value="">-- Select Category --</option>
+                        <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="size">Size:</label>
+                    <select class="form-control" id="size" th:field="*{size}" required>
+                        <option value="">-- Select Size --</option>
+                        <option th:each="size : ${sizes}" th:value="${size.id}" th:text="${size.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="color">Color:</label>
+                    <select class="form-control" id="color" th:field="*{color}" required>
+                        <option value="">-- Select Color --</option>
+                        <option th:each="color : ${colors}" th:value="${color.id}" th:text="${color.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="brand">Brand:</label>
+                    <select class="form-control" id="brand" th:field="*{brand}" required>
+                        <option value="">-- Select Brand --</option>
+                        <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Product Detail</button>
+    </form>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

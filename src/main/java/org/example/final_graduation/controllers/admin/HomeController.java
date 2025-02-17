@@ -27,8 +27,8 @@ public class HomeController {
         return "admin/500";
     }
 
-    @GetMapping("/orders")
-    public String getOrder() {
-        return "admin/counter_sales";
-    }
+//    @GetMapping("/orders")
+//    public String getOrder() {
+//        return "order_form";
+//    }
 }

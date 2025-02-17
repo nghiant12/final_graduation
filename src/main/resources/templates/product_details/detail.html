@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
+<head>
+  <title>Product Detail</title>
+</head>
+<body>
+<div th:object="${productDetail}">
+  <h2>Product Detail</h2>
+  <img th:src="*{image}" alt="Product Image">
+  <p>Product: <span th:text="*{product.name}"></span></p>
+  <p>Price: <span th:text="*{price}"></span></p>
+  <p>Quantity: <span th:text="*{quantity}"></span></p>
+  <p>Size: <span th:text="*{size.name}"></span></p>
+  <p>Color: <span th:text="*{color.name}"></span></p>
+</div>
+<a th:href="@{/admin/product-details/edit/{id}(id=${productDetail.id})}">Edit</a>
+<a th:href="@{/admin/product-details/list}">Back to List</a>
+</body>
+</html>
+`

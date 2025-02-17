@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Integer> {
     @Query("""
-    SELECT pd FROM ProductDetail pd WHERE pd.product.id = :idProduct
-""")
+                SELECT pd FROM ProductDetail pd WHERE pd.product.id = :idProduct
+            """)
     List<ProductDetail> findByProductID(@Param("idProduct") Integer idProduct);
 }

@@ -1,0 +1,6 @@
+<div th:fragment="orderDetail">
+    <p th:text="${order.id}"></p>
+    <div th:each="orderDetail : ${orderDetails}">
+        <p th:text="${orderDetail.productDetail.product.name}"></p>
+    </div>
+</div>
