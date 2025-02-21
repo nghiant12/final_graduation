@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,4 +23,11 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     Optional<OrderDetail> findByOrderAndProductDetail(@Param("order") Order order,
                                                       @Param("productDetail") ProductDetail productDetail);
 
+    @Query("""
+    SELECT SUM(pd.price * od.quantity) 
+    FROM OrderDetail od
+    JOIN od.productDetail pd 
+    WHERE od.order.id = :idOrder
+""")
+    BigDecimal tongTien(@Param("idOrder") Integer idOrder);
 }

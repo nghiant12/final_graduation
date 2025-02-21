@@ -93,6 +93,8 @@ public class OrderController {
     @GetMapping("/detail")
     public String showOrderDetail(@RequestParam Integer idOrder, Model model) {
         // Lấy danh sách hóa đơn
+        model.addAttribute("idOrder", idOrder);
+
         List<Order> orders = orderRepository.findAllProcessing();
         model.addAttribute("orders", orders);
 
@@ -101,6 +103,8 @@ public class OrderController {
         model.addAttribute("orderDetails", orderDetails);
 
         model.addAttribute("productDetails", productDetailService.getAllProductDetails());
+
+        model.addAttribute("totalPrice", orderDetailRepository.tongTien(idOrder));
 
         // Gửi thêm thông tin nếu cần thiết
         Optional<Order> selectedOrder = orderRepository.findById(idOrder);
@@ -156,28 +160,29 @@ public class OrderController {
     // API Thêm sản phẩm vào đơn hàng
     @PostMapping("/addProductToOrder")
     public String addProductToOrder(
-            @RequestParam(required = false) Integer orderID,
+            @RequestParam(required = false) Integer orderId,
             @RequestParam Integer productDetailId,
             @RequestParam Integer quantity,
             RedirectAttributes redirectAttributes
     ) {
         // Kiểm tra nếu orderID không tồn tại
-        if (orderID == null) {
+        if (orderId == null) {
             redirectAttributes.addFlashAttribute("error", "Vui lòng chọn đơn hàng!");
             return "redirect:/admin/orders";
         }
 
         try {
             // Thêm sản phẩm vào đơn hàng
-            orderDetailService.addProductToOrder(orderID, productDetailId, 1);
+            orderDetailService.addProductToOrder(orderId, productDetailId, 1);
             redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào hóa đơn!");
         } catch (Exception e) {
             // Xử lý lỗi nếu có vấn đề xảy ra khi thêm sản phẩm
             redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm sản phẩm: " + e.getMessage());
         }
 
+        redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(orderId));
         // Quay về trang chi tiết đơn hàng
-        return "redirect:/admin/orders/detail?idOrder=" + orderID;
+        return "redirect:/admin/orders/detail?idOrder=" + orderId;
     }
 
     // Xử lý tăng/giảm số lượng sản phẩm trong đơn hàng
@@ -219,6 +224,7 @@ public class OrderController {
                 // Ghi log để debug nếu cần
                 System.out.println("Redirecting to: /admin/orders/detail?idOrder=" + orderId);
 
+                redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(orderId));
                 // Redirect về trang chi tiết đơn hàng đang chỉnh sửa
                 return "redirect:/admin/orders/detail?idOrder=" + orderId;
             } else {
@@ -254,6 +260,9 @@ public class OrderController {
 
                     // Thêm thông báo thành công
                     redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được xóa khỏi đơn hàng!");
+
+                    redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(order.getId()));
+
                     return "redirect:/admin/orders/detail?idOrder=" + order.getId();  // Sử dụng order.getId() sau khi kiểm tra null
                 } else {
                     redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
@@ -275,19 +284,41 @@ public class OrderController {
     public String confirmOrder(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
         try {
             Optional<Order> optionalOrder = orderService.getOrderById(id);
+
             if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
+
+                List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(order.getId());
+                if (orderDetails.isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", "Đơn hàng chưa có sản phẩm, vui lòng thêm sản phẩm trước khi xác nhận.");
+                    return "redirect:/admin/orders/detail?idOrder=" + order.getId();
+                }
+
+                // Kiểm tra nếu đơn hàng chưa có khách hàng
+                if (order.getUser() == null) {
+                    redirectAttributes.addFlashAttribute("error", "Đơn hàng chưa có khách hàng, vui lòng chọn khách hàng trước.");
+                    return "redirect:/admin/orders/detail?idOrder=" + order.getId();
+                }
+
+                // Tính tổng tiền đơn hàng
+                BigDecimal totalPrice = orderDetailRepository.tongTien(order.getId());
+                order.setTotalPrice(totalPrice != null ? totalPrice : BigDecimal.ZERO);
+
+                // Cập nhật trạng thái đơn hàng
                 order.setStatus("Confirmed");
                 orderService.saveOrder(order);
                 redirectAttributes.addFlashAttribute("success", "Đơn hàng đã được xác nhận!");
+
             } else {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xác nhận đơn hàng: " + e.getMessage());
         }
+
         return "redirect:/admin/orders";
     }
+
 
     // Lấy danh sách khách hàng và hiển thị modal chọn khách hàng
     @GetMapping("/{orderId}")
@@ -301,13 +332,29 @@ public class OrderController {
 
     // Xử lý chọn khách hàng từ modal
     @PostMapping("/selectCustomer/{orderId}")
-    public String selectCustomer(@PathVariable("orderId") Integer orderId, // orderId từ URL path
-                                 @RequestParam("customerId") Integer customerId, // customerId từ query string
-                                 @RequestParam("idOrder") Integer idOrder // idOrder từ query string
-    ) {
-        orderService.addCustomerToOrder(orderId, customerId); // Thêm khách hàng vào đơn hàng
-        return "redirect:/admin/orders/detail/" + orderId; // Quay lại trang đơn hàng sau khi chọn khách hàng
+    public String selectCustomer(@PathVariable("orderId") Integer orderId,
+                                 @RequestParam("customerId") Integer customerId,
+                                 @RequestParam("idOrder") Integer idOrder,
+                                 RedirectAttributes redirectAttributes) {
+        try {
+            // Kiểm tra dữ liệu đầu vào
+            if (orderId == null || customerId == null) {
+                redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ!");
+                return "redirect:/admin/orders/detail?idOrder=" + orderId;
+            }
+
+            // Thêm khách hàng vào đơn hàng
+            orderService.addCustomerToOrder(orderId, customerId);
+            redirectAttributes.addFlashAttribute("success", "Đã thêm khách hàng vào hóa đơn!");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm khách hàng vào hóa đơn!");
+            e.printStackTrace(); // Log lỗi để debug
+        }
+
+        return "redirect:/admin/orders/detail?idOrder=" + orderId;
     }
+
 
     @ResponseBody
     @GetMapping("/searchCustomer")
