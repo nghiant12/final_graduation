@@ -29,6 +29,10 @@ public class ProductDetailService {
         return productDetailRepository.findById(id);
     }
 
+    public Optional<ProductDetail> getProductDetail(Integer productId, Integer brandId, Integer colorId, Integer sizeId) {
+        return productDetailRepository.findByProductAndAttributes(productId, brandId, colorId, sizeId);
+    }
+
     public ProductDetail saveProductDetail(ProductDetail productDetail) {
         return productDetailRepository.save(productDetail);
     }

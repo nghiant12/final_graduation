@@ -6,6 +6,7 @@ import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
 import org.example.final_graduation.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -45,6 +46,15 @@ public class OrderController {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private BrandService brandService;
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private OrderDetailService orderDetailService;
+
     // Hiển thị form tạo đơn hàng mới
     @GetMapping("")
     public String showCreateOrderForm(Model model) {
@@ -58,7 +68,8 @@ public class OrderController {
         Optional<Account> adminUser = accountService.getAccountById(4); // Giả sử admin ID = 2
         adminUser.ifPresent(order::setAdmin);
         model.addAttribute("order", order);
-        model.addAttribute("products", productDetailService.getAllProductDetails());
+
+        model.addAttribute("productDetails", productDetailService.getAllProductDetails());
 
         //của Thịnh
         List<Order> orders = orderRepository.findAllProcessing();
@@ -89,7 +100,7 @@ public class OrderController {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(idOrder);
         model.addAttribute("orderDetails", orderDetails);
 
-        model.addAttribute("products", productDetailService.getAllProductDetails());
+        model.addAttribute("productDetails", productDetailService.getAllProductDetails());
 
         // Gửi thêm thông tin nếu cần thiết
         Optional<Order> selectedOrder = orderRepository.findById(idOrder);
@@ -105,99 +116,122 @@ public class OrderController {
         try {
             orderService.cancelOrder(orderId);
             orderService.deleteOrderById(orderId);
-            redirectAttributes.addFlashAttribute("successMessage", "Hóa đơn đã được hủy thành công.");
+            redirectAttributes.addFlashAttribute("success", "Hóa đơn đã được hủy thành công.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể hủy và xóa hóa đơn: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Không thể hủy và xóa hóa đơn: " + e.getMessage());
         }
         return "redirect:/admin/orders";
     }
 
-    @GetMapping("/getProductDetails")
+    // API Lấy danh sách sản phẩm
+    @GetMapping("/products")
     @ResponseBody
-    public Map<String, Object> getProductDetails(@RequestParam("productDetailId") Integer productDetailId) {
+    public List<Product> getAllProducts() {
+        return productService.getAllProducts();
+    }
+
+    // API Lấy danh sách thương hiệu, màu sắc, kích thước theo sản phẩm
+    @GetMapping("/productDetails")
+    @ResponseBody
+    public Map<String, Object> getProductDeatils(@RequestParam("productId") Integer productId) {
         Map<String, Object> response = new HashMap<>();
-        Optional<ProductDetail> optionalProductDetail = productDetailService.getProductDetailById(productDetailId);
-
-        if (optionalProductDetail.isPresent()) {
-            ProductDetail productDetail = optionalProductDetail.get();
-            response.put("price", productDetail.getPrice());
-            response.put("sizes", sizeService.getAvailableSizesForProduct(productDetail.getProduct().getId())); // Lấy danh sách size
-            response.put("colors", colorService.getAvailableColorsForProduct(productDetail.getProduct().getId())); // Lấy danh sách color
-        } else {
-            response.put("error", "Không tìm thấy sản phẩm!");
-        }
-
+        response.put("brands", brandService.getAvailableBrandsForProduct(productId));
+        response.put("colors", colorService.getAvailableColorsForProduct(productId));
+        response.put("sizes", sizeService.getAvailableSizesForProduct(productId));
         return response;
     }
 
-    @PostMapping("/addProduct")
-    public String addProductToOrder(@RequestParam("orderId") Integer orderId, @RequestParam("productDetailId") Integer productDetailId, @RequestParam("sizeId") Integer sizeId, @RequestParam("colorId") Integer colorId, @RequestParam("quantity") Integer quantity, RedirectAttributes redirectAttributes) {
+    // API Lấy giá sản phẩm chi tiết theo thuộc tính
+    @GetMapping("/productPrice")
+    @ResponseBody
+    public Map<String, Object> getProductPrice(@RequestParam("productId") Integer productId, @RequestParam("brandId") Integer brandId, @RequestParam("colorId") Integer colorId, @RequestParam("sizeId") Integer sizeId) {
+        Optional<ProductDetail> productDetail = productDetailService.getProductDetail(productId, brandId, colorId, sizeId);
+        if (productDetail.isPresent()) {
+            return Map.of("price", productDetail.get().getPrice(), "productDetailId", productDetail.get().getId());
+        } else {
+            return Map.of("error", "Không tìm thấy sản phẩm phù hợp");
+        }
+    }
+
+    // API Thêm sản phẩm vào đơn hàng
+    @PostMapping("/addProductToOrder")
+    public String addProductToOrder(
+            @RequestParam(required = false) Integer orderID,
+            @RequestParam Integer productDetailId,
+            @RequestParam Integer quantity,
+            RedirectAttributes redirectAttributes
+    ) {
+        // Kiểm tra nếu orderID không tồn tại
+        if (orderID == null) {
+            redirectAttributes.addFlashAttribute("error", "Vui lòng chọn đơn hàng!");
+            return "redirect:/admin/orders";
+        }
+
         try {
-            Optional<Order> optionalOrder = orderService.getOrderById(orderId);
-            Optional<ProductDetail> optionalProductDetail = productDetailService.getProductDetailById(productDetailId);
-            Optional<Size> optionalSize = sizeService.getSizeById(sizeId);
-            Optional<Color> optionalColor = colorService.getColorById(colorId);
-
-            if (optionalOrder.isEmpty() || optionalProductDetail.isEmpty() || optionalSize.isEmpty() || optionalColor.isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ!");
-                return "redirect:/admin/orders/detail?idOrder=" + orderId;
-            }
-
-            Order order = optionalOrder.get();
-            ProductDetail productDetail = optionalProductDetail.get();
-            Size size = optionalSize.get();
-            Color color = optionalColor.get();
-
-            OrderDetail orderDetail = new OrderDetail();
-            orderDetail.setOrder(order);
-            orderDetail.setProductDetail(productDetail);
-            orderDetail.setPrice(productDetail.getPrice());
-            orderDetail.setQuantity(quantity);
-
-            orderDetailRepository.save(orderDetail);
-
-            // Cập nhật tổng giá trị đơn hàng
-            order.setTotalPrice(order.getTotalPrice().add(productDetail.getPrice().multiply(new BigDecimal(quantity))));
-            orderService.saveOrder(order);
-
-            redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được thêm vào hóa đơn!");
+            // Thêm sản phẩm vào đơn hàng
+            orderDetailService.addProductToOrder(orderID, productDetailId, 1);
+            redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào hóa đơn!");
         } catch (Exception e) {
+            // Xử lý lỗi nếu có vấn đề xảy ra khi thêm sản phẩm
             redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm sản phẩm: " + e.getMessage());
         }
 
-        return "redirect:/admin/orders/detail?idOrder=" + orderId;
+        // Quay về trang chi tiết đơn hàng
+        return "redirect:/admin/orders/detail?idOrder=" + orderID;
     }
 
     // Xử lý tăng/giảm số lượng sản phẩm trong đơn hàng
     @PostMapping("/updateQuantity")
-    public String updateQuantity(@RequestParam("orderDetailId") Integer orderDetailId, @RequestParam("action") String action, Model model) {
+    public String updateQuantity(@RequestParam("orderDetailId") Integer orderDetailId,
+                                 @RequestParam("action") String action,
+                                 RedirectAttributes redirectAttributes) {
         try {
             Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(orderDetailId);
             if (optionalOrderDetail.isPresent()) {
                 OrderDetail orderDetail = optionalOrderDetail.get();
-                if (action.equals("increase")) {
+                Order order = orderDetail.getOrder();
+                Integer orderId = order.getId(); // Lấy ID của đơn hàng
+
+                // Kiểm tra xem orderId có hợp lệ không
+                if (orderId == null) {
+                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
+                    return "redirect:/admin/orders";
+                }
+
+                // Cập nhật số lượng sản phẩm
+                if ("increase".equals(action)) {
                     orderDetail.setQuantity(orderDetail.getQuantity() + 1);
-                } else if (action.equals("decrease") && orderDetail.getQuantity() > 1) {
+                } else if ("decrease".equals(action) && orderDetail.getQuantity() > 1) {
                     orderDetail.setQuantity(orderDetail.getQuantity() - 1);
                 }
+
                 // Cập nhật tổng giá trị đơn hàng
-                Order order = orderDetail.getOrder();
                 BigDecimal priceDifference = orderDetail.getPrice();
-                if (action.equals("increase")) {
+                if ("increase".equals(action)) {
                     order.setTotalPrice(order.getTotalPrice().add(priceDifference));
-                } else if (action.equals("decrease")) {
+                } else if ("decrease".equals(action)) {
                     order.setTotalPrice(order.getTotalPrice().subtract(priceDifference));
                 }
+
+                // Lưu thay đổi vào DB
                 orderService.saveOrder(order);
-                model.addAttribute("success", "Số lượng sản phẩm đã được cập nhật!");
+                redirectAttributes.addFlashAttribute("success", "Số lượng sản phẩm đã được cập nhật!");
+                // Ghi log để debug nếu cần
+                System.out.println("Redirecting to: /admin/orders/detail?idOrder=" + orderId);
+
+                // Redirect về trang chi tiết đơn hàng đang chỉnh sửa
+                return "redirect:/admin/orders/detail?idOrder=" + orderId;
             } else {
-                model.addAttribute("error", "Không tìm thấy chi tiết đơn hàng.");
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi tiết đơn hàng.");
+                return "redirect:/admin/orders";
             }
         } catch (Exception e) {
-            model.addAttribute("error", "Lỗi khi cập nhật số lượng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật số lượng: " + e.getMessage());
+            return "redirect:/admin/orders";
         }
-        return "redirect:/admin/orders/create";
     }
+
+
 
     // Xử lý xóa sản phẩm khỏi đơn hàng
     @PostMapping("/removeProduct")
@@ -275,11 +309,13 @@ public class OrderController {
         return "redirect:/admin/orders/detail/" + orderId; // Quay lại trang đơn hàng sau khi chọn khách hàng
     }
 
-    @GetMapping("/searchCustomer")
     @ResponseBody
-    public List<Account> searchCustomer(@RequestParam String email, @RequestParam String fullname) {
-        List<Account> accountList = accountRepository.findCustomers(email, fullname);
-        System.out.println("aaaaaaa" + accountList.size());
-        return accountList;
+    @GetMapping("/searchCustomer")
+    public List<Account> searchCustomer(@RequestParam String query) {
+        System.out.println("Searching for customers with query: " + query);
+        List<Account> customers = accountRepository.findCustomers(query);
+        System.out.println("Found customers: " + customers.size());
+        return customers;
     }
+
 }

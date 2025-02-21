@@ -136,3 +136,6 @@ ADD CONSTRAINT FK_order_details_order FOREIGN KEY (order_id) REFERENCES orders(i
 ALTER TABLE order_details
 ADD CONSTRAINT FK_order_details_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
 
+ALTER TABLE accounts
+ADD phone NVARCHAR(10);
+

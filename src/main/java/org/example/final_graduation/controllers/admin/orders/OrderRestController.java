@@ -1,8 +1,10 @@
 package org.example.final_graduation.controllers.admin.orders;
 
+import org.example.final_graduation.entities.Account;
 import org.example.final_graduation.entities.Order;
 import org.example.final_graduation.entities.OrderDetail;
 import org.example.final_graduation.entities.ProductDetail;
+import org.example.final_graduation.repositories.AccountRepository;
 import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.services.AccountService;
 import org.example.final_graduation.services.OrderService;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -28,9 +31,18 @@ public class OrderRestController {
     private AccountService accountService;
 
     @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
     private OrderDetailRepository orderDetailRepository;
 
     // Hiển thị form tạo đơn hàng mới
+
+    @GetMapping("/searchCustomera")
+    public List<Account> searchCustomer(@RequestParam String query) {
+        System.out.println("aaaaaa" + accountRepository.findCustomers(query).size());
+        return accountRepository.findCustomers(query);
+    }
 
 
     // Xử lý tạo đơn hàng mới

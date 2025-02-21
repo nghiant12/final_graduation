@@ -52,10 +52,6 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public List<Account> searchCustomers(String email, String fullname) {
-        return accountRepository.findCustomers(email, fullname);
-    }
-
     public void deleteOrderById(Integer id) {
         orderRepository.deleteById(id);
     }

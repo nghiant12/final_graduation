@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ProductDetailRepository extends JpaRepository<ProductDetail, Integer> {
@@ -14,4 +15,17 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
                 SELECT pd FROM ProductDetail pd WHERE pd.product.id = :idProduct
             """)
     List<ProductDetail> findByProductID(@Param("idProduct") Integer idProduct);
+
+    @Query("""
+                SELECT pd FROM ProductDetail pd
+                WHERE pd.product.id = :productId
+                AND pd.brand.id = :brandId
+                AND pd.color.id = :colorId
+                AND pd.size.id = :sizeId
+            """)
+    Optional<ProductDetail> findByProductAndAttributes(
+            @Param("productId") Integer productId,
+            @Param("brandId") Integer brandId,
+            @Param("colorId") Integer colorId,
+            @Param("sizeId") Integer sizeId);
 }

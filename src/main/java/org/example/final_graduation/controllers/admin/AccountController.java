@@ -1,7 +1,7 @@
-package org.example.final_graduation.controllers.admin.products.attributes;
+package org.example.final_graduation.controllers.admin;
 
 import org.example.final_graduation.entities.Account;
-import org.example.final_graduation.repositories.products.attributes.AccountRepository;
+import org.example.final_graduation.repositories.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +22,7 @@ public class AccountController {
         List<Account> accounts = accountRepository.findAccountsByRole("user"); // Chỉ lấy tài khoản có quyền "user"
         model.addAttribute("accounts", accounts);
         model.addAttribute("account", new Account());
-        return "admin/attributes/accounts/index"; // Trả về trang quản lý tài khoản
+        return "admin/accounts/index"; // Trả về trang quản lý tài khoản
     }
 
     // Thêm tài khoản mới
@@ -52,7 +52,7 @@ public class AccountController {
         model.addAttribute("account", accountEdit);
         List<Account> accounts = accountRepository.findAll();
         model.addAttribute("accounts", accounts);
-        return "admin/attributes/accounts/index";
+        return "admin/accounts/index";
     }
 
     // Cập nhật thông tin tài khoản

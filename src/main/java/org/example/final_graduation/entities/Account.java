@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.Date;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -62,16 +62,17 @@ public class Account {
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     private List<Authority> authorities;
-  
+
+    @Size(max = 100)
     @NotNull
-    @ColumnDefault("getdate()")
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
+    @Nationalized
+    @Column(name = "phone", nullable = false, length = 10)
+    private String phone;
 
     public Account() {
     }
 
-    public Account(Integer id, String username, String password, String fullname, String email, String address, String photo, LocalDateTime createdDate) {
+    public Account(Integer id, String username, String password, String fullname, String email, String address, String photo, Date createdDate) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -80,6 +81,7 @@ public class Account {
         this.address = address;
         this.photo = photo;
         this.createdDate = createdDate;
+        this.phone = phone;
     }
 
     public Integer getId() {
@@ -138,11 +140,19 @@ public class Account {
         this.photo = photo;
     }
 
-    public @NotNull LocalDateTime getCreatedDate() {
+    public @NotNull Date getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(@NotNull LocalDateTime createdDate) {
+    public void setCreatedDate(@NotNull Date createdDate) {
         this.createdDate = createdDate;
+    }
+
+    public @Size(max = 10) @NotNull String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(@Size(max = 10) @NotNull String phone) {
+        this.phone = phone;
     }
 }
