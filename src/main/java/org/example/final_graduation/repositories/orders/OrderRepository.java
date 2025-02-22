@@ -13,4 +13,12 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
             select o from Order o where o.status like "Processing"
             """)
     List<Order> findAllProcessing();
+
+    @Query("""
+    SELECT COUNT(*)
+    FROM Order od
+    WHERE od.type = 'At the counter'
+    AND od.status = 'Processing'
+""")
+    Integer countByTypeStatus();
 }

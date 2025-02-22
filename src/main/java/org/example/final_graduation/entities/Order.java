@@ -27,13 +27,13 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.SET_NULL)
-    @JoinColumn(name = "user_id")
-    private Account user;
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "admin_id", nullable = false)
-    private Account admin;
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
 
     @NotNull
     @ColumnDefault("getdate()")
@@ -79,16 +79,16 @@ public class Order {
     public Order() {
     }
 
-    public Order(Integer id, Account user, Account admin, LocalDateTime createdDate, BigDecimal totalPrice, String type, String status, String address, List<OrderDetail> orderDetails) {
+    public Order(Integer id, Customer customer, Employee employee, LocalDateTime createdDate, BigDecimal totalPrice, String type, String status, String address, List<OrderDetail> orderDetails) {
         this.id = id;
-        this.user = user;
-        this.admin = admin;
+        this.customer = customer;
+        this.employee = employee;
         this.createdDate = createdDate;
         this.totalPrice = totalPrice;
         this.type = type;
         this.status = status;
         this.address = address;
-//        this.orderDetails = orderDetails;
+        this.orderDetails = orderDetails;
     }
 
     public Integer getId() {
@@ -99,20 +99,20 @@ public class Order {
         this.id = id;
     }
 
-    public Account getUser() {
-        return user;
+    public Customer getCustomer() {
+        return customer;
     }
 
-    public void setUser(Account user) {
-        this.user = user;
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
     }
 
-    public @NotNull Account getAdmin() {
-        return admin;
+    public @NotNull Employee getEmployee() {
+        return employee;
     }
 
-    public void setAdmin(@NotNull Account admin) {
-        this.admin = admin;
+    public void setEmployee(@NotNull Employee employee) {
+        this.employee = employee;
     }
 
     public @NotNull LocalDateTime getCreatedDate() {

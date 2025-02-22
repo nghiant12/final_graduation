@@ -164,7 +164,7 @@
                                     <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
                                     <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
                                 </div>
-                                <p class="text-danger" th:text="${orderDetail.price} + ' đ'"></p>
+                                <p class="text-danger" th:text="${orderDetail.price} + ' VND'"></p>
                             </div>
                             <div class="ms-auto d-flex align-items-center">
                                 <form th:action="@{/admin/orders/updateQuantity}" method="post"
@@ -207,7 +207,7 @@
                                     <th>Thương hiệu</th>
                                     <th>Màu</th>
                                     <th>Kích thước</th>
-                                    <th>Giá</th>
+                                    <th>Giá (VND)</th>
                                     <th>Số lượng</th>
                                     <th>Thao tác</th>
                                 </tr>
@@ -344,7 +344,7 @@
                                 data.forEach(customer => {
                                     let customerName = customer.fullname || "Không có tên";
                                     let customerEmail = customer.email || "Không có email";
-                                    let customerPhone = customer.phone || "Không có số điện thoại";
+                                    let customerPhone = customer.phoneNumber || "Không có số điện thoại";
 
                                     let div = document.createElement('div');
                                     div.classList.add('dropdown-item');
@@ -406,9 +406,9 @@
                     <h5>Thông tin đơn hàng</h5>
 
                     <p>Khách hàng: <span
-                            th:text="${order.user != null ? order.user.fullname : 'Chưa chọn khách hàng'}"></span></p>
+                            th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span></p>
                     <p>Nhân viên: <span
-                            th:text="${order.admin != null ? order.admin.fullname : 'Chưa chọn nhân viên'}"></span></p>
+                            th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
 
                     <p>Tổng số tiền: <span class="text-danger">
     <span th:text="${totalPrice != null ? totalPrice + ' VND' : '0 VND'}"></span>

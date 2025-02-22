@@ -1,9 +1,11 @@
 package org.example.final_graduation.controllers.admin.orders;
 
 import org.example.final_graduation.entities.*;
-import org.example.final_graduation.repositories.AccountRepository;
+import org.example.final_graduation.repositories.CustomerRepository;
+import org.example.final_graduation.repositories.EmployeeRepository;
 import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
+import org.example.final_graduation.repositories.products.attributes.ColorRepository;
 import org.example.final_graduation.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,10 @@ public class OrderController {
     private ProductDetailService productDetailService;
 
     @Autowired
-    private AccountService accountService;
+    private CustomerService customerService;
+
+    @Autowired
+    private EmpolyeeService empolyeeService;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -44,7 +49,10 @@ public class OrderController {
     private OrderDetailRepository orderDetailRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     @Autowired
     private BrandService brandService;
@@ -62,16 +70,13 @@ public class OrderController {
         // Giả sử bạn có người dùng đang đăng nhập (user)
         // Bạn có thể lấy từ session hoặc security context
         // Ví dụ đơn giản:
-        Optional<Account> currentUser = accountService.getAccountById(1); // Giả sử user ID = 1
-        currentUser.ifPresent(order::setUser);
         // Thiết lập admin nếu cần
-        Optional<Account> adminUser = accountService.getAccountById(4); // Giả sử admin ID = 2
-        adminUser.ifPresent(order::setAdmin);
+        Optional<Employee> adminUser = empolyeeService.getEmployeeById(4); // Giả sử admin ID = 2
+        adminUser.ifPresent(order::setEmployee);
         model.addAttribute("order", order);
 
         model.addAttribute("productDetails", productDetailService.getAllProductDetails());
 
-        //của Thịnh
         List<Order> orders = orderRepository.findAllProcessing();
         model.addAttribute("orders", orders);
 
@@ -82,6 +87,13 @@ public class OrderController {
     @PostMapping("/create")
     public String createOrder(RedirectAttributes redirectAttributes) {
         try {
+            Integer soLuongHoaDonCho = orderRepository.countByTypeStatus();
+
+            if (soLuongHoaDonCho >= 5) {
+                redirectAttributes.addFlashAttribute("error", "Vượt quá số lượng hóa đơn chờ! Không thể tạo thêm.");
+                return "redirect:/admin/orders";
+            }
+
             orderService.createNewOrder(); // Lưu hóa đơn
             redirectAttributes.addFlashAttribute("success", "Hóa đơn được tạo thành công!");
         } catch (Exception e) {
@@ -89,6 +101,7 @@ public class OrderController {
         }
         return "redirect:/admin/orders"; // Điều hướng lại trang danh sách hóa đơn
     }
+
 
     @GetMapping("/detail")
     public String showOrderDetail(@RequestParam Integer idOrder, Model model) {
@@ -99,6 +112,7 @@ public class OrderController {
         model.addAttribute("orders", orders);
 
         // Lấy chi tiết hóa đơn dựa trên idOrder
+
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(idOrder);
         model.addAttribute("orderDetails", orderDetails);
 
@@ -288,16 +302,22 @@ public class OrderController {
             if (optionalOrder.isPresent()) {
                 Order order = optionalOrder.get();
 
+                // Kiểm tra nếu đơn hàng chưa có sản phẩm
                 List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(order.getId());
                 if (orderDetails.isEmpty()) {
                     redirectAttributes.addFlashAttribute("error", "Đơn hàng chưa có sản phẩm, vui lòng thêm sản phẩm trước khi xác nhận.");
                     return "redirect:/admin/orders/detail?idOrder=" + order.getId();
                 }
 
-                // Kiểm tra nếu đơn hàng chưa có khách hàng
-                if (order.getUser() == null) {
-                    redirectAttributes.addFlashAttribute("error", "Đơn hàng chưa có khách hàng, vui lòng chọn khách hàng trước.");
-                    return "redirect:/admin/orders/detail?idOrder=" + order.getId();
+                // Kiểm tra nếu đơn hàng chưa có khách hàng -> Set mặc định account có id = 1
+                if (order.getCustomer() == null) {
+                    Optional<Customer> defaultAccount = customerRepository.findById(1); // Tìm account có id = 1
+                    if (defaultAccount.isPresent()) {
+                        order.setCustomer(defaultAccount.get()); // Gán khách hàng mặc định
+                    } else {
+                        redirectAttributes.addFlashAttribute("error", "Không tìm thấy tài khoản mặc định.");
+                        return "redirect:/admin/orders/detail?idOrder=" + order.getId();
+                    }
                 }
 
                 // Tính tổng tiền đơn hàng
@@ -320,15 +340,15 @@ public class OrderController {
     }
 
 
-    // Lấy danh sách khách hàng và hiển thị modal chọn khách hàng
-    @GetMapping("/{orderId}")
-    public String viewOrder(@PathVariable("orderId") Integer orderId, Model model) {
-        Optional<Order> order = orderService.getOrderById(orderId);
-        List<Authority> customers = accountService.getAllCustomers(); // Lấy danh sách khách hàng
-        model.addAttribute("order", order);
-        model.addAttribute("customers", customers); // Truyền danh sách khách hàng vào view
-        return "admin/orders/order_form"; // Tên trang hiện tại mà bạn muốn hiển thị
-    }
+//    // Lấy danh sách khách hàng và hiển thị modal chọn khách hàng
+//    @GetMapping("/{orderId}")
+//    public String viewOrder(@PathVariable("orderId") Integer orderId, Model model) {
+//        Optional<Order> order = orderService.getOrderById(orderId);
+//        List<Authority> customers = accountService.getAllCustomers(); // Lấy danh sách khách hàng
+//        model.addAttribute("order", order);
+//        model.addAttribute("customers", customers); // Truyền danh sách khách hàng vào view
+//        return "admin/orders/order_form"; // Tên trang hiện tại mà bạn muốn hiển thị
+//    }
 
     // Xử lý chọn khách hàng từ modal
     @PostMapping("/selectCustomer/{orderId}")
@@ -358,9 +378,9 @@ public class OrderController {
 
     @ResponseBody
     @GetMapping("/searchCustomer")
-    public List<Account> searchCustomer(@RequestParam String query) {
+    public List<Customer> searchCustomer(@RequestParam String query) {
         System.out.println("Searching for customers with query: " + query);
-        List<Account> customers = accountRepository.findCustomers(query);
+        List<Customer> customers = customerRepository.findCustomers(query);
         System.out.println("Found customers: " + customers.size());
         return customers;
     }
