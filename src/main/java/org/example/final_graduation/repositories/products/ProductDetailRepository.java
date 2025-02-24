@@ -17,6 +17,20 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     List<ProductDetail> findByProductID(@Param("idProduct") Integer idProduct);
 
     @Query("""
+    SELECT pd 
+    FROM ProductDetail pd
+    JOIN pd.product p
+    WHERE pd.quantity > 0 AND p.status = true
+""")
+    List<ProductDetail> findALL();
+
+
+    @Query("""
+                SELECT pd FROM ProductDetail pd WHERE pd.id = :id
+            """)
+    ProductDetail findByID(@Param("id") Integer id);
+
+    @Query("""
                 SELECT pd FROM ProductDetail pd
                 WHERE pd.product.id = :productId
                 AND pd.brand.id = :brandId

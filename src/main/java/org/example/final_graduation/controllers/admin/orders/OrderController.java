@@ -5,6 +5,8 @@ import org.example.final_graduation.repositories.CustomerRepository;
 import org.example.final_graduation.repositories.EmployeeRepository;
 import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
+import org.example.final_graduation.repositories.products.ProductDetailRepository;
+import org.example.final_graduation.repositories.products.ProductRepository;
 import org.example.final_graduation.repositories.products.attributes.ColorRepository;
 import org.example.final_graduation.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,9 @@ public class OrderController {
     private ProductService productService;
 
     @Autowired
+    private ProductDetailRepository productDetailRepository;
+
+    @Autowired
     private OrderDetailService orderDetailService;
 
     // Hiển thị form tạo đơn hàng mới
@@ -75,7 +80,7 @@ public class OrderController {
         adminUser.ifPresent(order::setEmployee);
         model.addAttribute("order", order);
 
-        model.addAttribute("productDetails", productDetailService.getAllProductDetails());
+        model.addAttribute("productDetails", productDetailRepository.findALL());
 
         List<Order> orders = orderRepository.findAllProcessing();
         model.addAttribute("orders", orders);
@@ -116,7 +121,7 @@ public class OrderController {
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(idOrder);
         model.addAttribute("orderDetails", orderDetails);
 
-        model.addAttribute("productDetails", productDetailService.getAllProductDetails());
+        model.addAttribute("productDetails", productDetailRepository.findALL());
 
         model.addAttribute("totalPrice", orderDetailRepository.tongTien(idOrder));
 
@@ -132,14 +137,34 @@ public class OrderController {
     @PostMapping("/cancel/{id}")
     public String cancelOrder(@PathVariable("id") Integer orderId, RedirectAttributes redirectAttributes) {
         try {
+            // Lấy danh sách OrderDetail của đơn hàng
+            List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(orderId);
+
+            // Hoàn trả số lượng sản phẩm vào kho
+            for (OrderDetail orderDetail : orderDetails) {
+                ProductDetail productDetail = orderDetail.getProductDetail();
+                int quantityToReturn = orderDetail.getQuantity();
+
+                if (productDetail != null) {
+                    productDetail.setQuantity(productDetail.getQuantity() + quantityToReturn);
+                    productDetailService.saveProductDetail(productDetail);
+                }
+            }
+
+            // Hủy đơn hàng
             orderService.cancelOrder(orderId);
+
+            // Xóa đơn hàng khỏi DB
             orderService.deleteOrderById(orderId);
-            redirectAttributes.addFlashAttribute("success", "Hóa đơn đã được hủy thành công.");
+
+            redirectAttributes.addFlashAttribute("success", "Hóa đơn đã được hủy, sản phẩm đã được hoàn kho.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Không thể hủy và xóa hóa đơn: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Không thể hủy hóa đơn: " + e.getMessage());
         }
+
         return "redirect:/admin/orders";
     }
+
 
     // API Lấy danh sách sản phẩm
     @GetMapping("/products")
@@ -186,8 +211,22 @@ public class OrderController {
         }
 
         try {
+            // Lấy thông tin chi tiết sản phẩm từ productDetailId
+            ProductDetail productDetail = productDetailService.findById(productDetailId);
+
+            // Kiểm tra xem số lượng có đủ không
+            if (productDetail.getQuantity() < quantity) {
+                redirectAttributes.addFlashAttribute("error", "Số lượng sản phẩm không đủ!");
+                return "redirect:/admin/orders/detail?idOrder=" + orderId;
+            }
+
             // Thêm sản phẩm vào đơn hàng
-            orderDetailService.addProductToOrder(orderId, productDetailId, 1);
+            orderDetailService.addProductToOrder(orderId, productDetailId, quantity);
+
+            // Cập nhật số lượng sản phẩm (trừ đi số lượng đã thêm vào đơn hàng)
+            productDetail.setQuantity(productDetail.getQuantity() - quantity);
+            productDetailService.saveProductDetail(productDetail);
+
             redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào hóa đơn!");
         } catch (Exception e) {
             // Xử lý lỗi nếu có vấn đề xảy ra khi thêm sản phẩm
@@ -199,6 +238,7 @@ public class OrderController {
         return "redirect:/admin/orders/detail?idOrder=" + orderId;
     }
 
+
     // Xử lý tăng/giảm số lượng sản phẩm trong đơn hàng
     @PostMapping("/updateQuantity")
     public String updateQuantity(@RequestParam("orderDetailId") Integer orderDetailId,
@@ -206,40 +246,52 @@ public class OrderController {
                                  RedirectAttributes redirectAttributes) {
         try {
             Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(orderDetailId);
+
             if (optionalOrderDetail.isPresent()) {
                 OrderDetail orderDetail = optionalOrderDetail.get();
                 Order order = orderDetail.getOrder();
-                Integer orderId = order.getId(); // Lấy ID của đơn hàng
+                Integer orderId = order.getId();
+                ProductDetail productDetail = orderDetail.getProductDetail();
 
-                // Kiểm tra xem orderId có hợp lệ không
-                if (orderId == null) {
-                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
+                if (orderId == null || productDetail == null) {
+                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng hoặc sản phẩm.");
                     return "redirect:/admin/orders";
                 }
 
-                // Cập nhật số lượng sản phẩm
+                int currentQuantity = orderDetail.getQuantity();
+                int quantityInStock = productDetail.getQuantity();
+                BigDecimal unitPrice = productDetail.getPrice(); // Đơn giá của sản phẩm
+
+                // Xử lý tăng hoặc giảm số lượng
                 if ("increase".equals(action)) {
-                    orderDetail.setQuantity(orderDetail.getQuantity() + 1);
-                } else if ("decrease".equals(action) && orderDetail.getQuantity() > 1) {
-                    orderDetail.setQuantity(orderDetail.getQuantity() - 1);
+                    if (quantityInStock > 0) {
+                        orderDetail.setQuantity(currentQuantity + 1);
+                        productDetail.setQuantity(quantityInStock - 1);
+                    } else {
+                        redirectAttributes.addFlashAttribute("error", "Sản phẩm đã hết hàng!");
+                        return "redirect:/admin/orders/detail?idOrder=" + orderId;
+                    }
+                } else if ("decrease".equals(action) && currentQuantity > 1) {
+                    orderDetail.setQuantity(currentQuantity - 1);
+                    productDetail.setQuantity(quantityInStock + 1);
                 }
+
+                // Cập nhật lại giá của OrderDetail theo số lượng mới
+                BigDecimal newPrice = unitPrice.multiply(BigDecimal.valueOf(orderDetail.getQuantity()));
+                orderDetail.setPrice(newPrice);
 
                 // Cập nhật tổng giá trị đơn hàng
-                BigDecimal priceDifference = orderDetail.getPrice();
-                if ("increase".equals(action)) {
-                    order.setTotalPrice(order.getTotalPrice().add(priceDifference));
-                } else if ("decrease".equals(action)) {
-                    order.setTotalPrice(order.getTotalPrice().subtract(priceDifference));
-                }
+                BigDecimal totalPrice = orderDetailRepository.tongTien(orderId);
+                order.setTotalPrice(totalPrice);
 
                 // Lưu thay đổi vào DB
+                productDetailService.saveProductDetail(productDetail);
+                orderDetailRepository.save(orderDetail);
                 orderService.saveOrder(order);
-                redirectAttributes.addFlashAttribute("success", "Số lượng sản phẩm đã được cập nhật!");
-                // Ghi log để debug nếu cần
-                System.out.println("Redirecting to: /admin/orders/detail?idOrder=" + orderId);
 
-                redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(orderId));
-                // Redirect về trang chi tiết đơn hàng đang chỉnh sửa
+                redirectAttributes.addFlashAttribute("success", "Số lượng sản phẩm đã được cập nhật!");
+                redirectAttributes.addFlashAttribute("totalPrice", totalPrice);
+
                 return "redirect:/admin/orders/detail?idOrder=" + orderId;
             } else {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi tiết đơn hàng.");
@@ -253,6 +305,8 @@ public class OrderController {
 
 
 
+
+
     // Xử lý xóa sản phẩm khỏi đơn hàng
     @PostMapping("/removeProduct")
     public String removeProduct(@RequestParam("orderDetailId") Integer orderDetailId, RedirectAttributes redirectAttributes) {
@@ -261,36 +315,42 @@ public class OrderController {
             if (optionalOrderDetail.isPresent()) {
                 OrderDetail orderDetail = optionalOrderDetail.get();
                 Order order = orderDetail.getOrder();
+                ProductDetail productDetail = orderDetail.getProductDetail(); // Lấy sản phẩm từ order detail
 
-                // Kiểm tra nếu order là null
-                if (order != null) {
-                    // Trừ giá trị sản phẩm khỏi tổng giá
-                    BigDecimal priceTotal = orderDetail.getPrice().multiply(new BigDecimal(orderDetail.getQuantity()));
+                if (order != null && productDetail != null) {
+                    // Cộng lại số lượng vào tồn kho
+                    int quantityToReturn = orderDetail.getQuantity();
+                    productDetail.setQuantity(productDetail.getQuantity() + quantityToReturn);
+
+                    // Cập nhật tổng giá trị đơn hàng
+                    BigDecimal priceTotal = orderDetail.getPrice().multiply(new BigDecimal(quantityToReturn));
                     order.setTotalPrice(order.getTotalPrice().subtract(priceTotal));
 
                     // Xóa chi tiết đơn hàng khỏi đơn hàng
                     order.removeOrderDetail(orderDetail);
                     orderService.saveOrder(order);
+                    productDetailService.saveProductDetail(productDetail); // Lưu thay đổi vào database
+                    orderDetailRepository.delete(orderDetail); // Xóa OrderDetail khỏi DB
 
                     // Thêm thông báo thành công
                     redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được xóa khỏi đơn hàng!");
-
                     redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(order.getId()));
 
-                    return "redirect:/admin/orders/detail?idOrder=" + order.getId();  // Sử dụng order.getId() sau khi kiểm tra null
+                    return "redirect:/admin/orders/detail?idOrder=" + order.getId();
                 } else {
-                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
-                    return "redirect:/admin/orders";  // Quay lại trang danh sách đơn hàng
+                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng hoặc sản phẩm.");
+                    return "redirect:/admin/orders";
                 }
             } else {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi tiết đơn hàng.");
-                return "redirect:/admin/orders";  // Quay lại trang danh sách đơn hàng
+                return "redirect:/admin/orders";
             }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi xóa sản phẩm: " + e.getMessage());
-            return "redirect:/admin/orders";  // Quay lại trang danh sách đơn hàng khi có lỗi
+            return "redirect:/admin/orders";
         }
     }
+
 
 
     // Xử lý xác nhận đặt hàng

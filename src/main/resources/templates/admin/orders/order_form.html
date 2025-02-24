@@ -132,11 +132,11 @@
                 </div>
                 <!-- Tabs -->
                 <ul class="nav nav-tabs mb-4">
-                    <li class="nav-item" th:each="order : ${orders}">
+                    <li class="nav-item" th:each="order, stat : ${orders}">
                         <a class="nav-link"
                            th:classappend="${order.id == idOrder} ? 'active' : ''"
                            th:href="@{'/admin/orders/detail'(idOrder=${order.id})}" style="color: black">
-                            HD<span th:text="${order.id}"></span>
+                            Hóa đơn <span th:text="${stat.index +1}"></span>
                         </a>
                     </li>
                 </ul>
@@ -163,21 +163,40 @@
                                     <h6 th:text="${orderDetail.productDetail.size.name}">Size</h6>
                                     <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
                                     <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">Price</h6>
                                 </div>
-                                <p class="text-danger" th:text="${orderDetail.price} + ' VND'"></p>
+                                <p class="text-danger fw-bold" th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
                             </div>
                             <div class="ms-auto d-flex align-items-center">
-                                <form th:action="@{/admin/orders/updateQuantity}" method="post"
-                                      class="d-flex align-items-center">
+                                <form th:action="@{/admin/orders/updateQuantity}" method="post" class="d-flex align-items-center">
                                     <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
-                                    <button type="submit" name="action" value="decrease" class="btn btn-icon">
+
+                                    <!-- Nút giảm (-) -->
+                                    <button type="submit" name="action" value="decrease" class="btn btn-icon"
+                                            th:disabled="${orderDetail.quantity == 1}">
                                         <i class="fas fa-minus"></i>
                                     </button>
-                                    <span class="mx-3" th:text="${orderDetail.quantity}">1</span>
-                                    <button type="submit" name="action" value="increase" class="btn btn-icon">
+
+                                    <span class="fw-bold mx-4" th:text="${orderDetail.quantity}"></span>
+
+                                    <!-- Nút tăng (+) -->
+                                    <button type="submit" name="action" value="increase" class="btn btn-icon"
+                                            th:disabled="${orderDetail.productDetail.quantity == 0}">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </form>
+
+
+                                <style>
+                                    .btn-icon:disabled {
+                                        border: 1px solid white !important; /* Viền trắng */
+                                        background-color: #f8f9fa !important; /* Màu nền nhẹ hơn */
+                                        color: #ccc !important; /* Màu chữ xám */
+                                        cursor: not-allowed; /* Hiển thị con trỏ không thể click */
+                                    }
+                                </style>
+
                                 <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
                                     <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
@@ -220,7 +239,7 @@
                                     <td th:text="${productDetail.brand.name}"></td>
                                     <td th:text="${productDetail.color.name}"></td>
                                     <td th:text="${productDetail.size.name}"></td>
-                                    <td th:text="${productDetail.price}"></td>
+                                    <td th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')}"></td>
                                     <td th:text="${productDetail.quantity}"></td>
                                     <td>
                                         <form action="/admin/orders/addProductToOrder" method="post">
@@ -411,7 +430,7 @@
                             th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
 
                     <p>Tổng số tiền: <span class="text-danger">
-    <span th:text="${totalPrice != null ? totalPrice + ' VND' : '0 VND'}"></span>
+    <span class="text-danger fw-bold" th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
 </span></p>
 
 

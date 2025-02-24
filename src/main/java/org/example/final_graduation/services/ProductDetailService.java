@@ -45,4 +45,8 @@ public class ProductDetailService {
         return sizeRepository.findById(sizeId);
     }
 
+    public ProductDetail findById(Integer id) {
+        return productDetailRepository.findByID(id);
+    }
+
 }
