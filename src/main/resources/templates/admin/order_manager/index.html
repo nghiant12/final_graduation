@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <title>Sản phẩm</title>
+    <link th:href="@{/admin/css/styles.css}" rel="stylesheet" type="text/css">
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <!-- Navbar Brand-->
+    <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+    <!-- Sidebar Toggle-->
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <!-- Navbar Search-->
+    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+        <div class="input-group">
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch"/>
+            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
+        </div>
+    </form>
+    <!-- Navbar-->
+    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#!">Settings</a></li>
+                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                <li>
+                    <hr class="dropdown-divider"/>
+                </li>
+                <li><a class="dropdown-item" href="#!">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<!-- Menu Sidebar -->
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
+    </div>
+    <!-- Nội dung chính -->
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Quản lý hóa đơn</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Quản lý hóa đơn</li>
+                </ol>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-filter"></i> Lọc hóa đơn
+                    </div>
+                    <div class="card-body">
+                        <form id="filterForm" th:action="@{/admin/order-manager/filter}" method="get" class="row g-3 align-items-end p-3 border rounded bg-light">
+
+                            <!-- Ô chọn ngày bắt đầu -->
+                            <div class="col-md-3">
+                                <label for="startDate" class="form-label fw-bold">Từ ngày:</label>
+                                <input type="date" id="startDate" name="startDate"
+                                       th:value="${startDate}" class="form-control" required>
+                            </div>
+
+                            <!-- Ô chọn ngày kết thúc -->
+                            <div class="col-md-3">
+                                <label for="endDate" class="form-label fw-bold">Đến ngày:</label>
+                                <input type="date" id="endDate" name="endDate"
+                                       th:value="${endDate}" class="form-control" required>
+                            </div>
+
+                            <!-- Lọc theo loại hóa đơn -->
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold">Loại hóa đơn:</label>
+                                <div class="btn-group d-flex" role="group">
+                                    <input type="radio" class="btn-check" name="type" value="" id="all"
+                                           th:checked="${type == null or type == ''}" onchange="submitForm()">
+                                    <label class="btn btn-outline-secondary w-100" for="all">Tất cả</label>
+
+                                    <input type="radio" class="btn-check" name="type" value="At the counter" id="counter"
+                                           th:checked="${type == 'At the counter'}" onchange="submitForm()">
+                                    <label class="btn btn-outline-secondary w-100" for="counter">At the counter</label>
+
+                                    <input type="radio" class="btn-check" name="type" value="Online" id="online"
+                                           th:checked="${type == 'Online'}" onchange="submitForm()">
+                                    <label class="btn btn-outline-secondary w-100" for="online">Online</label>
+                                </div>
+                            </div>
+
+                            <!-- Nút Lọc và Reset -->
+                            <div class="col-md-2 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary w-50">
+                                    <i class="fas fa-filter"></i> Lọc
+                                </button>
+                                <a th:href="@{/admin/order-manager}" class="btn btn-secondary w-50">
+                                    <i class="fas fa-sync-alt"></i> Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+                <script>
+                    function submitForm() {
+                        document.getElementById("filterForm").submit();
+                    }
+                </script>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        DataTable Example
+                    </div>
+                    <div class="card-body">
+                        <table id="datatablesSimple">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Khách hàng</th>
+                                <th>Nhân viên</th>
+                                <th>Ngày tạo</th>
+                                <th>Tổng tiền</th>
+                                <th>Loại hóa đơn</th>
+                                <th>Trạng thái</th>
+                                <th>Địa chỉ</th>
+                                <th>Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="order, stat : ${orders}">
+                                <td th:text="${stat.index + 1}"></td>
+                                <td th:text="${order.customer != null ? order.customer.fullname : 'Chưa chọn khách hàng'}"></td>
+                                <td th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></td>
+                                <td th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
+                                <td th:text="${order.totalPrice}"></td>
+                                <td th:text="${order.type}"></td>
+                                <td th:text="${order.status}"></td>
+                                <td th:text="${order.address}"></td>
+                                <td>
+                                    <a th:href="@{/admin/order-manager/detail(idOrder=${order.id})}" style="color: black; text-decoration: none">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<footer class="py-4 bg-light mt-auto">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+            <div>
+                <a href="#">Privacy Policy</a>
+                &middot;
+                <a href="#">Terms & Conditions</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/admin/js/scripts.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/admin/js/datatables-simple-demo.js}"></script>
+</body>
+</html>

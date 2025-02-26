@@ -8,6 +8,8 @@
     <meta name="author" content=""/>
     <title>Bán hàng</title>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
+    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">-->
+    <!--    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" defer></script>-->
     <link th:href="@{/admin/css/styles.css}" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
@@ -108,15 +110,19 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
 
+
                         <div class="d-flex align-items-center mb-3">
-                            <form th:action="@{/admin/orders/create}" method="post" style="display: inline;">
+                            <form th:action="@{/admin/orders/create}" method="post" style="display: inline;"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn thêm hóa đơn mới không?');">
                                 <button type="submit" class="btn btn-success">
                                     <i class="fas fa-plus-circle me-1"></i>Thêm hóa đơn
                                 </button>
                             </form>
                             <form th:action="@{/admin/orders/cancel/{id}(id=${order.id})}" method="post"
-                                  style="display: inline; margin-left: 10px;">
-                                <button type="submit" class="btn btn-danger">
+                                  style="display: inline; margin-left: 10px;"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này không?');">
+                                <button type="submit" class="btn btn-danger"
+                                        th:disabled="${order.id == null}">
                                     <i class="fas fa-times-circle me-1"></i>Hủy hóa đơn
                                 </button>
                             </form>
@@ -126,152 +132,312 @@
                 </div>
                 <!-- Tabs -->
                 <ul class="nav nav-tabs mb-4">
-                    <li class="nav-item" th:each="order : ${orders}">
-                        <a class="nav-link active"
-                           th:href="@{'/admin/orders/detail'(idOrder=${order.id})}">
-                            <!--                            <i class="fas fa-receipt me-1"></i>-->
-                            HD<span th:text="${order.id}"></span>
+                    <li class="nav-item" th:each="order, stat : ${orders}">
+                        <a class="nav-link"
+                           th:classappend="${order.id == idOrder} ? 'active' : ''"
+                           th:href="@{'/admin/orders/detail'(idOrder=${order.id})}" style="color: black">
+                            Hóa đơn <span th:text="${stat.index +1}"></span>
                         </a>
                     </li>
                 </ul>
+
+                <style>
+                    .nav-link.active {
+                        background-color: #007bff !important; /* Bootstrap primary color */
+                        color: white !important;
+                        font-weight: bold;
+                    }
+                </style>
                 <!-- Product Section -->
                 <div class="mb-4">
-                    <h5>Sản phẩm</h5>
+                    <!--                    <h5>Sản phẩm</h5>-->
                     <div id="orderDetailsContainer" th:if="${orderDetails != null and orderDetails.size() > 0}">
                         <div th:each="orderDetail : ${orderDetails}"
                              class="d-flex align-items-center border rounded-3 p-3 mb-3">
                             <img th:src="@{${orderDetail.productDetail.image}}" alt="Product" class="me-3" width="100"
                                  height="100">
                             <div>
-                                <h6 th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</h6>
-                                <p class="text-danger" th:text="${orderDetail.price} + ' đ'"></p>
+                                <div style="display: flex; align-items: center;">
+                                    <h6 th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${orderDetail.productDetail.size.name}">Size</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">Price</h6>
+                                </div>
+                                <p class="text-danger fw-bold" th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
                             </div>
                             <div class="ms-auto d-flex align-items-center">
-                                <form th:action="@{/admin/orders/updateQuantity}" method="post"
-                                      class="d-flex align-items-center">
+                                <form th:action="@{/admin/orders/updateQuantity}" method="post" class="d-flex align-items-center">
                                     <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
-                                    <button type="submit" name="action" value="decrease" class="btn btn-icon">
+
+                                    <!-- Nút giảm (-) -->
+                                    <button type="submit" name="action" value="decrease" class="btn btn-icon"
+                                            th:disabled="${orderDetail.quantity == 1}">
                                         <i class="fas fa-minus"></i>
                                     </button>
-                                    <span class="mx-3" th:text="${orderDetail.quantity}">1</span>
-                                    <button type="submit" name="action" value="increase" class="btn btn-icon">
+
+                                    <span class="fw-bold mx-4" th:text="${orderDetail.quantity}"></span>
+
+                                    <!-- Nút tăng (+) -->
+                                    <button type="submit" name="action" value="increase" class="btn btn-icon"
+                                            th:disabled="${orderDetail.productDetail.quantity == 0}">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </form>
-                                <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3">
+
+
+                                <style>
+                                    .btn-icon:disabled {
+                                        border: 1px solid white !important; /* Viền trắng */
+                                        background-color: #f8f9fa !important; /* Màu nền nhẹ hơn */
+                                        color: #ccc !important; /* Màu chữ xám */
+                                        cursor: not-allowed; /* Hiển thị con trỏ không thể click */
+                                    }
+                                </style>
+
+                                <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
                                     <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
                                     <button type="submit" class="btn btn-danger">
-                                        <i class="fas fa-trash me-1"></i></button>
+                                        <i class="fas fa-trash me-1"></i>
+                                    </button>
                                 </form>
                             </div>
                         </div>
                     </div>
 
                     <!-- Thêm một container cho thông báo khi không có sản phẩm -->
-                    <div id="noProductsMessage">
+                    <div id="noProductsMessage" style="display: none;">
                         <h3>Chưa có sản phẩm</h3>
                     </div>
-
-                    <div>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                            <i class="fas fa-cart-plus me-1"></i>Thêm sản phẩm
-                        </button>
-                        <button class="btn btn-secondary">
-                            <i class="fas fa-qrcode me-1"></i>Quét QR sản phẩm
-                        </button>
+                    <div class="card my-4">
+                        <div class="card-header">
+                            <i class="fas fa-table me-1"></i>
+                            Sản phẩm
+                        </div>
+                        <div class="card-body">
+                            <table id="datatablesSimple">
+                                <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tên SP</th>
+                                    <th>Thương hiệu</th>
+                                    <th>Màu</th>
+                                    <th>Kích thước</th>
+                                    <th>Giá (VND)</th>
+                                    <th>Số lượng</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody id="productList">
+                                <tr th:each="productDetail, stat : ${productDetails}">
+                                    <td th:text="${stat.index+1}"></td>
+                                    <!--                                    <td th:text="${productDetail.id}"></td>-->
+                                    <td th:text="${productDetail.product.name}"></td>
+                                    <td th:text="${productDetail.brand.name}"></td>
+                                    <td th:text="${productDetail.color.name}"></td>
+                                    <td th:text="${productDetail.size.name}"></td>
+                                    <td th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')}"></td>
+                                    <td th:text="${productDetail.quantity}"></td>
+                                    <td>
+                                        <form action="/admin/orders/addProductToOrder" method="post">
+                                            <input type="hidden" name="orderId" th:value="${order.id}">
+                                            <input type="hidden" name="productDetailId" th:value="${productDetail.id}">
+                                            <input type="hidden" name="quantity" value="1">
+                                            <button type="submit" class="btn btn-primary"
+                                                    th:disabled="${order.id == null}">Thêm vào hóa đơn
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                    <!--                    <div>-->
+                    <!--                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">-->
+                    <!--                            <i class="fas fa-cart-plus me-1"></i>Thêm sản phẩm-->
+                    <!--                        </button>-->
+                    <!--                    </div>-->
                 </div>
                 <!-- Customer Section -->
-                <div class="mb-4">
+                <div class="mb-4" style="position: relative;">
                     <h5>Khách hàng</h5>
-                    <div>
-                        <div style="position: relative; display: inline-block;">
-                            <input
-                                    type="text"
-                                    id="search"
-                                    placeholder="Nhập email"
-                                    onkeyup="timKiemKhachHang()"
-                                    class="form-control"
-                                    style="width: 300px; display: inline-block;">
-
-                            <span id="fullnameDisplay" style="margin-left: 10px; font-size: 14px; color: #555;"></span>
-                        </div>
-
-                        <div id="ketQuaTimKiem" class="dropdown-menu"
-                             style="display: none; position: absolute; width: 300px;">
-                            <!-- Kết quả tìm kiếm sẽ được chèn vào đây -->
-                        </div>
-
-                        <!--                        <button id="btnSelectCustomer" class="btn btn-primary" style="padding-left: 20px">-->
-                        <!--                            <i class="fas fa-user-check me-1"></i>Chọn khách hàng-->
-                        <!--                        </button>-->
-
-                    </div>
-                    <!-- Modal chọn khách hàng -->
-                    <div id="customerModal" class="modal fade" tabindex="-1" role="dialog"
-                         aria-labelledby="customerModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="customerModalLabel">Chọn khách hàng</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Tìm kiếm khách hàng -->
-                                    <div class="mb-4">
-                                        <input id="searchCustomer" type="text" class="form-control"
-                                               placeholder="Tìm kiếm khách hàng..."/>
-                                    </div>
-
-                                    <!-- Danh sách khách hàng -->
-                                    <ul id="customerList" class="list-group mb-4">
-                                        <li th:each="customer : ${customers}" class="list-group-item">
-                                            <a href="#" class="customer-item" th:data-id="${customer.id}"
-                                               th:text="${customer.name}"></a>
-                                        </li>
-                                    </ul>
-
-                                    <hr>
-
-                                    <!-- Form thêm nhanh khách hàng -->
-                                    <h5 class="mb-3">Thêm nhanh khách hàng</h5>
-                                    <form id="addCustomerForm"
-                                          th:action="@{/admin/orders/selectCustomer/{orderId}(orderId=${order.id})}"
-                                          method="post">
-                                        <div class="mb-3">
-                                            <label for="customerId" class="form-label">Chọn khách hàng</label>
-                                            <select class="form-select" id="customerId" name="customerId" required>
-                                                <option value="" disabled selected>Chọn khách hàng</option>
-                                                <option th:each="customer : ${customers}" th:value="${customer.id}"
-                                                        th:text="${customer.account.fullname}"></option>
-                                            </select>
-                                        </div>
-                                        <button type="submit" class="btn btn-success">Chọn khách hàng</button>
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
+                    <input type="text" id="customerSearch" th:disabled="${order.id == null}" class="form-control"
+                           placeholder="Tìm kiếm khách hàng..." autocomplete="off">
+                    <div id="customerResults" class="dropdown-content"></div>
                 </div>
+
+                <style>
+                    /* CSS cho dropdown */
+                    .dropdown-content {
+                        position: absolute;
+                        width: 100%;
+                        background: white;
+                        border: 1px solid #ccc;
+                        max-height: 250px; /* Giới hạn chiều cao */
+                        overflow-y: auto; /* Tự động hiện scroll khi cần */
+                        display: none;
+                        z-index: 1000;
+                        border-radius: 5px;
+                        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                        scrollbar-width: thin; /* Ẩn bớt thanh scroll trên Firefox */
+                        scrollbar-color: #ccc transparent;
+                    }
+
+                    /* Ẩn thanh cuộn trên Chrome, Edge, Safari */
+                    .dropdown-content::-webkit-scrollbar {
+                        width: 6px; /* Độ rộng thanh scroll */
+                    }
+
+                    .dropdown-content::-webkit-scrollbar-thumb {
+                        background: #ccc; /* Màu thanh kéo */
+                        border-radius: 3px;
+                    }
+
+                    .dropdown-content::-webkit-scrollbar-track {
+                        background: transparent; /* Nền trong suốt */
+                    }
+
+                    /* Cách hiển thị từng mục */
+                    .dropdown-content .dropdown-item {
+                        padding: 10px;
+                        cursor: pointer;
+                        border-bottom: 1px solid #eee;
+                        font-size: 14px;
+                    }
+
+                    /* Hover chỉ đổi màu, không có hiệu ứng animation */
+                    .dropdown-content .dropdown-item:hover {
+                        background: #007bff; /* Màu xanh */
+                        color: white;
+                    }
+
+                    /* Bo góc item cuối */
+                    .dropdown-content .dropdown-item:last-child {
+                        border-bottom: none;
+                    }
+
+                    /* Kiểu chữ */
+                    .customer-name {
+                        font-weight: bold;
+                        color: #333;
+                    }
+
+                    .customer-email, .customer-phone {
+                        font-size: 12px;
+                        color: #666;
+                    }
+
+                    /* Khi hover, đổi màu text */
+                    .dropdown-content .dropdown-item:hover .customer-name,
+                    .dropdown-content .dropdown-item:hover .customer-email,
+                    .dropdown-content .dropdown-item:hover .customer-phone {
+                        color: white;
+                    }
+
+                </style>
+
+                <script>
+                    document.getElementById('customerSearch').addEventListener('input', function () {
+                        let query = this.value.trim();
+                        let resultContainer = document.getElementById('customerResults');
+
+                        if (query.length === 0) {
+                            resultContainer.style.display = 'none'; // Ẩn danh sách nếu không có input
+                            return;
+                        }
+
+                        fetch(`/admin/orders/searchCustomer?query=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log("Dữ liệu API trả về:", data); // Kiểm tra API trả về gì
+
+                                resultContainer.innerHTML = ''; // Xóa danh sách cũ
+                                if (data.length === 0) {
+                                    resultContainer.style.display = 'none'; // Ẩn nếu không có kết quả
+                                    return;
+                                }
+                                data.forEach(customer => {
+                                    let customerName = customer.fullname || "Không có tên";
+                                    let customerEmail = customer.email || "Không có email";
+                                    let customerPhone = customer.phoneNumber || "Không có số điện thoại";
+
+                                    let div = document.createElement('div');
+                                    div.classList.add('dropdown-item');
+                                    div.innerHTML = `
+                    <div class="customer-name">${customerName}</div>
+                    <div class="customer-email">${customerEmail}</div>
+                    <div class="customer-phone">${customerPhone}</div>
+                `;
+                                    div.onclick = function () {
+                                        document.getElementById('customerSearch').value = customerName;
+                                        resultContainer.style.display = 'none'; // Ẩn dropdown khi chọn xong
+                                        selectCustomer(customer.id); // Gọi API khi chọn khách hàng
+                                    };
+                                    resultContainer.appendChild(div);
+                                });
+                                resultContainer.style.display = 'block'; // Hiện dropdown khi có kết quả
+                            })
+                            .catch(error => console.error('Lỗi khi tìm kiếm khách hàng:', error));
+                    });
+
+                    // Gửi yêu cầu chọn khách hàng
+                    function selectCustomer(customerId) {
+                        let orderId = new URLSearchParams(window.location.search).get("idOrder"); // Lấy orderId từ URL
+                        if (!orderId) {
+                            alert("Không tìm thấy đơn hàng!");
+                            return;
+                        }
+
+                        fetch(`/admin/orders/selectCustomer/${orderId}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `customerId=${customerId}&idOrder=${orderId}`
+                        })
+                            .then(response => {
+                                if (response.redirected) {
+                                    window.location.href = response.url; // Chuyển hướng đến trang chi tiết đơn hàng
+                                } else {
+                                    return response.text();
+                                }
+                            })
+                            .then(data => console.log("Kết quả từ server:", data))
+                            .catch(error => console.error("Lỗi khi chọn khách hàng:", error));
+                    }
+
+                    // Ẩn dropdown khi click ra ngoài
+                    document.addEventListener('click', function (event) {
+                        let dropdown = document.getElementById('customerResults');
+                        if (!document.getElementById('customerSearch').contains(event.target)) {
+                            dropdown.style.display = 'none';
+                        }
+                    });
+                </script>
+
+
                 <!-- Order Info -->
                 <div class="border p-3">
                     <h5>Thông tin đơn hàng</h5>
 
-                    <p>Khách hàng: <span th:text="${order.user != null ? order.user.fullname : 'Chưa chọn khách hàng'}"></span></p>
-                    <p>Nhân viên: <span th:text="${order.admin != null ? order.admin.fullname : 'Chưa chọn nhân viên'}"></span></p>
+                    <p>Khách hàng: <span
+                            th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span></p>
+                    <p>Nhân viên: <span
+                            th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
 
-                    <p>Tổng số tiền: <span class="text-danger"></span></p>
+                    <p>Tổng số tiền: <span class="text-danger">
+    <span class="text-danger fw-bold" th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
+</span></p>
+
+
 
                     <form th:action="@{/admin/orders/confirm/{id}(id=${order.id})}" method="post"
                           onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn hàng không?');">
-                        <button class="btn btn-primary w-100">Xác nhận đặt hàng</button>
+                        <button class="btn btn-primary w-100" th:disabled="${order.id == null}">Xác nhận đặt hàng</button>
                     </form>
                 </div>
 
@@ -282,57 +448,52 @@
 </div>
 
 <!-- Modal chọn sản phẩm -->
-<div class="modal fade" id="productModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chọn Sản Phẩm</h5>
-                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="addProductForm">
-                    <input type="hidden" id="productDetailId" name="productDetailId">
-
-                    <div class="form-group mb-3">
-                        <label class="mb-1">Chọn Sản Phẩm:</label>
-                        <select id="productSelect" name="product" class="form-control">
-                            <option value="">Chọn sản phẩm</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="mb-1">Chọn Kiểu Dáng:</label>
-                        <select id="styleSelect" name="style" class="form-control" disabled>
-                            <option value="">Chọn kiểu dáng</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="mb-1">Chọn Màu:</label>
-                        <select id="colorSelect" name="color" class="form-control" disabled>
-                            <option value="">Chọn màu sắc</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="mb-1">Chọn Size:</label>
-                        <select id="sizeSelect" name="size" class="form-control" disabled>
-                            <option value="">Chọn size</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="mb-1">Số lượng:</label>
-                        <input type="number" id="quantity" name="quantity" class="form-control" value="1">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary">Thêm vào đơn hàng</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!--<div class="modal fade" id="productModal">-->
+<!--    <div class="modal-dialog modal-lg">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h5 class="modal-title">Chọn Sản Phẩm</h5>-->
+<!--                <button type="button" class="btn-close" data-dismiss="modal"></button>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div class="card mb-4">-->
+<!--                    <div class="card-header">-->
+<!--                        <i class="fas fa-table me-1"></i>-->
+<!--                        Sản phẩm-->
+<!--                    </div>-->
+<!--                    <div class="card-body">-->
+<!--                        <table id="datatablesSimple">-->
+<!--                            <thead>-->
+<!--                            <tr>-->
+<!--                                <th>STT</th>-->
+<!--                                <th>Tên SP</th>-->
+<!--                                <th>Thương hiệu</th>-->
+<!--                                <th>Màu</th>-->
+<!--                                <th>Kích thước</th>-->
+<!--                                <th>Giá</th>-->
+<!--                                <th>Số lượng</th>-->
+<!--                            </tr>-->
+<!--                            </thead>-->
+<!--                            <tbody>-->
+<!--                            <tr th:each="productDetail, stat : ${productDetails}">-->
+<!--                                <td th:text="${stat.index+1}"></td>-->
+<!--                                &lt;!&ndash;                                    <td th:text="${productDetail.id}"></td>&ndash;&gt;-->
+<!--                                <td th:text="${productDetail.product.name}"></td>-->
+<!--                                <td th:text="${productDetail.brand.name}"></td>-->
+<!--                                <td th:text="${productDetail.color.name}"></td>-->
+<!--                                <td th:text="${productDetail.size.name}"></td>-->
+<!--                                <td th:text="${productDetail.price}"></td>-->
+<!--                                <td th:text="${productDetail.quantity}"></td>-->
+<!--                            </tr>-->
+<!--                            </tbody>-->
+<!--                        </table>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <button class="btn btn-primary">Thêm vào đơn hàng</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 <footer class="py-4 bg-light mt-auto">
     <div class="container-fluid px-4">
         <div class="d-flex align-items-center justify-content-between small">
@@ -346,6 +507,33 @@
     </div>
 </footer>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let orderDetailsContainer = document.getElementById("orderDetailsContainer");
+        let noProductsMessage = document.getElementById("noProductsMessage");
+
+        // Lấy orderId từ URL
+        let urlParams = new URLSearchParams(window.location.search);
+        let orderId = urlParams.get("idOrder");
+
+        // Nếu không có orderId, ẩn toàn bộ giao diện liên quan đến đơn hàng
+        if (!orderId) {
+            if (orderDetailsContainer) orderDetailsContainer.style.display = "none";
+            if (noProductsMessage) noProductsMessage.style.display = "none";
+            return;
+        }
+
+        // Nếu có orderId, kiểm tra danh sách sản phẩm
+        if (!orderDetailsContainer || orderDetailsContainer.children.length === 0) {
+            noProductsMessage.style.display = "block"; // Hiển thị thông báo "Không có sản phẩm"
+        } else {
+            noProductsMessage.style.display = "none";  // Ẩn thông báo
+        }
+    });
+</script>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/admin/js/order.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>

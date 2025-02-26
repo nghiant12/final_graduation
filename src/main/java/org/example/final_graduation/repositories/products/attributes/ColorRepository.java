@@ -6,12 +6,19 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ColorRepository extends JpaRepository<Color, Integer> {
     boolean existsByName(String name);
 
     @Query("""
-    SELECT cl FROM Color cl WHERE cl.id = :idColor
-""")
+                SELECT cl FROM Color cl WHERE cl.id = :idColor
+            """)
     Color findByID(@Param("idColor") Integer idColor);
+
+    @Query("""
+                SELECT DISTINCT pd.color FROM ProductDetail pd WHERE pd.id = :idProduct
+            """)
+    List<Color> findColorsByProduct(@Param("productId") Integer productId);
 }

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <title>Sản phẩm</title>
+    <link th:href="@{/admin/css/styles.css}" rel="stylesheet" type="text/css">
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <!-- Navbar Brand-->
+    <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
+    <!-- Sidebar Toggle-->
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
+            class="fas fa-bars"></i></button>
+    <!-- Navbar Search-->
+    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+        <div class="input-group">
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
+                   aria-describedby="btnNavbarSearch"/>
+            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
+        </div>
+    </form>
+    <!-- Navbar-->
+    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="#!">Settings</a></li>
+                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                <li>
+                    <hr class="dropdown-divider"/>
+                </li>
+                <li><a class="dropdown-item" href="#!">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+
+<!-- Menu Sidebar -->
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
+    </div>
+    <!-- Nội dung chính -->
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Hóa đơn chi tiết</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a th:href="@{/admin/order-manager}">Hóa đơn</a></li>
+                    <li class="breadcrumb-item active">Hóa đơn chi tiết</li>
+                </ol>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-user me-1"></i>
+                        Thông tin người dùng
+                    </div>
+                    <div class="card-body">
+                        <div style="display: flex; justify-content: center; align-items: center; width: 100%; gap: 100px;">
+                            <div style="display: flex; align-items: center;">
+                                <h3 style="margin-right: 5px;">Khách hàng:</h3>
+                                <h3 th:text="${order.customer.fullname}">Tên khách hàng</h3>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <h3 style="margin-right: 5px;">Nhân viên:</h3>
+                                <h3 th:text="${order.employee.fullname}">Tên nhân viên</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i>
+                        Danh sách sản phẩm
+                    </div>
+                    <div class="card-body">
+                        <div th:each="orderDetail : ${orderDetails}"
+                             class="d-flex align-items-center border rounded-3 p-3 mb-3">
+                            <img th:src="@{${orderDetail.productDetail.image}}" alt="Product" class="me-3" width="100"
+                                 height="100">
+                            <div>
+                                <div style="display: flex; align-items: center;">
+                                    <h6 th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${orderDetail.productDetail.size.name}">Size</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
+                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                    <h6 th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                        Price</h6>
+                                </div>
+                                <div style="display: flex">
+                                    <h6 style="margin-right: 5px">Số lượng: </h6>
+                                    <h6 th:text="${orderDetail.quantity}"></h6>
+                                </div>
+                                <div style="display: flex">
+                                    <h6 style="margin-right: 5px">Đơn giá: </h6> <h6 class="text-danger fw-bold"
+                                                                                     th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex">
+                            <h4 class="mx-2">Tổng tiền đơn hàng: </h4> <h4 class="text-danger fw-bold" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-file-invoice me-1"></i>
+                        Thông tin đơn hàng
+                    </div>
+                    <div class="card-body">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; text-align: center;">
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                                <h3 style="margin-right: 5px;">Ngày tạo:</h3>
+                                <h3 th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm:ss')}">Ngày tạo</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                                <h3 style="margin-right: 5px;">Địa chỉ:</h3>
+                                <h3 th:text="${order.address}">Địa chỉ</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                                <h3 style="margin-right: 5px;">Trạng thái:</h3>
+                                <h3 th:text="${order.status}">Trạng thái</h3>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                                <h3 style="margin-right: 5px;">Loại hóa đơn:</h3>
+                                <h3 th:text="${order.type}">Loại hóa đơn</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<footer class="py-4 bg-light mt-auto">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+            <div>
+                <a href="#">Privacy Policy</a>
+                &middot;
+                <a href="#">Terms & Conditions</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+<script th:src="@{/admin/js/scripts.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
+<script th:src="@{/admin/js/datatables-simple-demo.js}"></script>
+</body>
+</html>

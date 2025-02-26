@@ -1,38 +1,40 @@
 package org.example.final_graduation.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
-import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "accounts")
-public class Account {
+@Table(name = "customers")
+public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Size(max = 50)
+    @jakarta.validation.constraints.Size(max = 50)
     @NotNull
     @Nationalized
-    @Column(name = "username", nullable = false, length = 50)
+    @Column(name = "username", nullable = false, length = 50, unique = true)
     private String username;
 
-    @Size(max = 255)
+    @jakarta.validation.constraints.Size(max = 255)
     @NotNull
     @Nationalized
     @Column(name = "password", nullable = false)
+    @NotBlank(groups = Customer.class) // Chỉ kiểm tra khi tạo mới
     private String password;
 
-    @Size(max = 100)
+    @jakarta.validation.constraints.Size(max = 100)
     @NotNull
     @Nationalized
     @Column(name = "fullname", nullable = false, length = 100)
@@ -41,32 +43,37 @@ public class Account {
     @Size(max = 100)
     @NotNull
     @Nationalized
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "phone_number", nullable = false, length = 10)
+    private String phoneNumber;
+
+    @jakarta.validation.constraints.Size(max = 100)
+    @NotNull
+    @Nationalized
+    @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
-    @Size(max = 100)
+    @jakarta.validation.constraints.Size(max = 100)
     @Nationalized
     @Column(name = "address", length = 100)
     private String address;
 
-    @Size(max = 255)
+    @jakarta.validation.constraints.Size(max = 255)
     @Nationalized
     @Column(name = "photo")
     private String photo;
 
-    @NotNull
-    @ColumnDefault("getdate()")
     @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate;
+    private java.util.Date createdDate = new java.util.Date();
 
-    public Account() {
+    public Customer() {
     }
 
-    public Account(Integer id, String username, String password, String fullname, String email, String address, String photo, LocalDateTime createdDate) {
+    public Customer(Integer id, String username, String password, String fullname, String phoneNumber, String email, String address, String photo, Date createdDate) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.fullname = fullname;
+        this.phoneNumber = phoneNumber;
         this.email = email;
         this.address = address;
         this.photo = photo;
@@ -89,11 +96,11 @@ public class Account {
         this.username = username;
     }
 
-    public @Size(max = 255) @NotNull String getPassword() {
+    public @Size(max = 255) @NotNull @NotBlank(groups = Customer.class) String getPassword() {
         return password;
     }
 
-    public void setPassword(@Size(max = 255) @NotNull String password) {
+    public void setPassword(@Size(max = 255) @NotNull @NotBlank(groups = Customer.class) String password) {
         this.password = password;
     }
 
@@ -103,6 +110,14 @@ public class Account {
 
     public void setFullname(@Size(max = 100) @NotNull String fullname) {
         this.fullname = fullname;
+    }
+
+    public @Size(max = 100) @NotNull String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(@Size(max = 100) @NotNull String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public @Size(max = 100) @NotNull String getEmail() {
@@ -129,11 +144,11 @@ public class Account {
         this.photo = photo;
     }
 
-    public @NotNull LocalDateTime getCreatedDate() {
+    public Date getCreatedDate() {
         return createdDate;
     }
 
-    public void setCreatedDate(@NotNull LocalDateTime createdDate) {
+    public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
     }
 }

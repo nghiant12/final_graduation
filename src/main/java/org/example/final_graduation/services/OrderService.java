@@ -1,8 +1,9 @@
 package org.example.final_graduation.services;
 
-import org.example.final_graduation.entities.Account;
+import org.example.final_graduation.entities.Customer;
 import org.example.final_graduation.entities.Order;
-import org.example.final_graduation.repositories.AccountRepository;
+import org.example.final_graduation.repositories.CustomerRepository;
+import org.example.final_graduation.repositories.EmployeeRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,10 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
-    private AccountRepository accountRepository;
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
@@ -27,7 +31,7 @@ public class OrderService {
     public void createNewOrder() {
 
         Order newOrder = new Order();
-        newOrder.setAdmin(accountRepository.findByID(4));
+        newOrder.setEmployee(employeeRepository.findByID(4));
         newOrder.setCreatedDate(LocalDateTime.now());
         newOrder.setTotalPrice(BigDecimal.ZERO);
         newOrder.setType("At the counter");
@@ -52,10 +56,6 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public List<Account> searchCustomers(String email, String fullname) {
-        return accountRepository.findCustomers(email, fullname);
-    }
-
     public void deleteOrderById(Integer id) {
         orderRepository.deleteById(id);
     }
@@ -64,9 +64,9 @@ public class OrderService {
     public void addCustomerToOrder(Integer orderId, Integer customerId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-        Account customer = accountRepository.findById(customerId)
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
-        order.setUser(customer); // Thiết lập khách hàng cho đơn hàng
+        order.setCustomer(customer); // Thiết lập khách hàng cho đơn hàng
         orderRepository.save(order); // Lưu lại thay đổi
     }
 }

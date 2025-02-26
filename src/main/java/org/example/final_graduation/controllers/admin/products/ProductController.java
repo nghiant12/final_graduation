@@ -45,14 +45,6 @@ public class ProductController {
     }
     @PostMapping("/update")
     public String edit(@ModelAttribute Product product, RedirectAttributes redirectAttributes) {
-        if (product.getStatus() == null) {
-//            product.setStatus(true); // Hoặc false nếu muốn mặc định là không hoạt động
-        }
-//        boolean exists = productRepository.existsByName(product.getName());
-//        if (exists) {
-//            redirectAttributes.addFlashAttribute("error", "Tên sản phẩm đã tồn tại!");
-//            return "redirect:/admin/products";
-//        }
         // Kiểm tra tên sản phẩm, nhưng bỏ qua sản phẩm hiện tại
         boolean exists = productRepository.existsByName(product.getName()) &&
                 !productRepository.findByID(product.getId()).getName().equals(product.getName());

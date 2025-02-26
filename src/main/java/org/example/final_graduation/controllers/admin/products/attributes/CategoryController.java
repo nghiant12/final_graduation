@@ -14,11 +14,11 @@ import java.util.List;
     @RequestMapping("admin/categories")
     public class CategoryController {
         @Autowired
-        private CategoryRepository categoryRespository;
+        private CategoryRepository categoryRepository;
 
         @GetMapping("")
         public String index(Model model) {
-            List<Category> categories = categoryRespository.findAll();
+            List<Category> categories = categoryRepository.findAll();
             model.addAttribute("categories", categories);
             model.addAttribute("category", new Category());// Truyền đối tượng mới vào model
             return "admin/attributes/categories/index";
@@ -26,13 +26,13 @@ import java.util.List;
 
         @PostMapping("/add")
         public String add(@ModelAttribute Category category, RedirectAttributes redirectAttributes) {
-            boolean exists = categoryRespository.existsByName(category.getName());
+            boolean exists = categoryRepository.existsByName(category.getName());
             if (exists) {
                 redirectAttributes.addFlashAttribute("error", "Tên kiểu dáng đã tồn tại!");
                 return "redirect:/admin/categories"; // Nếu trùng tên, quay lại trang danh sách
             }
 
-            categoryRespository.save(category);
+            categoryRepository.save(category);
             redirectAttributes.addFlashAttribute("success", "Thêm kiểu dáng thành công!");
             return "redirect:/admin/categories"; // Quay lại trang danh sách
         }
@@ -40,21 +40,21 @@ import java.util.List;
         @PostMapping("/update")
         public String edit(@ModelAttribute Category category, RedirectAttributes redirectAttributes) {
             // Kiểm tra đối tượng có tồn tại trong cơ sở dữ liệu hay không
-            Category existingCategory = categoryRespository.findById(category.getId()).orElse(null);
+            Category existingCategory = categoryRepository.findById(category.getId()).orElse(null);
             if (existingCategory == null) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy kiểu dáng để cập nhật.");
                 return "redirect:/admin/categories";
             }
 
             // Kiểm tra trùng tên (ngoại trừ chính nó)
-            if (categoryRespository.existsByName(category.getName()) && !existingCategory.getName().equals(category.getName())) {
+            if (categoryRepository.existsByName(category.getName()) && !existingCategory.getName().equals(category.getName())) {
                 redirectAttributes.addFlashAttribute("error", "Tên kiểu dáng đã tồn tại!");
                 return "redirect:/admin/categories";
             }
 
             // Cập nhật dữ liệu
             existingCategory.setName(category.getName());
-            categoryRespository.save(existingCategory);
+            categoryRepository.save(existingCategory);
 
             redirectAttributes.addFlashAttribute("success", "Cập nhật kiểu dáng thành công!");
             return "redirect:/admin/categories";
@@ -64,7 +64,7 @@ import java.util.List;
 
         @GetMapping("/edit/{idCategory}")
         public String editForm(@PathVariable("idCategory") Integer idCategory, Model model, RedirectAttributes redirectAttributes) {
-            Category categoryEdit = categoryRespository.findByID(idCategory);
+            Category categoryEdit = categoryRepository.findByID(idCategory);
 
             if (categoryEdit == null) {
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy kiểu dáng.");
@@ -72,7 +72,7 @@ import java.util.List;
             }
 
             model.addAttribute("category", categoryEdit);
-            List<Category> categories = categoryRespository.findAll();
+            List<Category> categories = categoryRepository.findAll();
             model.addAttribute("categories", categories);
             return "admin/attributes/categories/index"; // Trả về trang chỉnh sửa
         }
