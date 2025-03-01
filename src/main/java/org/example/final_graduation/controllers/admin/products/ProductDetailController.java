@@ -9,6 +9,8 @@ import org.example.final_graduation.repositories.products.attributes.CategoryRep
 import org.example.final_graduation.repositories.products.attributes.ColorRepository;
 import org.example.final_graduation.repositories.products.attributes.SizeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -19,11 +21,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -54,35 +58,26 @@ public class ProductDetailController {
     @GetMapping("/list")
     public String listProductDetails(Model model) {
         model.addAttribute("productDetails", productDetailRepository.findAll());
+        model.addAttribute("productDetail", new ProductDetail());
+        addAttributes(model);
         return "product_details/list";
     }
 
-    @GetMapping("/add")
-    public String showAddForm(Model model) {
-        model.addAttribute("productDetail", new ProductDetail());
-        // Add necessary data for dropdowns
-        model.addAttribute("products", productRepository.findAll());
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("sizes", sizeRepository.findAll());
-        model.addAttribute("colors", colorRepository.findAll());
-        model.addAttribute("brands", brandRepository.findAll());
-        return "product_details/add";
-    }
-
     @PostMapping("/add")
-    public String addProductDetail(@Valid @ModelAttribute("productDetail") ProductDetail productDetail,
-                                   BindingResult bindingResult,
-                                   @RequestParam("imageFile") MultipartFile imageFile,
-                                   RedirectAttributes redirectAttributes,
-                                   Model model) {
+    @ResponseBody
+    public ResponseEntity<?> addProductDetail(@Valid @ModelAttribute("productDetail") ProductDetail productDetail,
+                                              BindingResult bindingResult,
+                                              @RequestParam("imageFile") MultipartFile imageFile) {
         if (bindingResult.hasErrors()) {
-            // Re-add necessary data for dropdowns
-            model.addAttribute("products", productRepository.findAll());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("sizes", sizeRepository.findAll());
-            model.addAttribute("colors", colorRepository.findAll());
-            model.addAttribute("brands", brandRepository.findAll());
-            return "product_details/add";
+            return ResponseEntity.badRequest().body(bindingResult.getAllErrors());
+        }
+
+        if (productDetail.getPrice() == null || productDetail.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.badRequest().body("Price must be a positive number");
+        }
+
+        if (productDetail.getQuantity() == null || productDetail.getQuantity() <= 0) {
+            return ResponseEntity.badRequest().body("Quantity must be a positive number");
         }
 
         try {
@@ -99,71 +94,83 @@ public class ProductDetailController {
                 try (InputStream inputStream = imageFile.getInputStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
                     productDetail.setImage("/uploads/products/" + filename);
-                } catch (IOException e) {
-                    throw new IOException("Could not save image file: " + filename, e);
                 }
             }
 
             ProductDetail savedProductDetail = productDetailRepository.save(productDetail);
+            return ResponseEntity.ok().body(savedProductDetail);
 
-            redirectAttributes.addFlashAttribute("success", "Product detail added successfully! ID: " + savedProductDetail.getId());
-            return "redirect:/admin/product-details/list";
         } catch (IOException e) {
-            model.addAttribute("error", "Failed to upload image: " + e.getMessage());
-            // Re-add necessary data for dropdowns
-            model.addAttribute("products", productRepository.findAll());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("sizes", sizeRepository.findAll());
-            model.addAttribute("colors", colorRepository.findAll());
-            model.addAttribute("brands", brandRepository.findAll());
-            return "product_details/add";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image: " + e.getMessage());
         } catch (Exception e) {
-            model.addAttribute("error", "Failed to add product detail: " + e.getMessage());
-            // Re-add necessary data for dropdowns
-            model.addAttribute("products", productRepository.findAll());
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("sizes", sizeRepository.findAll());
-            model.addAttribute("colors", colorRepository.findAll());
-            model.addAttribute("brands", brandRepository.findAll());
-            return "product_details/add";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add product detail: " + e.getMessage());
         }
     }
 
 
 
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Integer id, Model model) {
-        ProductDetail productDetail = productDetailRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid product detail Id:" + id));
-        model.addAttribute("productDetail", productDetail);
-        return "product_details/edit";
+    @GetMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<?> getProductDetail(@PathVariable Integer id) {
+        try {
+            ProductDetail productDetail = productDetailRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid product detail Id:" + id));
+            return ResponseEntity.ok().body(productDetail);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch product detail: " + e.getMessage());
+        }
     }
 
     @PostMapping("/update/{id}")
-    public String updateProductDetail(@PathVariable Integer id,
-                                      @Valid @ModelAttribute("productDetail") ProductDetail productDetail,
-                                      BindingResult bindingResult,
-                                      @RequestParam("imageFile") MultipartFile imageFile,
-                                      RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> updateProductDetail(@PathVariable Integer id,
+                                                 @Valid @ModelAttribute("productDetail") ProductDetail productDetail,
+                                                 BindingResult bindingResult,
+                                                 @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
         if (bindingResult.hasErrors()) {
-            return "product_details/edit";
+            Map<String, String> errors = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(errors);
         }
 
-        if (!imageFile.isEmpty()) {
-            String filename = StringUtils.cleanPath(imageFile.getOriginalFilename());
-            try {
-                Path path = Paths.get("uploads/products/" + filename);
-                Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-                productDetail.setImage("/uploads/products/" + filename);
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (productDetail.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            return ResponseEntity.badRequest().body("Price must be a positive number");
+        }
+
+        if (productDetail.getQuantity() <= 0) {
+            return ResponseEntity.badRequest().body("Quantity must be a positive number");
+        }
+
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String uploadDir = "uploads/products/";
+                Path uploadPath = Paths.get(uploadDir);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                String filename = UUID.randomUUID().toString() + "_" + StringUtils.cleanPath(imageFile.getOriginalFilename());
+                Path filePath = uploadPath.resolve(filename);
+
+                try (InputStream inputStream = imageFile.getInputStream()) {
+                    Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+                    productDetail.setImage("/uploads/products/" + filename);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image: " + e.getMessage());
+                }
             }
-        }
 
-        productDetailRepository.save(productDetail);
-        redirectAttributes.addFlashAttribute("message", "Product detail updated successfully!");
-        return "redirect:/admin/product-details/list";
+            ProductDetail savedProductDetail = productDetailRepository.save(productDetail);
+            return ResponseEntity.ok().body(savedProductDetail);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update product detail: " + e.getMessage());
+        }
     }
+
 
     @GetMapping("/delete/{id}")
     public String deleteProductDetail(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
@@ -180,12 +187,6 @@ public class ProductDetailController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid product detail Id:" + id));
         model.addAttribute("productDetail", productDetail);
         return "product_details/detail";
-    }
-
-    @GetMapping("/json")
-    @ResponseBody
-    public List<ProductDetail> getProductDetailsJson() {
-        return productDetailRepository.findALL();
     }
 
 }
