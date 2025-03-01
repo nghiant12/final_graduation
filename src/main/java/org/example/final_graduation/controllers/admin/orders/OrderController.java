@@ -10,6 +10,7 @@ import org.example.final_graduation.repositories.products.ProductRepository;
 import org.example.final_graduation.repositories.products.attributes.ColorRepository;
 import org.example.final_graduation.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -116,12 +117,15 @@ public class OrderController {
         List<Order> orders = orderRepository.findAllProcessing();
         model.addAttribute("orders", orders);
 
+        List<ProductDetail> productDetails = productDetailRepository.findALL();
+        System.out.println("Số sản phẩm: " + productDetails.size()); // Debug dữ liệu
+
         // Lấy chi tiết hóa đơn dựa trên idOrder
 
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(idOrder);
         model.addAttribute("orderDetails", orderDetails);
 
-        model.addAttribute("productDetails", productDetailRepository.findALL());
+        model.addAttribute("productDetails", productDetails);
 
         model.addAttribute("totalPrice", orderDetailRepository.tongTien(idOrder));
 
@@ -209,21 +213,13 @@ public class OrderController {
             redirectAttributes.addFlashAttribute("error", "Vui lòng chọn đơn hàng!");
             return "redirect:/admin/orders";
         }
-
         try {
-            // Lấy thông tin chi tiết sản phẩm từ productDetailId
             ProductDetail productDetail = productDetailService.findById(productDetailId);
-
-            // Kiểm tra xem số lượng có đủ không
             if (productDetail.getQuantity() < quantity) {
                 redirectAttributes.addFlashAttribute("error", "Số lượng sản phẩm không đủ!");
                 return "redirect:/admin/orders/detail?idOrder=" + orderId;
             }
-
-            // Thêm sản phẩm vào đơn hàng
             orderDetailService.addProductToOrder(orderId, productDetailId, quantity);
-
-            // Cập nhật số lượng sản phẩm (trừ đi số lượng đã thêm vào đơn hàng)
             productDetail.setQuantity(productDetail.getQuantity() - quantity);
             productDetailService.saveProductDetail(productDetail);
 
@@ -238,12 +234,12 @@ public class OrderController {
         return "redirect:/admin/orders/detail?idOrder=" + orderId;
     }
 
-
     // Xử lý tăng/giảm số lượng sản phẩm trong đơn hàng
     @PostMapping("/updateQuantity")
-    public String updateQuantity(@RequestParam("orderDetailId") Integer orderDetailId,
-                                 @RequestParam("action") String action,
-                                 RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateQuantity(@RequestParam("orderDetailId") Integer orderDetailId,
+                                                              @RequestParam("action") String action) {
+        Map<String, Object> response = new HashMap<>();
         try {
             Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(orderDetailId);
 
@@ -254,8 +250,9 @@ public class OrderController {
                 ProductDetail productDetail = orderDetail.getProductDetail();
 
                 if (orderId == null || productDetail == null) {
-                    redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng hoặc sản phẩm.");
-                    return "redirect:/admin/orders";
+                    response.put("success", false);
+                    response.put("message", "Không tìm thấy đơn hàng hoặc sản phẩm.");
+                    return ResponseEntity.badRequest().body(response);
                 }
 
                 int currentQuantity = orderDetail.getQuantity();
@@ -268,12 +265,17 @@ public class OrderController {
                         orderDetail.setQuantity(currentQuantity + 1);
                         productDetail.setQuantity(quantityInStock - 1);
                     } else {
-                        redirectAttributes.addFlashAttribute("error", "Sản phẩm đã hết hàng!");
-                        return "redirect:/admin/orders/detail?idOrder=" + orderId;
+                        response.put("success", false);
+                        response.put("message", "Sản phẩm đã hết hàng!");
+                        return ResponseEntity.badRequest().body(response);
                     }
                 } else if ("decrease".equals(action) && currentQuantity > 1) {
                     orderDetail.setQuantity(currentQuantity - 1);
                     productDetail.setQuantity(quantityInStock + 1);
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Yêu cầu không hợp lệ!");
+                    return ResponseEntity.badRequest().body(response);
                 }
 
                 // Cập nhật lại giá của OrderDetail theo số lượng mới
@@ -289,19 +291,27 @@ public class OrderController {
                 orderDetailRepository.save(orderDetail);
                 orderService.saveOrder(order);
 
-                redirectAttributes.addFlashAttribute("success", "Số lượng sản phẩm đã được cập nhật!");
-                redirectAttributes.addFlashAttribute("totalPrice", totalPrice);
-
-                return "redirect:/admin/orders/detail?idOrder=" + orderId;
+                // ✅ Thêm ID sản phẩm vào JSON để cập nhật bảng
+                response.put("success", true);
+                response.put("newQuantity", orderDetail.getQuantity());
+                response.put("totalPrice", totalPrice);
+                response.put("stockRemaining", productDetail.getQuantity());
+                response.put("productDetailId", productDetail.getId()); // Thêm ID sản phẩm
+                response.put("message", "Số lượng sản phẩm đã được cập nhật!");
+                return ResponseEntity.ok(response);
             } else {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi tiết đơn hàng.");
-                return "redirect:/admin/orders";
+                response.put("success", false);
+                response.put("message", "Không tìm thấy chi tiết đơn hàng.");
+                return ResponseEntity.badRequest().body(response);
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật số lượng: " + e.getMessage());
-            return "redirect:/admin/orders";
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật số lượng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+
 
 
 

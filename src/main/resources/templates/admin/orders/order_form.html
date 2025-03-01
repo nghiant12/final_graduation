@@ -169,24 +169,21 @@
                                 <p class="text-danger fw-bold" th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
                             </div>
                             <div class="ms-auto d-flex align-items-center">
-                                <form th:action="@{/admin/orders/updateQuantity}" method="post" class="d-flex align-items-center">
-                                    <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
-
+                                <form class="orderForm d-flex align-items-center"
+                                      th:attr="data-url=@{/admin/orders/updateQuantity}">
+                                    <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}" class="orderDetailId"/>
                                     <!-- Nút giảm (-) -->
-                                    <button type="submit" name="action" value="decrease" class="btn btn-icon"
+                                    <button type="button" class="btn btn-icon decrease-btn"
                                             th:disabled="${orderDetail.quantity == 1}">
                                         <i class="fas fa-minus"></i>
                                     </button>
-
-                                    <span class="fw-bold mx-4" th:text="${orderDetail.quantity}"></span>
-
+                                    <span class="fw-bold mx-4 quantity-text" th:text="${orderDetail.quantity}"></span>
                                     <!-- Nút tăng (+) -->
-                                    <button type="submit" name="action" value="increase" class="btn btn-icon"
+                                    <button type="button" class="btn btn-icon increase-btn"
                                             th:disabled="${orderDetail.productDetail.quantity == 0}">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </form>
-
 
                                 <style>
                                     .btn-icon:disabled {
@@ -218,6 +215,8 @@
                             Sản phẩm
                         </div>
                         <div class="card-body">
+                            <!-- Đặt input ẩn chứa orderId (để sử dụng cho các form) -->
+
                             <table id="datatablesSimple">
                                 <thead>
                                 <tr>
@@ -240,7 +239,7 @@
                                     <td th:text="${productDetail.color.name}"></td>
                                     <td th:text="${productDetail.size.name}"></td>
                                     <td th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')}"></td>
-                                    <td th:text="${productDetail.quantity}"></td>
+                                    <td id="product-quantity-[[${productDetail.id}]]" th:text="${productDetail.quantity}"></td>
                                     <td>
                                         <form action="/admin/orders/addProductToOrder" method="post">
                                             <input type="hidden" name="orderId" th:value="${order.id}">
@@ -254,6 +253,7 @@
                                 </tr>
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                     <!--                    <div>-->
@@ -429,71 +429,87 @@
                     <p>Nhân viên: <span
                             th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
 
-                    <p>Tổng số tiền: <span class="text-danger">
-    <span class="text-danger fw-bold" th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
-</span></p>
+                    <p>Tổng số tiền:
+                        <span class="text-danger fw-bold" id="totalPrice"
+                              th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}">
+    </span>
+                    </p>
 
-
-
+                    <input type="text" id="customerPaid" class="form-control my-2" placeholder="Tiền khách đưa...">
+                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
+                    <br>
+                    <br>
                     <form th:action="@{/admin/orders/confirm/{id}(id=${order.id})}" method="post"
                           onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn hàng không?');">
-                        <button class="btn btn-primary w-100" th:disabled="${order.id == null}">Xác nhận đặt hàng</button>
+                        <button class="btn btn-primary w-100" id="confirmOrderBtn" th:disabled="${order.id == null}">Xác nhận đặt hàng</button>
                     </form>
-                </div>
 
+
+                </div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const totalPriceElement = document.getElementById("totalPrice"); // Tổng tiền
+                        const customerPaidInput = document.getElementById("customerPaid"); // Ô nhập tiền khách đưa
+                        const changeAmountElement = document.getElementById("changeAmount"); // Tiền thừa
+                        const confirmOrderBtn = document.getElementById("confirmOrderBtn"); // Nút xác nhận đơn
+
+                        function parseCurrency(value) {
+                            return parseInt(value.replace(/[^\d]/g, ""), 10) || 0; // Lấy số từ chuỗi, bỏ ký tự khác
+                        }
+
+                        function formatCurrency(value) {
+                            return value.toLocaleString("vi-VN"); // Định dạng số theo kiểu 1,000,000
+                        }
+
+                        function updateChangeAmount() {
+                            let customerPaid = parseCurrency(customerPaidInput.value);
+                            let totalPrice = parseCurrency(totalPriceElement.textContent);
+                            let changeAmount = customerPaid - totalPrice;
+
+                            // Hiển thị tiền khách đưa theo format 1,000,000
+                            customerPaidInput.value = customerPaid > 0 ? formatCurrency(customerPaid) : "";
+
+                            // Hiển thị tiền thừa
+                            changeAmountElement.textContent = changeAmount >= 0
+                                ? formatCurrency(changeAmount) + " VND"
+                                : "0 VND";
+
+                            // Kiểm tra nếu tiền khách đưa < tổng tiền hoặc rỗng thì vô hiệu hóa nút xác nhận
+                            confirmOrderBtn.disabled = customerPaid <= 0 || customerPaid < totalPrice;
+                        }
+
+                        // Khi nhập số vào ô input
+                        customerPaidInput.addEventListener("input", function (event) {
+                            let cursorPosition = customerPaidInput.selectionStart; // Lưu vị trí con trỏ
+                            let oldLength = customerPaidInput.value.length;
+
+                            updateChangeAmount();
+
+                            // Giữ nguyên vị trí con trỏ sau khi format
+                            let newLength = customerPaidInput.value.length;
+                            let diff = newLength - oldLength;
+                            customerPaidInput.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+                        });
+
+                        // Khi focus vào ô input, chỉ hiển thị số (không có dấu phẩy)
+                        customerPaidInput.addEventListener("focus", function () {
+                            customerPaidInput.value = parseCurrency(customerPaidInput.value);
+                        });
+
+                        // Khi mất focus, định dạng lại số tiền có dấu phẩy
+                        customerPaidInput.addEventListener("blur", function () {
+                            updateChangeAmount();
+                        });
+
+                        // Khi load trang, disable nút nếu ô tiền khách đưa trống
+                        updateChangeAmount();
+                    });
+                </script>
 
             </div>
         </main>
     </div>
 </div>
-
-<!-- Modal chọn sản phẩm -->
-<!--<div class="modal fade" id="productModal">-->
-<!--    <div class="modal-dialog modal-lg">-->
-<!--        <div class="modal-content">-->
-<!--            <div class="modal-header">-->
-<!--                <h5 class="modal-title">Chọn Sản Phẩm</h5>-->
-<!--                <button type="button" class="btn-close" data-dismiss="modal"></button>-->
-<!--            </div>-->
-<!--            <div class="modal-body">-->
-<!--                <div class="card mb-4">-->
-<!--                    <div class="card-header">-->
-<!--                        <i class="fas fa-table me-1"></i>-->
-<!--                        Sản phẩm-->
-<!--                    </div>-->
-<!--                    <div class="card-body">-->
-<!--                        <table id="datatablesSimple">-->
-<!--                            <thead>-->
-<!--                            <tr>-->
-<!--                                <th>STT</th>-->
-<!--                                <th>Tên SP</th>-->
-<!--                                <th>Thương hiệu</th>-->
-<!--                                <th>Màu</th>-->
-<!--                                <th>Kích thước</th>-->
-<!--                                <th>Giá</th>-->
-<!--                                <th>Số lượng</th>-->
-<!--                            </tr>-->
-<!--                            </thead>-->
-<!--                            <tbody>-->
-<!--                            <tr th:each="productDetail, stat : ${productDetails}">-->
-<!--                                <td th:text="${stat.index+1}"></td>-->
-<!--                                &lt;!&ndash;                                    <td th:text="${productDetail.id}"></td>&ndash;&gt;-->
-<!--                                <td th:text="${productDetail.product.name}"></td>-->
-<!--                                <td th:text="${productDetail.brand.name}"></td>-->
-<!--                                <td th:text="${productDetail.color.name}"></td>-->
-<!--                                <td th:text="${productDetail.size.name}"></td>-->
-<!--                                <td th:text="${productDetail.price}"></td>-->
-<!--                                <td th:text="${productDetail.quantity}"></td>-->
-<!--                            </tr>-->
-<!--                            </tbody>-->
-<!--                        </table>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <button class="btn btn-primary">Thêm vào đơn hàng</button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
 <footer class="py-4 bg-light mt-auto">
     <div class="container-fluid px-4">
         <div class="d-flex align-items-center justify-content-between small">
@@ -509,29 +525,70 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        let orderDetailsContainer = document.getElementById("orderDetailsContainer");
-        let noProductsMessage = document.getElementById("noProductsMessage");
+        const forms = document.querySelectorAll(".orderForm");
 
-        // Lấy orderId từ URL
-        let urlParams = new URLSearchParams(window.location.search);
-        let orderId = urlParams.get("idOrder");
+        forms.forEach(form => {
+            const orderDetailId = form.querySelector(".orderDetailId").value;
+            const quantityText = form.querySelector(".quantity-text");
+            const decreaseBtn = form.querySelector(".decrease-btn");
+            const increaseBtn = form.querySelector(".increase-btn");
 
-        // Nếu không có orderId, ẩn toàn bộ giao diện liên quan đến đơn hàng
-        if (!orderId) {
-            if (orderDetailsContainer) orderDetailsContainer.style.display = "none";
-            if (noProductsMessage) noProductsMessage.style.display = "none";
-            return;
-        }
+            function updateQuantity(action) {
+                const url = form.dataset.url;
+                if (!url) {
+                    console.error("data-url không được xác định!");
+                    return;
+                }
 
-        // Nếu có orderId, kiểm tra danh sách sản phẩm
-        if (!orderDetailsContainer || orderDetailsContainer.children.length === 0) {
-            noProductsMessage.style.display = "block"; // Hiển thị thông báo "Không có sản phẩm"
-        } else {
-            noProductsMessage.style.display = "none";  // Ẩn thông báo
-        }
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        orderDetailId: orderDetailId,
+                        action: action
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Cập nhật số lượng trong form
+                            quantityText.textContent = data.newQuantity;
+                            decreaseBtn.disabled = data.newQuantity <= 1;
+                            increaseBtn.disabled = data.stockRemaining === 0;
+
+                            console.log(`Cập nhật sản phẩm ID: ${data.productDetailId}, Số lượng mới: ${data.newQuantity}`);
+
+                            // Chờ 500ms để đảm bảo HTML được render trước khi cập nhật
+                            setTimeout(() => {
+                                const productQuantityCell = document.getElementById(`product-quantity-${data.productDetailId}`);
+                                if (productQuantityCell) {
+                                    productQuantityCell.textContent = data.newQuantity;
+                                    console.log(`✅ Đã cập nhật số lượng cho sản phẩm ID: ${data.productDetailId}`);
+                                } else {
+                                    console.warn(`⚠ Không tìm thấy ô số lượng cho sản phẩm ID: ${data.productDetailId}`);
+                                }
+                            }, 500);
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => console.error("Lỗi:", error));
+            }
+
+            decreaseBtn.addEventListener("click", function(event) {
+                event.preventDefault();
+                updateQuantity("decrease");
+            });
+
+            increaseBtn.addEventListener("click", function(event) {
+                event.preventDefault();
+                updateQuantity("increase");
+            });
+        });
     });
 </script>
-
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/admin/js/order.js}"></script>

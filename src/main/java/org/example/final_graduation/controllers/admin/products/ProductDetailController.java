@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -179,6 +180,12 @@ public class ProductDetailController {
                 .orElseThrow(() -> new IllegalArgumentException("Invalid product detail Id:" + id));
         model.addAttribute("productDetail", productDetail);
         return "product_details/detail";
+    }
+
+    @GetMapping("/json")
+    @ResponseBody
+    public List<ProductDetail> getProductDetailsJson() {
+        return productDetailRepository.findALL();
     }
 
 }
