@@ -1,24 +1,23 @@
 ﻿-- Bảng roles (2 dòng)
 INSERT INTO roles ([name]) VALUES
-('user'),
-('staff');
+('staff'),
 ('admin');
 
--- Bảng accounts (5 dòng)
-INSERT INTO accounts (username, [password], fullname, email, [address]) VALUES
+-- Bảng employees (5 dòng)
+INSERT INTO employees (role_id, username, [password], fullname, email, [address]) VALUES
+(1, 'staff1', 'staffpass1', 'Pham Minh D', 'staff1@example.com', '111 JKL Street'),
+(1, 'staff2', 'staffpass2', 'Hoang Thi E', 'staff2@example.com', '222 MNO Street'),
+(1, 'staff3', 'staffpass3', 'Le Van H', 'staff3@example.com', '333 ABC Street'),
+(2, 'admin4', 'adminpass4', 'Nguyen Van L', 'admin4@example.com', '444 ABC Street'),
+(2, 'admin5', 'adminpass5', 'Tran Thi Q', 'admin5@example.com', '555 ABC Street');
+
+-- Bảng customers (3 dòng)
+INSERT INTO customers (username, [password], fullname, email, [address]) VALUES
 ('user1', 'password1', 'Nguyen Van A', 'user1@example.com', '123 ABC Street'),
 ('user2', 'password2', 'Le Thi B', 'user2@example.com', '456 DEF Street'),
 ('user3', 'password3', 'Tran Van C', 'user3@example.com', '789 GHI Street'),
-('admin1', 'adminpass1', 'Pham Minh D', 'admin1@example.com', '111 JKL Street'),
-('admin2', 'adminpass2', 'Hoang Thi E', 'admin2@example.com', '222 MNO Street');
-
--- Bảng authorities (5 dòng)
-INSERT INTO authorities (account_id, role_id) VALUES
-(1, 1),
-(2, 1),
-(3, 1),
-(4, 2),
-(5, 2);
+('user4', 'password4', 'Pham Thi E', 'user4@example.com', '115 LKJ Street'),
+('user5', 'password5', 'Nguyen Thi M', 'user5@example.com', '678 ABS Street');
 
 -- Bảng categories (5 dòng)
 INSERT INTO categories ([name]) VALUES

@@ -28,18 +28,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
            OR LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
     """)
     List<Customer> searchByKeyword(@Param("keyword") String keyword);
-//    //
-//    @Query("""
-//                SELECT acc FROM Account acc WHERE acc.id = :id
-//            """)
-//    Account findByID(Integer id);
-//
-//    @Query("""
-//                SELECT auth FROM Authority auth
-//                join Account acc on auth.id = acc.id
-//                join Role r on auth.id = r.id
-//            """)
-//    List<Authority> findAllCustomers();
 
     @Query("""
         SELECT c FROM Customer c

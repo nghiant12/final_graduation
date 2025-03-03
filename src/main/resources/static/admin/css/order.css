@@ -1,0 +1,111 @@
+/* CSS cho dropdown */
+.dropdown-content {
+    position: absolute;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    max-height: 250px; /* Giới hạn chiều cao */
+    overflow-y: auto; /* Tự động hiện scroll khi cần */
+    display: none;
+    z-index: 1000;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    scrollbar-width: thin; /* Ẩn bớt thanh scroll trên Firefox */
+    scrollbar-color: #ccc transparent;
+}
+
+/* Ẩn thanh cuộn trên Chrome, Edge, Safari */
+.dropdown-content::-webkit-scrollbar {
+    width: 6px; /* Độ rộng thanh scroll */
+}
+
+.dropdown-content::-webkit-scrollbar-thumb {
+    background: #ccc; /* Màu thanh kéo */
+    border-radius: 3px;
+}
+
+.dropdown-content::-webkit-scrollbar-track {
+    background: transparent; /* Nền trong suốt */
+}
+
+/* Cách hiển thị từng mục */
+.dropdown-content .dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+/* Hover chỉ đổi màu, không có hiệu ứng animation */
+.dropdown-content .dropdown-item:hover {
+    background: #007bff; /* Màu xanh */
+    color: white;
+}
+
+/* Bo góc item cuối */
+.dropdown-content .dropdown-item:last-child {
+    border-bottom: none;
+}
+
+/* Kiểu chữ */
+.customer-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.customer-email, .customer-phone {
+    font-size: 12px;
+    color: #666;
+}
+
+/* Khi hover, đổi màu text */
+.dropdown-content .dropdown-item:hover .customer-name,
+.dropdown-content .dropdown-item:hover .customer-email,
+.dropdown-content .dropdown-item:hover .customer-phone {
+    color: white;
+}
+
+.nav-link.active {
+    background-color: #007bff !important; /* Bootstrap primary color */
+    color: white !important;
+    font-weight: bold;
+}
+
+.dropdown-menu {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+    position: absolute;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dropdown-item {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown-item h3 {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+}
+
+.dropdown-item p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.btn-icon:disabled {
+    border: 1px solid white !important; /* Viền trắng */
+    background-color: #f8f9fa !important; /* Màu nền nhẹ hơn */
+    color: #ccc !important; /* Màu chữ xám */
+    cursor: not-allowed; /* Hiển thị con trỏ không thể click */
+}

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta name="description" content=""/>
     <meta name="author" content=""/>
-    <title>Sản phẩm</title>
+    <title>Hoá đơn</title>
     <link th:href="@{/admin/css/styles.css}" rel="stylesheet" type="text/css">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
@@ -58,7 +58,7 @@
                         <i class="fas fa-filter"></i> Lọc hóa đơn
                     </div>
                     <div class="card-body">
-                        <form id="filterForm" th:action="@{/admin/order-manager/filter}" method="get" class="row g-3 align-items-end p-3 border rounded bg-light">
+                        <form id="filterForm" th:action="@{/admin/order-manager/filter}" method="get" class="row g-3 align-items-end p-3 border rounded bg-light mt-3">
 
                             <!-- Ô chọn ngày bắt đầu -->
                             <div class="col-md-3">
@@ -126,6 +126,7 @@
                                 <th>Nhân viên</th>
                                 <th>Ngày tạo</th>
                                 <th>Tổng tiền</th>
+                                <th>Phương thức thanh toán</th>
                                 <th>Loại hóa đơn</th>
                                 <th>Trạng thái</th>
                                 <th>Địa chỉ</th>
@@ -139,6 +140,7 @@
                                 <td th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></td>
                                 <td th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
                                 <td th:text="${order.totalPrice}"></td>
+                                <td th:text="${order.paymentMethod}"></td>
                                 <td th:text="${order.type}"></td>
                                 <td th:text="${order.status}"></td>
                                 <td th:text="${order.address}"></td>

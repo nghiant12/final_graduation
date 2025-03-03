@@ -13,6 +13,10 @@ public class SizeService {
     @Autowired
     private SizeRepository sizeRepository;
 
+    public List<Size> getAllSizes() {
+        return sizeRepository.findAll();
+    }
+
     public List<Size> getAvailableSizesForProduct(Integer productId) {
         return sizeRepository.findSizesByProduct(productId);
     }

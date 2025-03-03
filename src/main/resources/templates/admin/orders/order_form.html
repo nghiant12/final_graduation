@@ -11,43 +11,9 @@
     <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">-->
     <!--    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" defer></script>-->
     <link th:href="@{/admin/css/styles.css}" rel="stylesheet"/>
+    <link th:href="@{/admin/css/order.css}" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
-
-    <!-- CSS thêm vào để tạo kiểu cho dropdown -->
-    <style>
-        .dropdown-menu {
-            border: 1px solid #ddd;
-            background-color: #fff;
-            max-height: 200px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            position: absolute;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        }
-
-        .dropdown-item {
-            padding: 8px 16px;
-            cursor: pointer;
-        }
-
-        .dropdown-item:hover {
-            background-color: #f1f1f1;
-        }
-
-        .dropdown-item h3 {
-            margin: 0;
-            padding: 0;
-            font-size: 14px;
-        }
-
-        .dropdown-item p {
-            margin: 0;
-            font-size: 12px;
-            color: #666;
-        }
-    </style>
 </head>
 <body class="sb-nav-fixed">
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -140,74 +106,150 @@
                         </a>
                     </li>
                 </ul>
-
-                <style>
-                    .nav-link.active {
-                        background-color: #007bff !important; /* Bootstrap primary color */
-                        color: white !important;
-                        font-weight: bold;
-                    }
-                </style>
                 <!-- Product Section -->
                 <div class="mb-4">
-                    <!--                    <h5>Sản phẩm</h5>-->
-                    <div id="orderDetailsContainer" th:if="${orderDetails != null and orderDetails.size() > 0}">
-                        <div th:each="orderDetail : ${orderDetails}"
-                             class="d-flex align-items-center border rounded-3 p-3 mb-3">
-                            <img th:src="@{${orderDetail.productDetail.image}}" alt="Product" class="me-3" width="100"
-                                 height="100">
-                            <div>
-                                <div style="display: flex; align-items: center;">
-                                    <h6 th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</h6>
-                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
-                                    <h6 th:text="${orderDetail.productDetail.size.name}">Size</h6>
-                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
-                                    <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
-                                    <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
-                                    <h6 th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">Price</h6>
+                    <div class="row">
+                        <div class="col-8">
+                            <div id="orderDetailsContainer" th:if="${orderDetails != null and orderDetails.size() > 0}">
+                                <div th:each="orderDetail : ${orderDetails}"
+                                     class="d-flex align-items-center border rounded-3 p-3 mb-3">
+                                    <img th:src="@{${orderDetail.productDetail.image}}" alt="Product" class="me-3"
+                                         width="100"
+                                         height="100">
+                                    <div>
+                                        <div style="display: flex; align-items: center;">
+                                            <h6 th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</h6>
+                                            <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                            <h6 th:text="${orderDetail.productDetail.size.name}">Size</h6>
+                                            <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                            <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
+                                            <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
+                                            <h6 th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                                Price</h6>
+                                        </div>
+                                        <p class="text-danger fw-bold"
+                                           th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
+                                    </div>
+                                    <div class="ms-auto d-flex align-items-center">
+                                        <form class="orderForm d-flex align-items-center"
+                                              th:attr="data-url=@{/admin/orders/updateQuantity}">
+                                            <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"
+                                                   class="orderDetailId"/>
+                                            <!-- Nút giảm (-) -->
+                                            <button type="button" class="btn btn-icon decrease-btn"
+                                                    th:disabled="${orderDetail.quantity == 1}">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <span class="fw-bold mx-4 quantity-text"
+                                                  th:text="${orderDetail.quantity}"></span>
+                                            <!-- Nút tăng (+) -->
+                                            <button type="button" class="btn btn-icon increase-btn"
+                                                    th:disabled="${orderDetail.productDetail.quantity == 0}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </form>
+
+                                        <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
+                                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                                            <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
+                                            <button type="submit" class="btn btn-danger">
+                                                <i class="fas fa-trash me-1"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
-                                <p class="text-danger fw-bold" th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
                             </div>
-                            <div class="ms-auto d-flex align-items-center">
-                                <form class="orderForm d-flex align-items-center"
-                                      th:attr="data-url=@{/admin/orders/updateQuantity}">
-                                    <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}" class="orderDetailId"/>
-                                    <!-- Nút giảm (-) -->
-                                    <button type="button" class="btn btn-icon decrease-btn"
-                                            th:disabled="${orderDetail.quantity == 1}">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <span class="fw-bold mx-4 quantity-text" th:text="${orderDetail.quantity}"></span>
-                                    <!-- Nút tăng (+) -->
-                                    <button type="button" class="btn btn-icon increase-btn"
-                                            th:disabled="${orderDetail.productDetail.quantity == 0}">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </form>
-
-                                <style>
-                                    .btn-icon:disabled {
-                                        border: 1px solid white !important; /* Viền trắng */
-                                        background-color: #f8f9fa !important; /* Màu nền nhẹ hơn */
-                                        color: #ccc !important; /* Màu chữ xám */
-                                        cursor: not-allowed; /* Hiển thị con trỏ không thể click */
-                                    }
-                                </style>
-
-                                <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
-                                    <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
-                                    <button type="submit" class="btn btn-danger">
-                                        <i class="fas fa-trash me-1"></i>
-                                    </button>
-                                </form>
+                            <!-- Thông báo khi không có sản phẩm -->
+                            <div id="noProductsMessage" th:if="${orderDetails == null or orderDetails.isEmpty()}">
+                                <h3>Chưa có sản phẩm</h3>
                             </div>
                         </div>
-                    </div>
+                        <div class="col-4">
+                            <!-- Customer Section -->
+                            <div class="mb-4" style="position: relative;">
+                                <h5>Khách hàng</h5>
+                                <input type="text" id="customerSearch" th:disabled="${order.id == null}"
+                                       class="form-control"
+                                       placeholder="Tìm kiếm khách hàng..." autocomplete="off">
+                                <div id="customerResults" class="dropdown-content"></div>
+                            </div>
 
-                    <!-- Thêm một container cho thông báo khi không có sản phẩm -->
-                    <div id="noProductsMessage" style="display: none;">
-                        <h3>Chưa có sản phẩm</h3>
+                            <!-- Order Info -->
+                            <div class="border p-3">
+                                <form th:action="@{/admin/orders/confirm/{id}(id=${order.id})}" method="post"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn hàng không?');">
+                                    <h5>Thông tin đơn hàng</h5>
+
+                                    <p>Khách hàng: <span th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span></p>
+                                    <p>Nhân viên: <span th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
+
+                                    <!-- Tổng tiền sản phẩm -->
+                                    <p>Tổng số tiền sản phẩm:
+                                        <span class="text-danger fw-bold" id="totalPrice"
+                                              th:data-total-price="${totalPrice}"
+                                              th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}">
+            </span>
+                                    </p>
+
+                                    <p>Chọn mã giảm giá:</p>
+                                    <select name="promotionId" class="form-control mb-3" onchange="updateTotalPrice(this)" th:disabled="${order.id == null}">
+                                        <option value="" data-discount="0" data-min-value="0">Không áp dụng</option>
+                                        <option th:each="promotion : ${promotions}"
+                                                th:value="${promotion.id}"
+                                                th:data-discount="${promotion.discount}"
+                                                th:data-min-value="${promotion.minOrderValue}"
+                                                th:data-remaining="${promotion.remainingQuantity}"
+                                                th:text="${promotion.name} + ' (-' + ${promotion.discount} + '%) - Tối thiểu ' + ${#numbers.formatDecimal(promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND (' + ${promotion.remainingQuantity} + ' còn lại)'">
+                                        </option>
+                                    </select>
+
+                                    <!-- Tổng số tiền cần thanh toán -->
+                                    <p>Tổng số tiền cần thanh toán:
+                                        <span class="text-danger fw-bold" id="finalPrice">
+                <span th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
+            </span>
+                                    </p>
+
+                                    <!-- Phương thức thanh toán -->
+                                    <select name="paymentMethod" class="form-control my-3">
+                                        <option value="">--Chọn phương thức thanh toán--</option>
+                                        <option value="Cash">Tiền mặt</option>
+                                        <option value="Transfer">Chuyển khoản</option>
+                                    </select>
+
+                                    <input type="text" id="customerPaid" class="form-control my-2"
+                                           placeholder="Tiền khách đưa..." oninput="calculateChange()">
+
+                                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
+
+                                    <br><br>
+                                    <button class="btn btn-primary w-100" id="confirmOrderBtn">Thanh toán</button>
+                                </form>
+                            </div>
+
+                            <script>
+                                function updateTotalPrice(select) {
+                                    let discount = parseFloat(select.options[select.selectedIndex].getAttribute("data-discount"));
+                                    let minValue = parseFloat(select.options[select.selectedIndex].getAttribute("data-min-value"));
+                                    let remaining = parseInt(select.options[select.selectedIndex].getAttribute("data-remaining"));
+
+                                    let totalPriceElement = document.getElementById("totalPrice");
+                                    let totalPrice = parseFloat(totalPriceElement.getAttribute("data-total-price"));
+
+                                    if (totalPrice < minValue || remaining <= 0) {
+                                        alert("Mã giảm giá không hợp lệ! Vui lòng chọn mã khác.");
+                                        select.value = "";
+                                        return;
+                                    }
+
+                                    let discountAmount = (totalPrice * discount) / 100;
+                                    let finalPrice = totalPrice - discountAmount;
+
+                                    document.getElementById("finalPrice").innerText = finalPrice.toLocaleString("vi-VN") + " VND";
+                                }
+                            </script>
+
+                        </div>
                     </div>
                     <div class="card my-4">
                         <div class="card-header">
@@ -239,7 +281,8 @@
                                     <td th:text="${productDetail.color.name}"></td>
                                     <td th:text="${productDetail.size.name}"></td>
                                     <td th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')}"></td>
-                                    <td id="product-quantity-[[${productDetail.id}]]" th:text="${productDetail.quantity}"></td>
+                                    <td id="product-quantity-[[${productDetail.id}]]"
+                                        th:text="${productDetail.quantity}"></td>
                                     <td>
                                         <form action="/admin/orders/addProductToOrder" method="post">
                                             <input type="hidden" name="orderId" th:value="${order.id}">
@@ -256,256 +299,7 @@
 
                         </div>
                     </div>
-                    <!--                    <div>-->
-                    <!--                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">-->
-                    <!--                            <i class="fas fa-cart-plus me-1"></i>Thêm sản phẩm-->
-                    <!--                        </button>-->
-                    <!--                    </div>-->
                 </div>
-                <!-- Customer Section -->
-                <div class="mb-4" style="position: relative;">
-                    <h5>Khách hàng</h5>
-                    <input type="text" id="customerSearch" th:disabled="${order.id == null}" class="form-control"
-                           placeholder="Tìm kiếm khách hàng..." autocomplete="off">
-                    <div id="customerResults" class="dropdown-content"></div>
-                </div>
-
-                <style>
-                    /* CSS cho dropdown */
-                    .dropdown-content {
-                        position: absolute;
-                        width: 100%;
-                        background: white;
-                        border: 1px solid #ccc;
-                        max-height: 250px; /* Giới hạn chiều cao */
-                        overflow-y: auto; /* Tự động hiện scroll khi cần */
-                        display: none;
-                        z-index: 1000;
-                        border-radius: 5px;
-                        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-                        scrollbar-width: thin; /* Ẩn bớt thanh scroll trên Firefox */
-                        scrollbar-color: #ccc transparent;
-                    }
-
-                    /* Ẩn thanh cuộn trên Chrome, Edge, Safari */
-                    .dropdown-content::-webkit-scrollbar {
-                        width: 6px; /* Độ rộng thanh scroll */
-                    }
-
-                    .dropdown-content::-webkit-scrollbar-thumb {
-                        background: #ccc; /* Màu thanh kéo */
-                        border-radius: 3px;
-                    }
-
-                    .dropdown-content::-webkit-scrollbar-track {
-                        background: transparent; /* Nền trong suốt */
-                    }
-
-                    /* Cách hiển thị từng mục */
-                    .dropdown-content .dropdown-item {
-                        padding: 10px;
-                        cursor: pointer;
-                        border-bottom: 1px solid #eee;
-                        font-size: 14px;
-                    }
-
-                    /* Hover chỉ đổi màu, không có hiệu ứng animation */
-                    .dropdown-content .dropdown-item:hover {
-                        background: #007bff; /* Màu xanh */
-                        color: white;
-                    }
-
-                    /* Bo góc item cuối */
-                    .dropdown-content .dropdown-item:last-child {
-                        border-bottom: none;
-                    }
-
-                    /* Kiểu chữ */
-                    .customer-name {
-                        font-weight: bold;
-                        color: #333;
-                    }
-
-                    .customer-email, .customer-phone {
-                        font-size: 12px;
-                        color: #666;
-                    }
-
-                    /* Khi hover, đổi màu text */
-                    .dropdown-content .dropdown-item:hover .customer-name,
-                    .dropdown-content .dropdown-item:hover .customer-email,
-                    .dropdown-content .dropdown-item:hover .customer-phone {
-                        color: white;
-                    }
-
-                </style>
-
-                <script>
-                    document.getElementById('customerSearch').addEventListener('input', function () {
-                        let query = this.value.trim();
-                        let resultContainer = document.getElementById('customerResults');
-
-                        if (query.length === 0) {
-                            resultContainer.style.display = 'none'; // Ẩn danh sách nếu không có input
-                            return;
-                        }
-
-                        fetch(`/admin/orders/searchCustomer?query=${encodeURIComponent(query)}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log("Dữ liệu API trả về:", data); // Kiểm tra API trả về gì
-
-                                resultContainer.innerHTML = ''; // Xóa danh sách cũ
-                                if (data.length === 0) {
-                                    resultContainer.style.display = 'none'; // Ẩn nếu không có kết quả
-                                    return;
-                                }
-                                data.forEach(customer => {
-                                    let customerName = customer.fullname || "Không có tên";
-                                    let customerEmail = customer.email || "Không có email";
-                                    let customerPhone = customer.phoneNumber || "Không có số điện thoại";
-
-                                    let div = document.createElement('div');
-                                    div.classList.add('dropdown-item');
-                                    div.innerHTML = `
-                    <div class="customer-name">${customerName}</div>
-                    <div class="customer-email">${customerEmail}</div>
-                    <div class="customer-phone">${customerPhone}</div>
-                `;
-                                    div.onclick = function () {
-                                        document.getElementById('customerSearch').value = customerName;
-                                        resultContainer.style.display = 'none'; // Ẩn dropdown khi chọn xong
-                                        selectCustomer(customer.id); // Gọi API khi chọn khách hàng
-                                    };
-                                    resultContainer.appendChild(div);
-                                });
-                                resultContainer.style.display = 'block'; // Hiện dropdown khi có kết quả
-                            })
-                            .catch(error => console.error('Lỗi khi tìm kiếm khách hàng:', error));
-                    });
-
-                    // Gửi yêu cầu chọn khách hàng
-                    function selectCustomer(customerId) {
-                        let orderId = new URLSearchParams(window.location.search).get("idOrder"); // Lấy orderId từ URL
-                        if (!orderId) {
-                            alert("Không tìm thấy đơn hàng!");
-                            return;
-                        }
-
-                        fetch(`/admin/orders/selectCustomer/${orderId}`, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/x-www-form-urlencoded"
-                            },
-                            body: `customerId=${customerId}&idOrder=${orderId}`
-                        })
-                            .then(response => {
-                                if (response.redirected) {
-                                    window.location.href = response.url; // Chuyển hướng đến trang chi tiết đơn hàng
-                                } else {
-                                    return response.text();
-                                }
-                            })
-                            .then(data => console.log("Kết quả từ server:", data))
-                            .catch(error => console.error("Lỗi khi chọn khách hàng:", error));
-                    }
-
-                    // Ẩn dropdown khi click ra ngoài
-                    document.addEventListener('click', function (event) {
-                        let dropdown = document.getElementById('customerResults');
-                        if (!document.getElementById('customerSearch').contains(event.target)) {
-                            dropdown.style.display = 'none';
-                        }
-                    });
-                </script>
-
-
-                <!-- Order Info -->
-                <div class="border p-3">
-                    <h5>Thông tin đơn hàng</h5>
-
-                    <p>Khách hàng: <span
-                            th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span></p>
-                    <p>Nhân viên: <span
-                            th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
-
-                    <p>Tổng số tiền:
-                        <span class="text-danger fw-bold" id="totalPrice"
-                              th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}">
-    </span>
-                    </p>
-
-                    <input type="text" id="customerPaid" class="form-control my-2" placeholder="Tiền khách đưa...">
-                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
-                    <br>
-                    <br>
-                    <form th:action="@{/admin/orders/confirm/{id}(id=${order.id})}" method="post"
-                          onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn hàng không?');">
-                        <button class="btn btn-primary w-100" id="confirmOrderBtn" th:disabled="${order.id == null}">Xác nhận đặt hàng</button>
-                    </form>
-
-
-                </div>
-                <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                        const totalPriceElement = document.getElementById("totalPrice"); // Tổng tiền
-                        const customerPaidInput = document.getElementById("customerPaid"); // Ô nhập tiền khách đưa
-                        const changeAmountElement = document.getElementById("changeAmount"); // Tiền thừa
-                        const confirmOrderBtn = document.getElementById("confirmOrderBtn"); // Nút xác nhận đơn
-
-                        function parseCurrency(value) {
-                            return parseInt(value.replace(/[^\d]/g, ""), 10) || 0; // Lấy số từ chuỗi, bỏ ký tự khác
-                        }
-
-                        function formatCurrency(value) {
-                            return value.toLocaleString("vi-VN"); // Định dạng số theo kiểu 1,000,000
-                        }
-
-                        function updateChangeAmount() {
-                            let customerPaid = parseCurrency(customerPaidInput.value);
-                            let totalPrice = parseCurrency(totalPriceElement.textContent);
-                            let changeAmount = customerPaid - totalPrice;
-
-                            // Hiển thị tiền khách đưa theo format 1,000,000
-                            customerPaidInput.value = customerPaid > 0 ? formatCurrency(customerPaid) : "";
-
-                            // Hiển thị tiền thừa
-                            changeAmountElement.textContent = changeAmount >= 0
-                                ? formatCurrency(changeAmount) + " VND"
-                                : "0 VND";
-
-                            // Kiểm tra nếu tiền khách đưa < tổng tiền hoặc rỗng thì vô hiệu hóa nút xác nhận
-                            confirmOrderBtn.disabled = customerPaid <= 0 || customerPaid < totalPrice;
-                        }
-
-                        // Khi nhập số vào ô input
-                        customerPaidInput.addEventListener("input", function (event) {
-                            let cursorPosition = customerPaidInput.selectionStart; // Lưu vị trí con trỏ
-                            let oldLength = customerPaidInput.value.length;
-
-                            updateChangeAmount();
-
-                            // Giữ nguyên vị trí con trỏ sau khi format
-                            let newLength = customerPaidInput.value.length;
-                            let diff = newLength - oldLength;
-                            customerPaidInput.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
-                        });
-
-                        // Khi focus vào ô input, chỉ hiển thị số (không có dấu phẩy)
-                        customerPaidInput.addEventListener("focus", function () {
-                            customerPaidInput.value = parseCurrency(customerPaidInput.value);
-                        });
-
-                        // Khi mất focus, định dạng lại số tiền có dấu phẩy
-                        customerPaidInput.addEventListener("blur", function () {
-                            updateChangeAmount();
-                        });
-
-                        // Khi load trang, disable nút nếu ô tiền khách đưa trống
-                        updateChangeAmount();
-                    });
-                </script>
-
             </div>
         </main>
     </div>
@@ -522,76 +316,11 @@
         </div>
     </div>
 </footer>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const forms = document.querySelectorAll(".orderForm");
-
-        forms.forEach(form => {
-            const orderDetailId = form.querySelector(".orderDetailId").value;
-            const quantityText = form.querySelector(".quantity-text");
-            const decreaseBtn = form.querySelector(".decrease-btn");
-            const increaseBtn = form.querySelector(".increase-btn");
-
-            function updateQuantity(action) {
-                const url = form.dataset.url;
-                if (!url) {
-                    console.error("data-url không được xác định!");
-                    return;
-                }
-
-                fetch(url, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: new URLSearchParams({
-                        orderDetailId: orderDetailId,
-                        action: action
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Cập nhật số lượng trong form
-                            quantityText.textContent = data.newQuantity;
-                            decreaseBtn.disabled = data.newQuantity <= 1;
-                            increaseBtn.disabled = data.stockRemaining === 0;
-
-                            console.log(`Cập nhật sản phẩm ID: ${data.productDetailId}, Số lượng mới: ${data.newQuantity}`);
-
-                            // Chờ 500ms để đảm bảo HTML được render trước khi cập nhật
-                            setTimeout(() => {
-                                const productQuantityCell = document.getElementById(`product-quantity-${data.productDetailId}`);
-                                if (productQuantityCell) {
-                                    productQuantityCell.textContent = data.newQuantity;
-                                    console.log(`✅ Đã cập nhật số lượng cho sản phẩm ID: ${data.productDetailId}`);
-                                } else {
-                                    console.warn(`⚠ Không tìm thấy ô số lượng cho sản phẩm ID: ${data.productDetailId}`);
-                                }
-                            }, 500);
-                        } else {
-                            alert(data.message);
-                        }
-                    })
-                    .catch(error => console.error("Lỗi:", error));
-            }
-
-            decreaseBtn.addEventListener("click", function(event) {
-                event.preventDefault();
-                updateQuantity("decrease");
-            });
-
-            increaseBtn.addEventListener("click", function(event) {
-                event.preventDefault();
-                updateQuantity("increase");
-            });
-        });
-    });
-</script>
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script th:src="@{/admin/js/order.js}"></script>
+<script th:src="@{/admin/js/order_product_quantity.js}"></script>
+<script th:src="@{/admin/js/order_customer.js}"></script>
+<script th:src="@{/admin/js/order_customer_paid.js}"></script>
+<script th:src="@{/admin/js/order_customer_search.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
 <script th:src="@{/admin/js/scripts.js}"></script>

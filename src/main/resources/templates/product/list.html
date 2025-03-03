@@ -48,7 +48,7 @@
       <button class="search-button">Tìm kiếm</button>
     </form>
     <div class="box-right">
-      <h5 class="result-title"><i class="fa-regular fa-lightbulb fa-sm"></i> KẾT QUẢ TÌM KIẾM CHO "[[${cname}]]"</h5>
+      <h5 class="result-title" th:if="${cname != 'ALL'}"><i class="fa-regular fa-lightbulb fa-sm"></i> KẾT QUẢ TÌM KIẾM CHO "[[${cname}]]"</h5>
       <div class="search-option">
         <form th:action="@{|/product/search|}" method="get">
           <input name="name" placeholder="Nhập tên sản phẩm..">
@@ -68,7 +68,7 @@
       <div class="product-item" th:if="${not #lists.isEmpty(page.content)}">
         <div class="item" th:each="item: ${page.content}">
           <a th:href="@{|/product/${item.id}|}"><img th:src="${item.image}" alt="Product Image" loading="lazy"></a>
-          <div class="product-title">[[${item.name}]]</div>
+          <div class="product-title">[[${item.product.name}]]</div>
           <div class="product-price">
             <span>$[[${item.price}]]</span>
             <div class="cart-hover-box">

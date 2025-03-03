@@ -8,63 +8,71 @@ GO
 
 -- Bảng roles
 CREATE TABLE roles (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(50) NOT NULL
 );
 
--- Bảng accounts
-CREATE TABLE accounts (
-    id INT PRIMARY KEY IDENTITY,
+-- Bảng employees
+CREATE TABLE employees (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    role_id INT NOT NULL,
     username NVARCHAR(50) NOT NULL UNIQUE,
     [password] NVARCHAR(255) NOT NULL,
     fullname NVARCHAR(100) NOT NULL,
+    phone_number NVARCHAR(15),
     email NVARCHAR(100) NOT NULL UNIQUE,
 	[address] NVARCHAR(100),
     photo NVARCHAR(255),
 	created_date DATETIME NOT NULL DEFAULT GETDATE()
 );
 
--- Bảng authorities
-CREATE TABLE authorities (
-    id INT PRIMARY KEY IDENTITY,
-    account_id INT NOT NULL,
-    role_id INT NOT NULL
+-- Bảng customers
+CREATE TABLE customers (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    username NVARCHAR(50) NOT NULL UNIQUE,
+    [password] NVARCHAR(255) NOT NULL,
+    fullname NVARCHAR(100) NOT NULL,
+    phone_number NVARCHAR(15),
+    email NVARCHAR(100) NOT NULL UNIQUE,
+	[address] NVARCHAR(100),
+    photo NVARCHAR(255),
+	created_date DATETIME NOT NULL DEFAULT GETDATE()
 );
 
 -- Bảng categories
 CREATE TABLE categories (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(100) NOT NULL
 );
 
 -- Bảng sizes
 CREATE TABLE sizes (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(50) NOT NULL
 );
 
 -- Bảng colors
 CREATE TABLE colors (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(50) NOT NULL
 );
 
 -- Bảng brands
 CREATE TABLE brands (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(100) NOT NULL
 );
 
 -- Bảng products
 CREATE TABLE products (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     [name] NVARCHAR(100) NOT NULL,
 	[status] BIT DEFAULT 1 -- 1-đang kinh doanh, 0-ngừng kinh doanh
 );
 
 -- Bảng products
 CREATE TABLE product_details (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
 	product_id INT,
     [image] NVARCHAR(255),
     price DECIMAL(10, 2) NOT NULL,
@@ -79,9 +87,9 @@ CREATE TABLE product_details (
 
 -- Bảng orders
 CREATE TABLE orders (
-    id INT PRIMARY KEY IDENTITY,
-    [user_id] INT,
-    admin_id INT NOT NULL,
+    id INT PRIMARY KEY IDENTITY(1,1),
+    [customer_id] INT,
+    employee_id INT NOT NULL,
     created_date DATETIME NOT NULL DEFAULT GETDATE(),
     total_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
     [type] NVARCHAR(50) NOT NULL,
@@ -91,20 +99,27 @@ CREATE TABLE orders (
 
 -- Bảng order_details
 CREATE TABLE order_details (
-    id INT PRIMARY KEY IDENTITY,
+    id INT PRIMARY KEY IDENTITY(1,1),
     order_id INT NOT NULL,
-    product_id INT NOT NULL,
+    product_detail_id INT NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
     quantity INT NOT NULL
 );
 
--- Thêm khóa ngoại sau khi tạo bảng
--- Bảng authorities
-ALTER TABLE authorities
-ADD CONSTRAINT FK_authorities_account FOREIGN KEY (account_id) REFERENCES accounts(id) ON DELETE NO ACTION;
+CREATE TABLE promotions (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL,
+    description NVARCHAR(MAX),
+    discount DECIMAL(5,2) CHECK (Discount >= 0 AND Discount <= 100), -- Giảm giá từ 0% đến 100%
+    start_date DATETIME NOT NULL,
+    end_date DATETIME NOT NULL,
+    is_active BIT DEFAULT 1 -- 1: Đang hoạt động, 0: Không hoạt động
+);
 
-ALTER TABLE authorities
-ADD CONSTRAINT FK_authorities_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE NO ACTION;
+-- Thêm khóa ngoại sau khi tạo bảng
+-- Bảng employees
+ALTER TABLE employees
+ADD CONSTRAINT FK_employees_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE NO ACTION;
 
 -- Bảng product_details
 ALTER TABLE product_details
@@ -124,18 +139,27 @@ ADD CONSTRAINT FK_product_details_brand FOREIGN KEY (brand_id) REFERENCES brands
 
 -- Bảng orders
 ALTER TABLE orders
-ADD CONSTRAINT FK_orders_user FOREIGN KEY (user_id) REFERENCES accounts(id) ON DELETE SET NULL;
+ADD CONSTRAINT FK_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL;
 
 ALTER TABLE orders
-ADD CONSTRAINT FK_orders_admin FOREIGN KEY (admin_id) REFERENCES accounts(id) ON DELETE NO ACTION;
+ADD CONSTRAINT FK_orders_admin FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE NO ACTION;
 
 -- Bảng order_details
 ALTER TABLE order_details
 ADD CONSTRAINT FK_order_details_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
 
 ALTER TABLE order_details
-ADD CONSTRAINT FK_order_details_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE;
+ADD CONSTRAINT FK_order_details_product_detail FOREIGN KEY (product_detail_id) REFERENCES product_details(id) ON DELETE CASCADE;
 
-ALTER TABLE accounts
-ADD phone NVARCHAR(10);
+ALTER TABLE orders 
+ADD promotion_id INT NULL;
+
+ALTER TABLE orders 
+ADD CONSTRAINT FK_orders_promotions FOREIGN KEY (promotion_id) 
+REFERENCES promotions(id);
+
+ALTER TABLE promotions ALTER COLUMN min_order_value NUMERIC(38,2);
+
+ALTER TABLE promotions 
+ADD remaining_quantity INT NOT NULL DEFAULT 0;
 

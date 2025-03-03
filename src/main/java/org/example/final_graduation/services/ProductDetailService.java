@@ -25,6 +25,10 @@ public class ProductDetailService {
         return productDetailRepository.findAll();
     }
 
+    public List<ProductDetail> getProductDetailsByProductId(Integer productId) {
+        return productDetailRepository.findByProductId(productId);
+    }
+
     public Optional<ProductDetail> getProductDetailById(Integer id) {
         return productDetailRepository.findById(id);
     }

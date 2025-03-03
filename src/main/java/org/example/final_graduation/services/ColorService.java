@@ -13,6 +13,10 @@ public class ColorService {
     @Autowired
     private ColorRepository colorRepository;
 
+    public List<Color> getAllColors() {
+        return colorRepository.findAll();
+    }
+
     public List<Color> getAvailableColorsForProduct(Integer productId) {
         return colorRepository.findColorsByProduct(productId);
     }

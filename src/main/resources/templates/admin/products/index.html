@@ -148,6 +148,7 @@
                             <tr>
                                 <th>STT</th>
                                 <th>Tên</th>
+                                <th>Số lượng tồn kho</th>
                                 <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
@@ -156,6 +157,7 @@
                             <tr th:each="product, stat : ${products}">
                                 <td th:text="${stat.index+1}"></td>
                                 <td th:text="${product.name}"></td>
+                                <td th:text="${productQuantities[product.id]}"></td>
                                 <td th:text="${product.status != null && product.status ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}"></td>
                                 <td>
                                     <a th:href="@{#}" style="color: black; text-decoration: none; padding-right: 15px;"

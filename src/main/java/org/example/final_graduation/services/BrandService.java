@@ -13,6 +13,10 @@ public class BrandService {
     @Autowired
     private BrandRepository brandRepository;
 
+    public List<Brand> getAllBrands() {
+        return brandRepository.findAll();
+    }
+
     public List<Brand> getAvailableBrandsForProduct(Integer productId) {
         return brandRepository.findBrandsByProduct(productId);
     }

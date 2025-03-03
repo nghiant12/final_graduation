@@ -74,22 +74,26 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/accounts/add}" method="post" th:object="${account}">
+                                        <form th:action="@{/admin/customers/add}" method="post" th:object="${customer}">
+                                            <div class="mb-3">
+                                                <label class="form-label">Họ tên</label>
+                                                <input type="text" class="form-control" th:field="*{fullname}" placeholder="Nhập họ tên" required/>
+                                            </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Username</label>
                                                 <input type="text" class="form-control" th:field="*{username}" placeholder="Nhập username" required/>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" th:field="*{email}" placeholder="Nhập email" required/>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Mật khẩu</label>
                                                 <input type="password" class="form-control" th:field="*{password}" placeholder="Nhập mật khẩu" required/>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" th:field="*{fullname}" placeholder="Nhập họ tên" required/>
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" th:field="*{email}" placeholder="Nhập email" required/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Số điện thoại</label>
+                                                <input type="text" class="form-control" th:field="*{phoneNumber}" placeholder="Nhập số điện thoại" required/>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Địa chỉ</label>
@@ -98,7 +102,7 @@
                                             <!-- Ảnh đại diện -->
                                             <div class="mb-3">
                                                 <label for="photo" class="form-label">Ảnh đại diện</label>
-                                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*" />
+                                                <input type="file" class="form-control" id="" name="photo" accept="image/*" />
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">Lưu</button>
@@ -118,19 +122,27 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/accounts/update}" method="post">
+                                        <form th:action="@{/admin/customers/update}" method="post">
                                             <input type="hidden" name="id"/>
+                                            <div class="mb-3">
+                                                <label class="form-label">Họ tên</label>
+                                                <input type="text" class="form-control" name="fullname" required/>
+                                            </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Username</label>
                                                 <input type="text" class="form-control" name="username" readonly/>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Mật khẩu</label>
+                                                <input type="password" class="form-control" name="password" readonly/>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Email</label>
                                                 <input type="email" class="form-control" name="email" readonly/>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" name="fullname" required/>
+                                                <label class="form-label">Số điện thoại</label>
+                                                <input type="text" class="form-control" name="phone_number" readonly/>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Địa chỉ</label>
@@ -160,23 +172,27 @@
                             <thead>
                             <tr>
                                 <th>STT</th>
+                                <th>Họ tên</th>
                                 <th>Username</th>
                                 <th>Email</th>
-                                <th>Họ tên</th>
+                                <th>Sđt</th>
                                 <th>Địa chỉ</th>
                                 <th>Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="account, stat : ${accounts}">
+                            <tr th:each="customer, stat : ${customers}">
                                 <td th:text="${stat.index + 1}"></td>
-                                <td th:text="${account.username}"></td>
-                                <td th:text="${account.email}"></td>
-                                <td th:text="${account.fullname}"></td>
-                                <td th:text="${account.address}"></td>
+                                <td th:text="${customer.fullname}"></td>
+                                <td th:text="${customer.username}"></td>
+                                <td th:text="${customer.email}"></td>
+                                <td th:text="${customer.phoneNumber}"></td>
+                                <td th:text="${customer.address}"></td>
                                 <td>
                                     <a href="#" class="text-dark" data-bs-toggle="modal" data-bs-target="#editAccountModal"
-                                       th:attr="data-id=${account.id}, data-username=${account.username}, data-email=${account.email}, data-fullname=${account.fullname}, data-address=${account.address}">
+                                       th:attr="data-id=${customer.id}, data-username=${customer.username}, data-password=${customer.password},
+                                       data-email=${customer.email}, data-fullname=${customer.fullname},
+                                       data-phone_number=${customer.phoneNumber}, data-address=${customer.address}">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                 </td>
@@ -211,13 +227,17 @@
             const email = button.getAttribute('data-email');
             const fullname = button.getAttribute('data-fullname');
             const address = button.getAttribute('data-address');
+            const phoneNumber = button.getAttribute('data-phone_number');
+            const password = button.getAttribute('data-password');
 
             const form = editAccountModal.querySelector('form');
             form.querySelector('input[name="id"]').value = id;
             form.querySelector('input[name="username"]').value = username;
             form.querySelector('input[name="email"]').value = email;
             form.querySelector('input[name="fullname"]').value = fullname;
+            form.querySelector('input[name="phone_number"]').value = phoneNumber;
             form.querySelector('input[name="address"]').value = address;
+            form.querySelector('input[name="password"]').value = password;
         });
     });
 </script>

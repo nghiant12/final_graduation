@@ -7,6 +7,7 @@
     <meta name="description" content=""/>
     <meta name="author" content=""/>
     <title>Sản phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
     <link th:href="@{/admin/css/styles.css}" rel="stylesheet" type="text/css">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
@@ -15,18 +16,21 @@
     <!-- Navbar Brand-->
     <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
     <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
+            class="fas fa-bars"></i></button>
     <!-- Navbar Search-->
     <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
         <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch"/>
+            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
+                   aria-describedby="btnNavbarSearch"/>
             <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
         </div>
     </form>
     <!-- Navbar-->
     <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
+               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                 <li><a class="dropdown-item" href="#!">Settings</a></li>
                 <li><a class="dropdown-item" href="#!">Activity Log</a></li>
@@ -55,7 +59,106 @@
                 </ol>
                 <div class="card mb-4">
                     <div class="card-body">
-                        Đây là phần nội dung của trang.
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <span th:text="${error}">Lỗi</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <div th:if="${success}" class="alert alert-success" role="alert">
+                            <span th:text="${success}">Thành công</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                data-bs-target="#addProductDetailModal">
+                            Thêm mới
+                        </button>
+
+                        <!-- Modal for Adding New ProductDetail -->
+                        <div class="modal fade" id="addProductDetailModal" tabindex="-1" aria-labelledby="addModalLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <form th:action="@{/admin/products/addDetail}" method="post">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addModalLabel">Thêm Sản phẩm chi tiết</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="product.id" th:value="${idProduct}"/>
+                                            <!-- Combobox Category -->
+                                            <div class="mb-3">
+                                                <label for="brand" class="form-label">Danh mục sản phẩm</label>
+                                                <select class="form-select" id="category" name="category.id">
+                                                    <option th:each="category : ${categories}"
+                                                            th:value="${category.id}"
+                                                            th:text="${category.name}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Combobox Brand -->
+                                            <div class="mb-3">
+                                                <label for="brand" class="form-label">Thương hiệu</label>
+                                                <select class="form-select" id="brand" name="brand.id">
+                                                    <option th:each="brand : ${brands}"
+                                                            th:value="${brand.id}"
+                                                            th:text="${brand.name}">
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <!-- Combobox Color -->
+                                            <div class="mb-3">
+                                                <label for="color" class="form-label">Màu sắc</label>
+                                                <select class="form-select" id="color" name="color.id">
+                                                    <option th:each="color : ${colors}"
+                                                            th:value="${color.id}"
+                                                            th:text="${color.name}">
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <!-- Combobox Size -->
+                                            <div class="mb-3">
+                                                <label for="size" class="form-label">Size</label>
+                                                <select class="form-select" id="size" name="size.id">
+                                                    <option th:each="size : ${sizes}"
+                                                            th:value="${size.id}"
+                                                            th:text="${size.name}">
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="price" class="form-label">Giá</label>
+                                                <input type="text" class="form-control" id="price" name="price"
+                                                       required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="quantity" class="form-label">Số lượng</label>
+                                                <input type="number" class="form-control" id="quantity" name="quantity"
+                                                       required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="image" class="form-label">Image URL</label>
+                                                <input type="text" class="form-control" id="image" name="image">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="available" class="form-label">Trạng thái</label>
+                                                <select class="form-select" id="available" name="available">
+                                                    <option value="true">Đang kinh doanh</option>
+                                                    <option value="false">Ngừng kinh doanh</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Đóng
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">Lưu</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="card mb-4">
@@ -84,7 +187,8 @@
                             <tr th:each="productDetail, stat : ${productDetails}">
                                 <td th:text="${stat.index + 1}"></td>
                                 <td>
-                                    <img th:src="${productDetail.image}" alt="Product Image" style="width: 100px; height: auto;">
+                                    <img th:src="${productDetail.image}" alt="Product Image"
+                                         style="width: 100px; height: auto;">
                                 </td>
                                 <td th:text="${productDetail.product.name}"></td>
                                 <td th:text="${productDetail.price}"></td>
@@ -95,7 +199,9 @@
                                 <td th:text="${productDetail.color.name}"></td>
                                 <td th:text="${productDetail.brand.name}"></td>
                                 <td>
-                                    <a th:href="@{#}" style="color: black; text-decoration: none; padding-right: 15px;">
+                                    <a style="color: black; text-decoration: none; padding-right: 15px;"
+                                       data-bs-toggle="modal"
+                                       th:attr="data-bs-target='#editModal-' + ${productDetail.id}">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
                                 </td>
@@ -111,6 +217,87 @@
         </main>
     </div>
 </div>
+<!-- Loop qua từng sản phẩm chi tiết để tạo modal -->
+<th:block th:each="detail : ${productDetails}">
+    <div class="modal fade" th:id="'editModal-' + ${detail.id}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/admin/products/updateDetail}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Chỉnh sửa sản phẩm chi tiết</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" th:value="${detail.id}"/>
+
+                        <!-- Combobox Brand -->
+                        <div class="mb-3">
+                            <label class="form-label">Thương hiệu</label>
+                            <select class="form-select" name="brand.id">
+                                <option th:each="brand : ${brands}"
+                                        th:value="${brand.id}"
+                                        th:text="${brand.name}"
+                                        th:selected="${brand.id == detail.brand.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Combobox Color -->
+                        <div class="mb-3">
+                            <label class="form-label">Màu sắc</label>
+                            <select class="form-select" name="color.id">
+                                <option th:each="color : ${colors}"
+                                        th:value="${color.id}"
+                                        th:text="${color.name}"
+                                        th:selected="${color.id == detail.color.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Combobox Size -->
+                        <div class="mb-3">
+                            <label class="form-label">Size</label>
+                            <select class="form-select" name="size.id">
+                                <option th:each="size : ${sizes}"
+                                        th:value="${size.id}"
+                                        th:text="${size.name}"
+                                        th:selected="${size.id == detail.size.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Giá</label>
+                            <input type="text" class="form-control" name="price" th:value="${detail.price}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Số lượng</label>
+                            <input type="number" class="form-control" name="quantity" th:value="${detail.quantity}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Image URL</label>
+                            <input type="text" class="form-control" name="image" th:value="${detail.image}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-select" name="available">
+                                <option value="true" th:selected="${detail.available}">Đang kinh doanh</option>
+                                <option value="false" th:selected="${!detail.available}">Ngừng kinh doanh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</th:block>
 
 <footer class="py-4 bg-light mt-auto">
     <div class="container-fluid px-4">
@@ -124,10 +311,13 @@
         </div>
     </div>
 </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
 <script th:src="@{/admin/js/scripts.js}"></script>
-<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
 <script th:src="@{/admin/js/datatables-simple-demo.js}"></script>
 </body>
 </html>
+

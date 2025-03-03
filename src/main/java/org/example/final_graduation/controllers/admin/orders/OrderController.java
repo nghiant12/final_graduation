@@ -3,6 +3,7 @@ package org.example.final_graduation.controllers.admin.orders;
 import org.example.final_graduation.entities.*;
 import org.example.final_graduation.repositories.CustomerRepository;
 import org.example.final_graduation.repositories.EmployeeRepository;
+import org.example.final_graduation.repositories.PromotionRepository;
 import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +57,7 @@ public class OrderController {
     private CustomerRepository customerRepository;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private PromotionRepository promotionRepository;
 
     @Autowired
     private BrandService brandService;
@@ -108,7 +110,6 @@ public class OrderController {
         return "redirect:/admin/orders"; // Điều hướng lại trang danh sách hóa đơn
     }
 
-
     @GetMapping("/detail")
     public String showOrderDetail(@RequestParam Integer idOrder, Model model) {
         // Lấy danh sách hóa đơn
@@ -133,9 +134,12 @@ public class OrderController {
         Optional<Order> selectedOrder = orderRepository.findById(idOrder);
         selectedOrder.ifPresent(order -> model.addAttribute("order", order));
 
+        // Lấy danh sách khuyến mãi đang diễn ra
+        List<Promotion> activePromotions = promotionRepository.findActivePromotions();
+        model.addAttribute("promotions", activePromotions);
+
         return "admin/orders/order_form";
     }
-
 
     // Xử lý hủy đơn hàng
     @PostMapping("/cancel/{id}")
@@ -167,37 +171,6 @@ public class OrderController {
         }
 
         return "redirect:/admin/orders";
-    }
-
-
-    // API Lấy danh sách sản phẩm
-    @GetMapping("/products")
-    @ResponseBody
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
-    }
-
-    // API Lấy danh sách thương hiệu, màu sắc, kích thước theo sản phẩm
-    @GetMapping("/productDetails")
-    @ResponseBody
-    public Map<String, Object> getProductDeatils(@RequestParam("productId") Integer productId) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("brands", brandService.getAvailableBrandsForProduct(productId));
-        response.put("colors", colorService.getAvailableColorsForProduct(productId));
-        response.put("sizes", sizeService.getAvailableSizesForProduct(productId));
-        return response;
-    }
-
-    // API Lấy giá sản phẩm chi tiết theo thuộc tính
-    @GetMapping("/productPrice")
-    @ResponseBody
-    public Map<String, Object> getProductPrice(@RequestParam("productId") Integer productId, @RequestParam("brandId") Integer brandId, @RequestParam("colorId") Integer colorId, @RequestParam("sizeId") Integer sizeId) {
-        Optional<ProductDetail> productDetail = productDetailService.getProductDetail(productId, brandId, colorId, sizeId);
-        if (productDetail.isPresent()) {
-            return Map.of("price", productDetail.get().getPrice(), "productDetailId", productDetail.get().getId());
-        } else {
-            return Map.of("error", "Không tìm thấy sản phẩm phù hợp");
-        }
     }
 
     // API Thêm sản phẩm vào đơn hàng
@@ -291,7 +264,6 @@ public class OrderController {
                 orderDetailRepository.save(orderDetail);
                 orderService.saveOrder(order);
 
-                // ✅ Thêm ID sản phẩm vào JSON để cập nhật bảng
                 response.put("success", true);
                 response.put("newQuantity", orderDetail.getQuantity());
                 response.put("totalPrice", totalPrice);
@@ -310,12 +282,6 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
-
-
-
-
-
 
     // Xử lý xóa sản phẩm khỏi đơn hàng
     @PostMapping("/removeProduct")
@@ -361,64 +327,84 @@ public class OrderController {
         }
     }
 
-
-
     // Xử lý xác nhận đặt hàng
     @PostMapping("/confirm/{id}")
-    public String confirmOrder(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+    public String confirmOrder(@PathVariable("id") Integer id,
+                               @RequestParam("paymentMethod") String paymentMethod,
+                               @RequestParam(value = "promotionId", required = false) Integer promotionId,
+                               RedirectAttributes redirectAttributes) {
         try {
             Optional<Order> optionalOrder = orderService.getOrderById(id);
+            if (optionalOrder.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
+                return "redirect:/admin/orders";
+            }
 
-            if (optionalOrder.isPresent()) {
-                Order order = optionalOrder.get();
+            Order order = optionalOrder.get();
 
-                // Kiểm tra nếu đơn hàng chưa có sản phẩm
-                List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(order.getId());
-                if (orderDetails.isEmpty()) {
-                    redirectAttributes.addFlashAttribute("error", "Đơn hàng chưa có sản phẩm, vui lòng thêm sản phẩm trước khi xác nhận.");
-                    return "redirect:/admin/orders/detail?idOrder=" + order.getId();
-                }
+            List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(order.getId());
+            if (orderDetails.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Đơn hàng chưa có sản phẩm, vui lòng thêm sản phẩm trước khi thanh toán.");
+                return "redirect:/admin/orders/detail?idOrder=" + order.getId();
+            }
 
-                // Kiểm tra nếu đơn hàng chưa có khách hàng -> Set mặc định account có id = 1
-                if (order.getCustomer() == null) {
-                    Optional<Customer> defaultAccount = customerRepository.findById(1); // Tìm account có id = 1
-                    if (defaultAccount.isPresent()) {
-                        order.setCustomer(defaultAccount.get()); // Gán khách hàng mặc định
+            if (order.getCustomer() == null) {
+                Optional<Customer> defaultAccount = customerRepository.findById(1);
+                defaultAccount.ifPresent(order::setCustomer);
+            }
+
+            if (paymentMethod.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Chưa chọn phương thức thanh toán.");
+                return "redirect:/admin/orders/detail?idOrder=" + order.getId();
+            }
+
+            order.setPaymentMethod(paymentMethod);
+
+            BigDecimal totalPrice = orderDetailRepository.tongTien(order.getId());
+            if (totalPrice == null) {
+                totalPrice = BigDecimal.ZERO;
+            }
+
+            // Áp dụng khuyến mãi nếu hợp lệ
+            if (promotionId != null) {
+                Optional<Promotion> optionalPromotion = promotionRepository.findById(promotionId);
+                if (optionalPromotion.isPresent()) {
+                    Promotion promotion = optionalPromotion.get();
+                    if (promotion.getActive() &&
+                            promotion.getRemainingQuantity() > 0 &&
+                            LocalDateTime.now().isAfter(promotion.getStartDate()) &&
+                            LocalDateTime.now().isBefore(promotion.getEndDate()) &&
+                            totalPrice.compareTo(promotion.getMinOrderValue()) >= 0) {
+
+                        // Tính số tiền giảm giá
+                        BigDecimal discountAmount = totalPrice.multiply(promotion.getDiscount()).divide(BigDecimal.valueOf(100));
+                        totalPrice = totalPrice.subtract(discountAmount);
+
+                        // Giảm số lượng mã giảm giá
+                        promotion.setRemainingQuantity(promotion.getRemainingQuantity() - 1);
+                        promotionRepository.save(promotion);
+
+                        order.setPromotion(promotion);
                     } else {
-                        redirectAttributes.addFlashAttribute("error", "Không tìm thấy tài khoản mặc định.");
+                        redirectAttributes.addFlashAttribute("error", "Mã giảm giá không hợp lệ hoặc đã hết số lượng.");
                         return "redirect:/admin/orders/detail?idOrder=" + order.getId();
                     }
                 }
-
-                // Tính tổng tiền đơn hàng
-                BigDecimal totalPrice = orderDetailRepository.tongTien(order.getId());
-                order.setTotalPrice(totalPrice != null ? totalPrice : BigDecimal.ZERO);
-
-                // Cập nhật trạng thái đơn hàng
-                order.setStatus("Confirmed");
-                orderService.saveOrder(order);
-                redirectAttributes.addFlashAttribute("success", "Đơn hàng đã được xác nhận!");
-
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy đơn hàng.");
             }
+
+            order.setTotalPrice(totalPrice);
+            order.setStatus("Completed");
+            orderService.saveOrder(order);
+
+            redirectAttributes.addFlashAttribute("success", "Đơn hàng đã hoàn thành!");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi khi xác nhận đơn hàng: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi thanh toán đơn hàng: " + e.getMessage());
         }
 
         return "redirect:/admin/orders";
     }
 
 
-//    // Lấy danh sách khách hàng và hiển thị modal chọn khách hàng
-//    @GetMapping("/{orderId}")
-//    public String viewOrder(@PathVariable("orderId") Integer orderId, Model model) {
-//        Optional<Order> order = orderService.getOrderById(orderId);
-//        List<Authority> customers = accountService.getAllCustomers(); // Lấy danh sách khách hàng
-//        model.addAttribute("order", order);
-//        model.addAttribute("customers", customers); // Truyền danh sách khách hàng vào view
-//        return "admin/orders/order_form"; // Tên trang hiện tại mà bạn muốn hiển thị
-//    }
 
     // Xử lý chọn khách hàng từ modal
     @PostMapping("/selectCustomer/{orderId}")

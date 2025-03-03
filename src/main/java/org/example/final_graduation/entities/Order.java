@@ -30,6 +30,10 @@ public class Order {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+    @ManyToOne
+    @JoinColumn(name = "promotion_id")
+    private Promotion promotion;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "employee_id", nullable = false)
@@ -63,6 +67,9 @@ public class Order {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "payment_method")
+    private String paymentMethod;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> orderDetails = new ArrayList<>();
 
@@ -79,16 +86,26 @@ public class Order {
     public Order() {
     }
 
-    public Order(Integer id, Customer customer, Employee employee, LocalDateTime createdDate, BigDecimal totalPrice, String type, String status, String address, List<OrderDetail> orderDetails) {
+    public Order(Integer id, Customer customer, Promotion promotion, Employee employee, LocalDateTime createdDate, BigDecimal totalPrice, String type, String status, String address, String paymentMethod, List<OrderDetail> orderDetails) {
         this.id = id;
         this.customer = customer;
+        this.promotion = promotion;
         this.employee = employee;
         this.createdDate = createdDate;
         this.totalPrice = totalPrice;
         this.type = type;
         this.status = status;
         this.address = address;
+        this.paymentMethod = paymentMethod;
         this.orderDetails = orderDetails;
+    }
+
+    public Promotion getPromotion() {
+        return promotion;
+    }
+
+    public void setPromotion(Promotion promotion) {
+        this.promotion = promotion;
     }
 
     public Integer getId() {
@@ -161,5 +178,13 @@ public class Order {
 
     public void setOrderDetails(List<OrderDetail> orderDetails) {
         this.orderDetails = orderDetails;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
