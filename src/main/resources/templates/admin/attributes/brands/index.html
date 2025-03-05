@@ -103,19 +103,22 @@
                             </div>
                         </div>
 
-                        <div class="modal fade" id="editBrandModal" tabindex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+                        <div class="modal fade" id="editBrandModal" tabindex="-1" aria-labelledby="exampleModalLabel1"
+                             aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h1 class="modal-title fs-5" id="exampleModalLabel1">Sửa thương hiệu</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
                                         <form th:action="@{/admin/brands/update}" method="post">
-                                            <input type="hidden" name="id" />
+                                            <input type="hidden" name="id"/>
                                             <div class="mb-3">
                                                 <label for="name" class="form-label">Tên thương hiệu</label>
-                                                <input type="text" class="form-control" name="name" placeholder="Nhập tên thương hiệu" maxlength="100" required />
+                                                <input type="text" class="form-control" name="name"
+                                                       placeholder="Nhập tên thương hiệu" maxlength="100" required/>
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -163,21 +166,20 @@
                 </div>
             </div>
         </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms & Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </div>
-
-<footer class="py-4 bg-light mt-auto">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-            <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms & Conditions</a>
-            </div>
-        </div>
-    </div>
-</footer>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

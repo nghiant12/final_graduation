@@ -28,7 +28,7 @@ public class Promotion {
     private LocalDateTime endDate;
 
     @Column(name = "is_active")
-    private Boolean isActive;
+    private Boolean isActive = true;
 
     @Column(name = "min_order_value")
     private BigDecimal minOrderValue; // Giá trị tối thiểu của hóa đơn

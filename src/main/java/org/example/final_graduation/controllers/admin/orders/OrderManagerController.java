@@ -1,17 +1,13 @@
-package org.example.final_graduation.controllers.admin.order_manager;
+package org.example.final_graduation.controllers.admin.orders;
 
 import org.example.final_graduation.entities.Order;
 import org.example.final_graduation.entities.OrderDetail;
-import org.example.final_graduation.entities.Product;
-import org.example.final_graduation.entities.ProductDetail;
 import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

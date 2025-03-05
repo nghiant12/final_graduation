@@ -8,16 +8,16 @@ INSERT INTO employees (role_id, username, [password], fullname, email, [address]
 (1, 'staff1', 'staffpass1', 'Pham Minh D', 'staff1@example.com', '111 JKL Street'),
 (1, 'staff2', 'staffpass2', 'Hoang Thi E', 'staff2@example.com', '222 MNO Street'),
 (1, 'staff3', 'staffpass3', 'Le Van H', 'staff3@example.com', '333 ABC Street'),
-(2, 'admin4', 'adminpass4', 'Nguyen Van L', 'admin4@example.com', '444 ABC Street'),
-(2, 'admin5', 'adminpass5', 'Tran Thi Q', 'admin5@example.com', '555 ABC Street');
+(2, 'admin', '123', 'Nguyen Van L', 'admin4@example.com', '444 ABC Street')
 
--- Bảng customers (3 dòng)
-INSERT INTO customers (username, [password], fullname, email, [address]) VALUES
-('user1', 'password1', 'Nguyen Van A', 'user1@example.com', '123 ABC Street'),
-('user2', 'password2', 'Le Thi B', 'user2@example.com', '456 DEF Street'),
-('user3', 'password3', 'Tran Van C', 'user3@example.com', '789 GHI Street'),
-('user4', 'password4', 'Pham Thi E', 'user4@example.com', '115 LKJ Street'),
-('user5', 'password5', 'Nguyen Thi M', 'user5@example.com', '678 ABS Street');
+-- Bảng customers (5 dòng)
+INSERT INTO customers (username, [password], fullname, email, [address], phone_number) VALUES
+('user1', 'password1', 'Nguyen Van A', 'user1@example.com', '123 ABC Street', '0123456789'),
+('user2', 'password2', 'Le Thi B', 'user2@example.com', '456 DEF Street', '0987654321'),
+('user3', 'password3', 'Tran Van C', 'user3@example.com', '789 GHI Street', '0912345678'),
+('user4', 'password4', 'Pham Thi E', 'user4@example.com', '115 LKJ Street', '0965432187'),
+('user5', 'password5', 'Nguyen Thi M', 'user5@example.com', '678 ABS Street', '0932165487');
+
 
 -- Bảng categories (5 dòng)
 INSERT INTO categories ([name]) VALUES
@@ -76,6 +76,12 @@ INSERT INTO product_details (product_id, price, quantity, category_id, size_id, 
 (8, 90.00, 50, 3, 3, 4, 3),
 (9, 110.00, 15, 4, 4, 1, 4),
 (10, 80.00, 45, 2, 5, 2, 5);
+
+INSERT INTO promotions (name, is_active, discount, start_date, end_date, min_order_value, remaining_quantity) 
+VALUES 
+('Discount 10%', 1, 10, GETDATE(), DATEADD(DAY, 30, GETDATE()), 500, 100),
+('Giam 20% cho don hang lon', 1, 20, GETDATE(), DATEADD(DAY, 30, GETDATE()), 1000, 50);
+
 
 -- Bảng orders (5 dòng)
 --INSERT INTO orders (user_id, admin_id, total_price, [type], [status], [address]) VALUES

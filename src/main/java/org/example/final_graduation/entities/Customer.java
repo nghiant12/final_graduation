@@ -31,8 +31,7 @@ public class Customer {
     @NotNull
     @Nationalized
     @Column(name = "password", nullable = false)
-    @NotBlank(groups = Customer.class) // Chỉ kiểm tra khi tạo mới
-    private String password;
+    private String password = "default_password";
 
     @jakarta.validation.constraints.Size(max = 100)
     @NotNull

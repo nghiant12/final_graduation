@@ -7,11 +7,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Integer> {
-    // Kiểm tra sự tồn tại của username hoặc email
+    // Tìm khách hàng theo username
+    Optional<Customer> findByUsername(String username);
+
+    // Kiểm tra username đã tồn tại chưa
     boolean existsByUsername(String username);
+
+    // Kiểm tra email đã tồn tại chưa
     boolean existsByEmail(String email);
 
     // Tìm tài khoản theo ID
