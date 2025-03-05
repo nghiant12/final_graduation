@@ -22,32 +22,32 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Order findByID(@Param("id") Integer id);
 
     @Query("""
-    SELECT o FROM Order o 
-    WHERE NOT (o.type = 'At the counter' AND o.status = 'Processing')
-""")
+                SELECT o FROM Order o
+                WHERE NOT (o.type = 'At the counter' AND o.status = 'Processing')
+            """)
     List<Order> findAllOrderManager();
 
     @Query("""
-    SELECT COUNT(*)
-    FROM Order od
-    WHERE od.type = 'At the counter'
-    AND od.status = 'Processing'
-""")
+                SELECT COUNT(*)
+                FROM Order od
+                WHERE od.type = 'At the counter'
+                AND od.status = 'Processing'
+            """)
     Integer countByTypeStatus();
 
     @Query("""
-    SELECT o FROM Order o 
-    WHERE o.createdDate BETWEEN :start AND :end
-    AND NOT (o.type = 'At the counter' AND o.status = 'Processing')
-""")
+                SELECT o FROM Order o
+                WHERE o.createdDate BETWEEN :start AND :end
+                AND NOT (o.type = 'At the counter' AND o.status = 'Processing')
+            """)
     List<Order> findByCreatedDateBetween(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
 
     @Query("SELECT o FROM Order o WHERE o.createdDate BETWEEN :start AND :end " +
-           "AND (:type IS NULL OR o.type = :type) " +
-           "AND NOT (o.type = 'At the counter' AND o.status = 'Processing')")
+            "AND (:type IS NULL OR o.type = :type) " +
+            "AND NOT (o.type = 'At the counter' AND o.status = 'Processing')")
     List<Order> findByCreatedDateBetweenAndType(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
@@ -56,10 +56,10 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
 
     @Query("""
-    SELECT o FROM Order o 
-    WHERE o.type = :type
-    AND NOT (o.type = 'At the counter' AND o.status = 'Processing')
-""")
+                SELECT o FROM Order o 
+                WHERE o.type = :type
+                AND NOT (o.type = 'At the counter' AND o.status = 'Processing')
+            """)
     List<Order> findByType(
             @Param("type") String type
     );

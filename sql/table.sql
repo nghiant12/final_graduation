@@ -85,16 +85,21 @@ CREATE TABLE product_details (
     brand_id INT NULL
 );
 
--- Bảng orders
-CREATE TABLE orders (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    [customer_id] INT,
-    employee_id INT NOT NULL,
-    created_date DATETIME NOT NULL DEFAULT GETDATE(),
-    total_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
-    [type] NVARCHAR(50) NOT NULL,
-    [status] NVARCHAR(50) NOT NULL,
-    [address] NVARCHAR(255) NOT NULL
+CREATE TABLE [dbo].[orders] (
+    [id]             INT             IDENTITY (1, 1) NOT NULL,
+    [customer_id]    INT             NULL,
+    [employee_id]    INT             NOT NULL,
+    [promotion_id]   INT             NULL,
+    [created_date]   DATETIME        DEFAULT (getdate()) NOT NULL,
+    [total_price]    DECIMAL (10, 2) DEFAULT ((0)) NOT NULL,
+    [payment_method] NVARCHAR (50)   NULL,
+    [type]           NVARCHAR (50)   NOT NULL,
+    [status]         NVARCHAR (50)   NOT NULL,
+    [address]        NVARCHAR (255)  NOT NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC),
+    CONSTRAINT [FK_orders_admin] FOREIGN KEY ([employee_id]) REFERENCES [dbo].[employees] ([id]),
+    CONSTRAINT [FK_orders_customer] FOREIGN KEY ([customer_id]) REFERENCES [dbo].[customers] ([id]) ON DELETE SET NULL,
+    CONSTRAINT [FK_orders_promotions] FOREIGN KEY ([promotion_id]) REFERENCES [dbo].[promotions] ([id])
 );
 
 -- Bảng order_details
@@ -106,14 +111,19 @@ CREATE TABLE order_details (
     quantity INT NOT NULL
 );
 
-CREATE TABLE promotions (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name NVARCHAR(255) NOT NULL,
-    description NVARCHAR(MAX),
-    discount DECIMAL(5,2) CHECK (Discount >= 0 AND Discount <= 100), -- Giảm giá từ 0% đến 100%
-    start_date DATETIME NOT NULL,
-    end_date DATETIME NOT NULL,
-    is_active BIT DEFAULT 1 -- 1: Đang hoạt động, 0: Không hoạt động
+CREATE TABLE [dbo].[promotions] (
+    [id]                 INT             IDENTITY (1, 1) NOT NULL,
+    [name]               NVARCHAR (255)  NOT NULL,
+    [description]        NVARCHAR (MAX)  NULL,
+    [discount]           DECIMAL (5, 2)  NULL,
+    [min_order_value]    NUMERIC (38, 2) NULL,
+    [remaining_quantity] INT             DEFAULT ((0)) NOT NULL,
+    [start_date]         DATETIME        NOT NULL,
+    [end_date]           DATETIME        NOT NULL,
+    [is_active]          BIT             DEFAULT ((1)) NULL,
+    [created_date]       DATETIME        CONSTRAINT [DEFAULT_promotions_created_date] DEFAULT (getdate()) NOT NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC),
+    CHECK ([Discount]>=(0) AND [Discount]<=(100))
 );
 
 -- Thêm khóa ngoại sau khi tạo bảng
@@ -152,14 +162,6 @@ ALTER TABLE order_details
 ADD CONSTRAINT FK_order_details_product_detail FOREIGN KEY (product_detail_id) REFERENCES product_details(id) ON DELETE CASCADE;
 
 ALTER TABLE orders 
-ADD promotion_id INT NULL;
-
-ALTER TABLE orders 
 ADD CONSTRAINT FK_orders_promotions FOREIGN KEY (promotion_id) 
 REFERENCES promotions(id);
-
-ALTER TABLE promotions ALTER COLUMN min_order_value NUMERIC(38,2);
-
-ALTER TABLE promotions 
-ADD remaining_quantity INT NOT NULL DEFAULT 0;
 

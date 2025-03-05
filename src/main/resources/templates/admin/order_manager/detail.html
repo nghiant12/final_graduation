@@ -106,7 +106,8 @@
                             </div>
                         </div>
                         <div style="display: flex">
-                            <h4 class="mx-2">Tổng tiền đơn hàng: </h4> <h4 class="text-danger fw-bold" th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></h4>
+                            <h4 class="mx-2">Tổng tiền đơn hàng: </h4> <h4 class="text-danger fw-bold"
+                                                                           th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></h4>
                         </div>
                     </div>
                 </div>
@@ -118,19 +119,24 @@
                     </div>
                     <div class="card-body">
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; text-align: center;">
-                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;"
+                                 class="mx-5">
                                 <h3 style="margin-right: 5px;">Ngày tạo:</h3>
-                                <h3 th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm:ss')}">Ngày tạo</h3>
+                                <h3 th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm:ss')}">Ngày
+                                    tạo</h3>
                             </div>
-                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;"
+                                 class="mx-5">
                                 <h3 style="margin-right: 5px;">Địa chỉ:</h3>
                                 <h3 th:text="${order.address}">Địa chỉ</h3>
                             </div>
-                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;"
+                                 class="mx-5">
                                 <h3 style="margin-right: 5px;">Trạng thái:</h3>
                                 <h3 th:text="${order.status}">Trạng thái</h3>
                             </div>
-                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;" class="mx-5">
+                            <div style="display: flex; align-items: center; justify-content: left; margin-right: 5px;"
+                                 class="mx-5">
                                 <h3 style="margin-right: 5px;">Loại hóa đơn:</h3>
                                 <h3 th:text="${order.type}">Loại hóa đơn</h3>
                             </div>
@@ -139,21 +145,21 @@
                 </div>
             </div>
         </main>
+
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms & Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </div>
-
-<footer class="py-4 bg-light mt-auto">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-            <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms & Conditions</a>
-            </div>
-        </div>
-    </div>
-</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>

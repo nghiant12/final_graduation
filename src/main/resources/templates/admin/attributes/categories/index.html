@@ -44,7 +44,7 @@
 </nav>
 <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
-            <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
+        <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
     </div>
     <div id="layoutSidenav_content">
         <main>
@@ -82,11 +82,12 @@
                                         <!-- Form thêm thương hiệu hoặc chỉnh sửa thương hiệu -->
                                         <form action="#" th:action="@{/admin/categories/add}" method="post"
                                               th:object="${category}">
-                                        <input type="hidden" th:field="*{id}"/>
+                                            <input type="hidden" th:field="*{id}"/>
                                             <div class="mb-3">
                                                 <label for="name" class="form-label">Tên danh mục sản phẩm</label>
                                                 <input type="text" class="form-control" id="name" th:field="*{name}"
-                                                       placeholder="Nhập tên danh mục sản phẩm" maxlength="100" required>
+                                                       placeholder="Nhập tên danh mục sản phẩm" maxlength="100"
+                                                       required>
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -99,7 +100,8 @@
                             </div>
                         </div>
 
-                        <div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="exampleModalLabel1"
+                        <div class="modal fade" id="editCategoryModal" tabindex="-1"
+                             aria-labelledby="exampleModalLabel1"
                              aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
@@ -110,10 +112,12 @@
                                     </div>
                                     <div class="modal-body">
                                         <form th:action="@{/admin/categories/update}" method="post">
-                                            <input type="hidden" name="id" />
+                                            <input type="hidden" name="id"/>
                                             <div class="mb-3">
                                                 <label for="name" class="form-label">Tên danh mục sản phẩm</label>
-                                                <input type="text" class="form-control" name="name" placeholder="Nhập tên danh mục sản phẩm" maxlength="100" required />
+                                                <input type="text" class="form-control" name="name"
+                                                       placeholder="Nhập tên danh mục sản phẩm" maxlength="100"
+                                                       required/>
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -161,20 +165,20 @@
                 </div>
             </div>
         </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </div>
-<footer class="py-4 bg-light mt-auto">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-            <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms &amp; Conditions</a>
-            </div>
-        </div>
-    </div>
-</footer>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

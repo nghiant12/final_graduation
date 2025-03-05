@@ -180,8 +180,12 @@
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn hàng không?');">
                                     <h5>Thông tin đơn hàng</h5>
 
-                                    <p>Khách hàng: <span th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span></p>
-                                    <p>Nhân viên: <span th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>
+                                    <p>Khách hàng: <span
+                                            th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span>
+                                    </p>
+                                    <p>Nhân viên: <span
+                                            th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span>
+                                    </p>
 
                                     <!-- Tổng tiền sản phẩm -->
                                     <p>Tổng số tiền sản phẩm:
@@ -192,7 +196,8 @@
                                     </p>
 
                                     <p>Chọn mã giảm giá:</p>
-                                    <select name="promotionId" class="form-control mb-3" onchange="updateTotalPrice(this)" th:disabled="${order.id == null}">
+                                    <select name="promotionId" class="form-control mb-3"
+                                            onchange="updateTotalPrice(this)" th:disabled="${order.id == null}">
                                         <option value="" data-discount="0" data-min-value="0">Không áp dụng</option>
                                         <option th:each="promotion : ${promotions}"
                                                 th:value="${promotion.id}"
@@ -205,9 +210,8 @@
 
                                     <!-- Tổng số tiền cần thanh toán -->
                                     <p>Tổng số tiền cần thanh toán:
-                                        <span class="text-danger fw-bold" id="finalPrice">
-                <span th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
-            </span>
+                                        <span class="text-danger fw-bold" id="finalPrice"
+                                              th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
                                     </p>
 
                                     <!-- Phương thức thanh toán -->
@@ -217,10 +221,10 @@
                                         <option value="Transfer">Chuyển khoản</option>
                                     </select>
 
-                                    <input type="text" id="customerPaid" class="form-control my-2"
-                                           placeholder="Tiền khách đưa..." oninput="calculateChange()">
+                                    <!--                                    <input type="text" id="customerPaid" class="form-control my-2"-->
+                                    <!--                                           placeholder="Tiền khách đưa..." oninput="calculateChange()">-->
 
-                                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
+                                    <!--                                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>-->
 
                                     <br><br>
                                     <button class="btn btn-primary w-100" id="confirmOrderBtn">Thanh toán</button>
@@ -302,20 +306,21 @@
                 </div>
             </div>
         </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms & Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </div>
-<footer class="py-4 bg-light mt-auto">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-            <div>
-                <a href="#">Privacy Policy</a>
-                &middot;
-                <a href="#">Terms & Conditions</a>
-            </div>
-        </div>
-    </div>
-</footer>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/admin/js/order_product_quantity.js}"></script>
 <script th:src="@{/admin/js/order_customer.js}"></script>

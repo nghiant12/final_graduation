@@ -19,7 +19,7 @@
     <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
             class="fas fa-bars"></i></button>
     <!-- Navbar Search-->
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0 needs-validation" novalidate>
         <div class="input-group">
             <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
                    aria-describedby="btnNavbarSearch"/>
@@ -42,70 +42,101 @@
         </li>
     </ul>
 </nav>
-
-<!-- Menu Sidebar -->
 <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
-        <div th:replace="menu :: menu"></div>
+        <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
     </div>
-
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <h1 class="mt-4">Quản lý khách hàng</h1>
+                <h1 class="mt-4">Khách hàng</h1>
                 <ol class="breadcrumb mb-4">
                     <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
                     <li class="breadcrumb-item active">Khách hàng</li>
                 </ol>
-
                 <div class="card mb-4">
                     <div class="card-body">
-                        <div th:if="${error}" class="alert alert-danger">Lỗi: <span th:text="${error}"></span></div>
-                        <div th:if="${success}" class="alert alert-success">Thành công: <span th:text="${success}"></span></div>
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <span th:text="${error}">Lỗi</span>
+                        </div>
+                        <div th:if="${success}" class="alert alert-success" role="alert">
+                            <span th:text="${success}">Thành công</span>
+                        </div>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal"
+                                data-bs-target="#addCustomerModal" onclick="openAddModal()">
+                            Thêm khách hàng
+                        </button>
 
-                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addAccountModal">Thêm khách hàng</button>
-
-                        <!-- Modal Thêm khách hàng -->
-                        <div class="modal fade" id="addAccountModal" tabindex="-1" aria-labelledby="addAccountLabel" aria-hidden="true">
+                        <!-- Modal thêm khách hàng -->
+                        <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="addAccountLabel">Thêm khách hàng</h5>
+                                        <h5 class="modal-title" id="addModalTitle">Thêm khách hàng</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/customers/add}" method="post" th:object="${customer}">
+                                        <form id="addCustomerForm" th:action="@{/admin/customers/add}" method="post"
+                                              th:object="${customer}" class="needs-validation" novalidate>
+                                            <input type="hidden" th:field="*{id}"/>
                                             <div class="mb-3">
-                                                <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" th:field="*{fullname}" placeholder="Nhập họ tên" required/>
+                                                <label class="form-label">Tên đăng nhập</label>
+                                                <input type="text" class="form-control" th:field="*{username}" required
+                                                       minlength="3" maxlength="50">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập tên đăng nhập (từ 3 đến 50 ký tự).
+                                                </div>
                                             </div>
+
                                             <div class="mb-3">
-                                                <label class="form-label">Username</label>
-                                                <input type="text" class="form-control" th:field="*{username}" placeholder="Nhập username" required/>
+                                                <label class="form-label">Họ và Tên</label>
+                                                <input type="text" class="form-control" th:field="*{fullname}" required
+                                                       minlength="3" maxlength="100">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập họ và tên (từ 3 đến 100 ký tự).
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Mật khẩu</label>
-                                                <input type="password" class="form-control" th:field="*{password}" placeholder="Nhập mật khẩu" required/>
-                                            </div>
+
                                             <div class="mb-3">
                                                 <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" th:field="*{email}" placeholder="Nhập email" required/>
+                                                <input type="email" class="form-control" th:field="*{email}" required
+                                                       pattern="^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ email hợp lệ.
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Số điện thoại</label>
-                                                <input type="text" class="form-control" th:field="*{phoneNumber}" placeholder="Nhập số điện thoại" required/>
-                                            </div>
+
                                             <div class="mb-3">
                                                 <label class="form-label">Địa chỉ</label>
-                                                <input type="text" class="form-control" th:field="*{address}" placeholder="Nhập địa chỉ"/>
+                                                <input type="text" class="form-control" th:field="*{address}" required
+                                                       minlength="5" maxlength="200">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ (từ 5 đến 200 ký tự).
+                                                </div>
                                             </div>
-                                            <!-- Ảnh đại diện -->
+
                                             <div class="mb-3">
-                                                <label for="photo" class="form-label">Ảnh đại diện</label>
-                                                <input type="file" class="form-control" id="" name="photo" accept="image/*" />
+                                                <label class="form-label">Số điện thoại</label>
+                                                <input type="text" class="form-control" th:field="*{phoneNumber}"
+                                                       required pattern="^\d{10,15}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập số điện thoại hợp lệ (từ 10 đến 15 chữ số).
+                                                </div>
                                             </div>
-                                            <div class="text-end">
+
+                                            <!--                                            <div class="mb-3">-->
+                                            <!--                                                <label class="form-label">Ảnh đại diện</label>-->
+                                            <!--                                                <input type="file" class="form-control" name="photo" accept="image/*"-->
+                                            <!--                                                       onchange="previewAddImage(event)">-->
+                                            <!--                                                <img id="previewAdd" src="#" alt="Xem trước ảnh"-->
+                                            <!--                                                     style="width: 50px; height: 50px; border-radius: 50%; display: none;"/>-->
+                                            <!--                                            </div>-->
+
+                                            <div class="modal-footer">
                                                 <button type="submit" class="btn btn-primary">Lưu</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Đóng
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
@@ -113,87 +144,122 @@
                             </div>
                         </div>
 
-                        <!-- Modal Sửa khách hàng -->
-                        <div class="modal fade" id="editAccountModal" tabindex="-1" aria-labelledby="editAccountLabel" aria-hidden="true">
+                        <!-- Modal sửa khách hàng -->
+                        <div class="modal fade" id="editCustomerModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="editAccountLabel">Sửa khách hàng</h5>
+                                        <h5 class="modal-title" id="editModalTitle">Sửa khách hàng</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/customers/update}" method="post">
-                                            <input type="hidden" name="id"/>
+                                        <form id="editCustomerForm" th:action="@{/admin/customers/update}" method="post"
+                                              th:object="${customer}" class="needs-validation" novalidate>
+                                            <input type="hidden" th:field="*{id}"/>
                                             <div class="mb-3">
-                                                <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" name="fullname" required/>
+                                                <label class="form-label">Tên đăng nhập</label>
+                                                <input type="text" class="form-control" th:field="*{username}" required
+                                                       minlength="3" maxlength="50">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập tên đăng nhập (từ 3 đến 50 ký tự).
+                                                </div>
                                             </div>
+
                                             <div class="mb-3">
-                                                <label class="form-label">Username</label>
-                                                <input type="text" class="form-control" name="username" readonly/>
+                                                <label class="form-label">Họ và Tên</label>
+                                                <input type="text" class="form-control" th:field="*{fullname}" required
+                                                       minlength="3" maxlength="100">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập họ và tên (từ 3 đến 100 ký tự).
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Mật khẩu</label>
-                                                <input type="password" class="form-control" name="password" readonly/>
-                                            </div>
+
                                             <div class="mb-3">
                                                 <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" name="email" readonly/>
+                                                <input type="email" class="form-control" th:field="*{email}" required
+                                                       pattern="^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ email hợp lệ.
+                                                </div>
                                             </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Số điện thoại</label>
-                                                <input type="text" class="form-control" name="phone_number" readonly/>
-                                            </div>
+
                                             <div class="mb-3">
                                                 <label class="form-label">Địa chỉ</label>
-                                                <input type="text" class="form-control" name="address"/>
+                                                <input type="text" class="form-control" th:field="*{address}" required
+                                                       minlength="5" maxlength="200">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ (từ 5 đến 200 ký tự).
+                                                </div>
                                             </div>
-                                            <!-- Ảnh đại diện -->
+
                                             <div class="mb-3">
-                                                <label for="photo" class="form-label">Ảnh đại diện</label>
-                                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*"/>
+                                                <label class="form-label">Số điện thoại</label>
+                                                <input type="text" class="form-control" th:field="*{phoneNumber}"
+                                                       required pattern="^\d{10,15}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập số điện thoại hợp lệ (từ 10 đến 15 chữ số).
+                                                </div>
                                             </div>
-                                            <div class="text-end">
-                                                <button type="submit" class="btn btn-primary">Lưu</button>
+
+                                            <div class="mb-3">
+                                                <label class="form-label">Ảnh đại diện</label>
+                                                <input type="file" class="form-control" name="photo" accept="image/*"
+                                                       onchange="previewEditImage(event)">
+                                                <img id="previewEdit" src="#" alt="Xem trước ảnh"
+                                                     style="width: 50px; height: 50px; border-radius: 50%; display: none;"/>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                    Đóng
+                                                </button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-
-                        <div class="card mb-4">
+                    </div>
+                </div>
+                <div class="card mb-4">
                     <div class="card-header">
-                        <i class="fas fa-table me-1"></i> Danh sách khách hàng
+                        <i class="fas fa-table me-1"></i>
+                        Danh sách khách hàng
                     </div>
                     <div class="card-body">
                         <table id="datatablesSimple">
                             <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>Họ tên</th>
-                                <th>Username</th>
+                                <th>Tên đăng nhập</th>
+                                <th>Họ và Tên</th>
                                 <th>Email</th>
-                                <th>Sđt</th>
                                 <th>Địa chỉ</th>
+                                <th>Số điện thoại</th>
+                                <th>Ảnh đại diện</th>
                                 <th>Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="customer, stat : ${customers}">
                                 <td th:text="${stat.index + 1}"></td>
-                                <td th:text="${customer.fullname}"></td>
                                 <td th:text="${customer.username}"></td>
+                                <td th:text="${customer.fullname}"></td>
                                 <td th:text="${customer.email}"></td>
-                                <td th:text="${customer.phoneNumber}"></td>
                                 <td th:text="${customer.address}"></td>
+                                <td th:text="${customer.phoneNumber}"></td>
                                 <td>
-                                    <a href="#" class="text-dark" data-bs-toggle="modal" data-bs-target="#editAccountModal"
-                                       th:attr="data-id=${customer.id}, data-username=${customer.username}, data-password=${customer.password},
-                                       data-email=${customer.email}, data-fullname=${customer.fullname},
-                                       data-phone_number=${customer.phoneNumber}, data-address=${customer.address}">
-                                        <i class="fa-solid fa-pen"></i>
+                                    <img th:if="${customer.photo}" th:src="${customer.photo}" alt="Ảnh đại diện"
+                                         style="width: 50px; height: 50px; border-radius: 50%;"/>
+                                    <span th:unless="${customer.photo}">Không có ảnh</span>
+                                </td>
+                                <td>
+                                    <a href="#" class="btn btn-link btn-sm" data-bs-toggle="modal"
+                                       data-bs-target="#editCustomerModal"
+                                       th:attr="data-id=${customer.id}, data-username=${customer.username}, data-fullName=${customer.fullname}, data-email=${customer.email}, data-address=${customer.address}, data-phoneNumber=${customer.phoneNumber}, data-photo=${customer.photo}"
+                                       onclick="openEditModal(this)">
+                                        <i class="fa-solid fa-pen" style="color: black;"></i> <!-- Icon màu đen -->
                                     </a>
                                 </td>
                             </tr>
@@ -203,50 +269,111 @@
                 </div>
             </div>
         </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; Your Website 2023</div>
+                    <div>
+                        <a href="#">Privacy Policy</a>
+                        &middot;
+                        <a href="#">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </div>
-
-<footer class="py-4 bg-light mt-auto">
-    <div class="container-fluid px-4">
-        <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Your Website 2023</div>
-            <div>
-                <a href="#">Privacy Policy</a> &middot; <a href="#">Terms &amp; Conditions</a>
-            </div>
-        </div>
-    </div>
-</footer>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const editAccountModal = document.getElementById('editAccountModal');
-        editAccountModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const id = button.getAttribute('data-id');
-            const username = button.getAttribute('data-username');
-            const email = button.getAttribute('data-email');
-            const fullname = button.getAttribute('data-fullname');
-            const address = button.getAttribute('data-address');
-            const phoneNumber = button.getAttribute('data-phone_number');
-            const password = button.getAttribute('data-password');
-
-            const form = editAccountModal.querySelector('form');
-            form.querySelector('input[name="id"]').value = id;
-            form.querySelector('input[name="username"]').value = username;
-            form.querySelector('input[name="email"]').value = email;
-            form.querySelector('input[name="fullname"]').value = fullname;
-            form.querySelector('input[name="phone_number"]').value = phoneNumber;
-            form.querySelector('input[name="address"]').value = address;
-            form.querySelector('input[name="password"]').value = password;
-        });
-    });
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
 <script th:src="@{js/scripts.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
         crossorigin="anonymous"></script>
 <script th:src="@{js/datatables-simple-demo.js}"></script>
+<script>
+    // Mở modal thêm khách hàng
+    function openAddModal() {
+        const modal = document.getElementById('addCustomerModal');
+        const form = document.getElementById('addCustomerForm');
+        form.reset(); // Reset form
+        form.classList.remove('was-validated'); // Remove validation classes
+        document.getElementById('addModalTitle').innerText = 'Thêm khách hàng';
+        form.action = '/admin/customers/add'; // Đặt action cho thêm
+        document.getElementById('previewAdd').style.display = 'none'; // Ẩn hình ảnh xem trước nếu có
+    }
+
+    function previewAddImage(event) {
+        const preview = document.getElementById('previewAdd');
+        preview.src = URL.createObjectURL(event.target.files[0]);
+        preview.style.display = 'block';
+    }
+
+    function previewEditImage(event) {
+        const preview = document.getElementById('previewEdit');
+        preview.src = URL.createObjectURL(event.target.files[0]);
+        preview.style.display = 'block';
+    }
+
+    // Mở modal sửa khách hàng
+    function openEditModal(button) {
+        const modal = document.getElementById('editCustomerModal');
+        const form = document.getElementById('editCustomerForm');
+        form.classList.remove('was-validated'); // Remove validation classes
+        const id = button.getAttribute('data-id');
+        const username = button.getAttribute('data-username');
+        const fullName = button.getAttribute('data-fullName');
+        const email = button.getAttribute('data-email');
+        const address = button.getAttribute('data-address');
+        const phoneNumber = button.getAttribute('data-phoneNumber');
+        const photo = button.getAttribute('data-photo');
+
+        // Điền dữ liệu vào form
+        form.querySelector('input[name="id"]').value = id;
+        form.querySelector('input[name="username"]').value = username;
+        form.querySelector('input[name="fullname"]').value = fullName;
+        form.querySelector('input[name="email"]').value = email;
+        form.querySelector('input[name="address"]').value = address;
+        form.querySelector('input[name="phoneNumber"]').value = phoneNumber;
+        // Hiển thị ảnh nếu có
+        if (photo) {
+            document.getElementById('previewEdit').src = photo;
+            document.getElementById('previewEdit').style.display = 'block';
+        } else {
+            document.getElementById('previewEdit').style.display = 'none';
+        }
+
+        document.getElementById('editModalTitle').innerText = 'Sửa khách hàng';
+        form.action = '/admin/customers/update'; // Đặt action cho sửa
+    }
+
+    // Custom Bootstrap validation
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })();
+
+    // Reset form sau khi thêm mới thành công
+    document.getElementById('addCustomerForm').addEventListener('submit', function () {
+        setTimeout(function () {
+            const form = document.getElementById('addCustomerForm');
+            form.reset();
+            document.getElementById('previewAdd').style.display = 'none';
+        }, 1000);
+    });
+</script>
 </body>
 </html>
