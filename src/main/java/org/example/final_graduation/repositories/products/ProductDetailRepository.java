@@ -34,7 +34,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     FROM ProductDetail pd
     JOIN pd.product p
     WHERE pd.quantity > 0 AND p.status = true
-    ORDER BY pd.quantity DESC 
+    ORDER BY pd.createdDate DESC 
 """)
     List<ProductDetail> findTop4Products(Pageable pageable);
 
@@ -46,6 +46,22 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     ORDER BY pd.quantity asc 
 """)
     List<ProductDetail> findTop4DacSac(Pageable pageable);
+
+    @Query("""
+    SELECT pd 
+    FROM ProductDetail pd
+    JOIN pd.product p
+    WHERE pd.quantity > 0 
+    AND p.status = true
+    AND pd.category.id = :idCategory
+    AND pd.id <> :idProductDetail
+""")
+    List<ProductDetail> find4TuongTu(
+            @Param("idCategory") Integer idCategory,
+            @Param("idProductDetail") Integer idProductDetail,
+            Pageable pageable
+    );
+
 
     @Query("""
                 SELECT pd
