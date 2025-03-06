@@ -30,6 +30,24 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     List<ProductDetail> findALL();
 
     @Query("""
+    SELECT pd 
+    FROM ProductDetail pd
+    JOIN pd.product p
+    WHERE pd.quantity > 0 AND p.status = true
+    ORDER BY pd.quantity DESC 
+""")
+    List<ProductDetail> findTop4Products(Pageable pageable);
+
+    @Query("""
+    SELECT pd 
+    FROM ProductDetail pd
+    JOIN pd.product p
+    WHERE pd.quantity > 0 AND p.status = true
+    ORDER BY pd.quantity asc 
+""")
+    List<ProductDetail> findTop4DacSac(Pageable pageable);
+
+    @Query("""
                 SELECT pd
                 FROM ProductDetail pd
                 JOIN pd.product p

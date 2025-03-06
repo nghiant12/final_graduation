@@ -85,6 +85,21 @@ CREATE TABLE product_details (
     brand_id INT NULL
 );
 
+CREATE TABLE [dbo].[promotions] (
+    [id]                 INT             IDENTITY (1, 1) NOT NULL,
+    [name]               NVARCHAR (255)  NOT NULL,
+    [description]        NVARCHAR (MAX)  NULL,
+    [discount]           DECIMAL (5, 2)  NULL,
+    [min_order_value]    NUMERIC (38, 2) NULL,
+    [remaining_quantity] INT             DEFAULT ((0)) NOT NULL,
+    [start_date]         DATETIME        NOT NULL,
+    [end_date]           DATETIME        NOT NULL,
+    [is_active]          BIT             DEFAULT ((1)) NULL,
+    [created_date]       DATETIME        CONSTRAINT [DEFAULT_promotions_created_date] DEFAULT (getdate()) NOT NULL,
+    PRIMARY KEY CLUSTERED ([id] ASC),
+    CHECK ([Discount]>=(0) AND [Discount]<=(100))
+);
+
 CREATE TABLE [dbo].[orders] (
     [id]             INT             IDENTITY (1, 1) NOT NULL,
     [customer_id]    INT             NULL,
@@ -111,21 +126,6 @@ CREATE TABLE order_details (
     quantity INT NOT NULL
 );
 
-CREATE TABLE [dbo].[promotions] (
-    [id]                 INT             IDENTITY (1, 1) NOT NULL,
-    [name]               NVARCHAR (255)  NOT NULL,
-    [description]        NVARCHAR (MAX)  NULL,
-    [discount]           DECIMAL (5, 2)  NULL,
-    [min_order_value]    NUMERIC (38, 2) NULL,
-    [remaining_quantity] INT             DEFAULT ((0)) NOT NULL,
-    [start_date]         DATETIME        NOT NULL,
-    [end_date]           DATETIME        NOT NULL,
-    [is_active]          BIT             DEFAULT ((1)) NULL,
-    [created_date]       DATETIME        CONSTRAINT [DEFAULT_promotions_created_date] DEFAULT (getdate()) NOT NULL,
-    PRIMARY KEY CLUSTERED ([id] ASC),
-    CHECK ([Discount]>=(0) AND [Discount]<=(100))
-);
-
 -- Thêm khóa ngoại sau khi tạo bảng
 -- Bảng employees
 ALTER TABLE employees
@@ -147,13 +147,6 @@ ADD CONSTRAINT FK_product_details_color FOREIGN KEY (color_id) REFERENCES colors
 ALTER TABLE product_details
 ADD CONSTRAINT FK_product_details_brand FOREIGN KEY (brand_id) REFERENCES brands(id) ON DELETE SET NULL;
 
--- Bảng orders
-ALTER TABLE orders
-ADD CONSTRAINT FK_orders_customer FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL;
-
-ALTER TABLE orders
-ADD CONSTRAINT FK_orders_admin FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE NO ACTION;
-
 -- Bảng order_details
 ALTER TABLE order_details
 ADD CONSTRAINT FK_order_details_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
@@ -161,7 +154,4 @@ ADD CONSTRAINT FK_order_details_order FOREIGN KEY (order_id) REFERENCES orders(i
 ALTER TABLE order_details
 ADD CONSTRAINT FK_order_details_product_detail FOREIGN KEY (product_detail_id) REFERENCES product_details(id) ON DELETE CASCADE;
 
-ALTER TABLE orders 
-ADD CONSTRAINT FK_orders_promotions FOREIGN KEY (promotion_id) 
-REFERENCES promotions(id);
 
