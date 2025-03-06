@@ -6,9 +6,11 @@ import java.util.Optional;
 
 import org.example.final_graduation.entities.Category;
 import org.example.final_graduation.entities.ProductDetail;
+import org.example.final_graduation.entities.Size;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
 import org.example.final_graduation.repositories.products.ProductRepository;
 import org.example.final_graduation.repositories.products.attributes.CategoryRepository;
+import org.example.final_graduation.repositories.products.attributes.SizeRepository;
 import org.example.final_graduation.services.CategoryService;
 import org.example.final_graduation.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,8 @@ public class ProductCtrl {
 
     @Autowired
     HttpSession session;
+    @Autowired
+    private SizeRepository sizeRepository;
 
     @ModelAttribute("categoryCounts")
     public Map<Category, Long> categoryCounts() {
@@ -188,14 +192,14 @@ public class ProductCtrl {
     @GetMapping("{id}")
     public String getMethodName(@PathVariable Integer id, Model model) {
 
-        ProductDetail product = productDetailRepo.getReferenceById(id);
-        Pageable pageable = PageRequest.of(0, 5);
-        Page<ProductDetail> page = productDetailRepo.findByCategoryId(product.getCategory().getId().toString(), pageable);
+        ProductDetail product = productDetailRepo.findByID(id);
+//        Pageable pageable = PageRequest.of(0, 5);
+//        Page<ProductDetail> page = productDetailRepo.findByCategoryId(product.getCategory().getId().toString(), pageable);
 
-//        List<ProductSize> size = productDetailRepo.findSizesByProductId(id);
+        List<Size> size = sizeRepository.findAll();
 
-//        model.addAttribute("size", size);
-        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+ //       model.addAttribute("page", page);
         model.addAttribute("product", product);
         return "product/detail";
     }

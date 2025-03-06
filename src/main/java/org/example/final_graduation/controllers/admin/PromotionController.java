@@ -14,7 +14,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -48,18 +50,26 @@ public class PromotionController {
                 end = LocalDate.parse(endDate).atTime(23, 59, 59);
             }
         } catch (DateTimeParseException e) {
-            redirectAttributes.addFlashAttribute("error", "Ngày không hợp lệ, vui lòng nhập đúng định dạng!");
-            return "redirect:/admin/promotions/filter";
+            redirectAttributes.addFlashAttribute("error", "Ngày không hợp lệ, vui lòng nhập đúng định dạng yyyy-MM-dd!");
+            return "redirect:/admin/promotions";
         }
 
         List<Promotion> filteredPromotions = promotionService.filterPromotions(start, end);
 
+        if (filteredPromotions == null || filteredPromotions.isEmpty()) {
+            filteredPromotions = Collections.emptyList();
+        }
+
         model.addAttribute("promotions", filteredPromotions);
+        model.addAttribute("promotion", new Promotion()); // Đảm bảo có object này trong model
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
 
         return "admin/promotions/index";
     }
+
+
+
 
     @PostMapping("add")
     public String add(
