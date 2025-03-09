@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.example.final_graduation.entities.Category;
+import org.example.final_graduation.entities.Product;
 import org.example.final_graduation.entities.ProductDetail;
 import org.example.final_graduation.entities.Size;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
@@ -49,6 +50,8 @@ public class ProductCtrl {
     HttpSession session;
     @Autowired
     private SizeRepository sizeRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     @ModelAttribute("categoryCounts")
     public Map<Category, Long> categoryCounts() {
@@ -192,7 +195,8 @@ public class ProductCtrl {
     @GetMapping("{id}")
     public String getMethodName(@PathVariable Integer id, Model model) {
 
-        ProductDetail product = productDetailRepo.findByID(id);
+        List<ProductDetail> productDetails = productDetailRepo.findByProductID(id);
+        Product product = productRepository.findByID(id);
 //        Pageable pageable = PageRequest.of(0, 5);
 //        Page<ProductDetail> page = productDetailRepo.findByCategoryId(product.getCategory().getId().toString(), pageable);
 
@@ -200,9 +204,10 @@ public class ProductCtrl {
 
         model.addAttribute("size", size);
  //       model.addAttribute("page", page);
+        model.addAttribute("productDetails", productDetails);
         model.addAttribute("product", product);
 
-        List<ProductDetail> tuongTu = productDetailRepo.find4TuongTu(product.getCategory().getId(), id, PageRequest.of(0, 4));
+        List<ProductDetail> tuongTu = productDetailRepo.find4TuongTu(product.getName(), id, PageRequest.of(0, 4));
         model.addAttribute("tuongTu", tuongTu);
         return "product/detail";
     }
