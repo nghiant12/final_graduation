@@ -13,16 +13,13 @@
     <span>&nbsp;>&nbsp;</span>
     <a href="/product/list">Sản phẩm</a>
     <span>&nbsp;>&nbsp;</span>
-    <span>[[${product.product.name}]]</span>
+    <span>[[${product.name}]]</span>
   </div>
   <div class="detail-container">
     <div class="flex-left">
-      <img th:src="@{${product.image}|}" alt="" class="main-img">
-      <div class="thumbnail-container">
-        <img th:src="@{${product.image}|}" alt="" class="thumbnail-img add-border">
-        <img th:src="@{${product.image}|}" alt="" class="thumbnail-img">
-        <img th:src="@{${product.image}|}" alt="" class="thumbnail-img">
-        <img th:src="@{${product.image}|}" alt="" class="thumbnail-img">
+<!--      <img th:src="@{${product.latestProductDetail.image}|}" alt="" class="main-img">-->
+      <div th:each="productDetail : ${productDetails}" class="thumbnail-container">
+        <img th:src="@{${productDetail.image}|}" alt="" class="thumbnail-img">
       </div>
     </div>
     <div class="flex-right">
@@ -88,6 +85,7 @@
       });
     });
   </script>
+  <script th:src="@{/admin/js/cart.js}"></script>
 </body>
 
 </html>

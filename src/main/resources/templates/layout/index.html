@@ -25,11 +25,11 @@ lấy toàn bộ phần body ở trang này truyền vào phần view có ở la
 
    <strong class="new-arrival-title">NEW ARRIVALS</strong>
    <div class="new-arrival">
-      <div th:each="productDetail : ${top4Product}">
-         <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
-         <img th:src="@{${productDetail.image}}" class="card-img-top">
+      <div th:each="product : ${top4Product}">
+         <a th:href="@{/product/{id}(id=${product.id})}" class="top-link">
+            <img th:src="@{${product.latestProductDetail.image}}" class="card-img-top">
             <div class="top-card-title">
-               <h5 th:text="${productDetail.product.name}">ChicQuilt</h5>
+               <h5 th:text="${product.name}">ChicQuilt</h5>
             </div>
          </a>
       </div>
@@ -37,11 +37,11 @@ lấy toàn bộ phần body ở trang này truyền vào phần view có ở la
 
    <strong class="new-arrival-title">FEATURED</strong>
    <div class="new-arrival-container">
-      <div th:each="productDetail : ${top4DacSac}">
-         <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
-         <img th:src="@{${productDetail.image}}" class="card-img-top">
+      <div th:each="product : ${top4DacSac}">
+         <a th:href="@{/product/{id}(id=${product.id})}" class="top-link">
+            <img th:src="@{${product.latestProductDetail.image}}" class="card-img-top">
             <div class="top-card-title">
-               <h5 th:text="${productDetail.product.name}">ChicQuilt</h5>
+               <h5 th:text="${product.name}">ChicQuilt</h5>
                <p>Thoải mái và thời trang, giày sneaker là lựa chọn hoàn hảo cho mọi hoạt động hàng ngày</p>
             </div>
          </a>

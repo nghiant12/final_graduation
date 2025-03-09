@@ -8,6 +8,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Nationalized;
 
+import java.util.List;
+
 @Entity
 @Table(name = "products")
 public class Product {
@@ -25,6 +27,21 @@ public class Product {
     @ColumnDefault("1")
     @Column(name = "status")
     private Boolean status;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProductDetail> productDetails;
+
+    @Transient // Không lưu vào database, chỉ dùng để hiển thị
+    private ProductDetail latestProductDetail;
+
+    // Getter & Setter cho latestProductDetail
+    public ProductDetail getLatestProductDetail() {
+        return latestProductDetail;
+    }
+
+    public void setLatestProductDetail(ProductDetail latestProductDetail) {
+        this.latestProductDetail = latestProductDetail;
+    }
 
     public Product() {
     }

@@ -30,34 +30,41 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     List<ProductDetail> findALL();
 
     @Query("""
-    SELECT pd 
-    FROM ProductDetail pd
-    JOIN pd.product p
-    WHERE pd.quantity > 0 AND p.status = true
-    ORDER BY pd.createdDate DESC 
-""")
+                SELECT pd 
+                FROM ProductDetail pd
+                JOIN pd.product p
+                WHERE pd.quantity > 0 AND p.status = true
+                ORDER BY pd.createdDate DESC 
+            """)
     List<ProductDetail> findTop4Products(Pageable pageable);
 
+    @Query("SELECT pd FROM ProductDetail pd " +
+           "WHERE pd.product.id = :productId " +
+           "AND pd.quantity > 0 " +
+           "AND pd.available = true " +
+           "ORDER BY pd.createdDate DESC LIMIT 1")
+    Optional<ProductDetail> findLatestProductDetailByProductId(@Param("productId") Integer productId);
+
     @Query("""
-    SELECT pd 
-    FROM ProductDetail pd
-    JOIN pd.product p
-    WHERE pd.quantity > 0 AND p.status = true
-    ORDER BY pd.quantity asc 
-""")
+                SELECT pd 
+                FROM ProductDetail pd
+                JOIN pd.product p
+                WHERE pd.quantity > 0 AND p.status = true
+                ORDER BY pd.quantity asc 
+            """)
     List<ProductDetail> findTop4DacSac(Pageable pageable);
 
     @Query("""
-    SELECT pd 
-    FROM ProductDetail pd
-    JOIN pd.product p
-    WHERE pd.quantity > 0 
-    AND p.status = true
-    AND pd.category.id = :idCategory
-    AND pd.id <> :idProductDetail
-""")
+                SELECT pd 
+                FROM ProductDetail pd
+                JOIN pd.product p
+                WHERE pd.quantity > 0 
+                AND p.status = true
+                AND pd.product.name = :name
+                AND pd.id <> :idProductDetail
+            """)
     List<ProductDetail> find4TuongTu(
-            @Param("idCategory") Integer idCategory,
+            @Param("name") String name,
             @Param("idProductDetail") Integer idProductDetail,
             Pageable pageable
     );

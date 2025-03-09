@@ -221,36 +221,91 @@
                                         <option value="Transfer">Chuyển khoản</option>
                                     </select>
 
-                                    <!--                                    <input type="text" id="customerPaid" class="form-control my-2"-->
-                                    <!--                                           placeholder="Tiền khách đưa..." oninput="calculateChange()">-->
+                                    <input type="text" id="customerPaid" class="form-control my-2"
+                                           placeholder="Tiền khách đưa..." oninput="updateChangeAmount()">
 
-                                    <!--                                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>-->
+
+                                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
 
                                     <br><br>
-                                    <button class="btn btn-primary w-100" id="confirmOrderBtn">Thanh toán</button>
+                                    <button class="btn btn-primary w-100" id="confirmOrderBtn1">Thanh toán</button>
                                 </form>
                             </div>
 
                             <script>
                                 function updateTotalPrice(select) {
-                                    let discount = parseFloat(select.options[select.selectedIndex].getAttribute("data-discount"));
-                                    let minValue = parseFloat(select.options[select.selectedIndex].getAttribute("data-min-value"));
-                                    let remaining = parseInt(select.options[select.selectedIndex].getAttribute("data-remaining"));
+                                    let selectedOption = select.options[select.selectedIndex];
+                                    let discount = parseFloat(selectedOption.getAttribute("data-discount")) || 0;
+                                    let minValue = parseCurrency(selectedOption.getAttribute("data-min-value")) || 0;
+                                    let remaining = parseInt(selectedOption.getAttribute("data-remaining")) || 0;
 
                                     let totalPriceElement = document.getElementById("totalPrice");
-                                    let totalPrice = parseFloat(totalPriceElement.getAttribute("data-total-price"));
+                                    let finalPriceElement = document.getElementById("finalPrice");
 
+                                    let totalPrice = parseCurrency(totalPriceElement.getAttribute("data-total-price"));
+
+                                    // Kiểm tra điều kiện mã giảm giá hợp lệ
                                     if (totalPrice < minValue || remaining <= 0) {
                                         alert("Mã giảm giá không hợp lệ! Vui lòng chọn mã khác.");
                                         select.value = "";
                                         return;
                                     }
 
+                                    // Tính toán giá sau giảm giá
                                     let discountAmount = (totalPrice * discount) / 100;
                                     let finalPrice = totalPrice - discountAmount;
 
-                                    document.getElementById("finalPrice").innerText = finalPrice.toLocaleString("vi-VN") + " VND";
+                                    // Cập nhật giá trên giao diện
+                                    finalPriceElement.innerText = formatCurrency(finalPrice);
+                                    finalPriceElement.setAttribute("data-final-price", finalPrice); // Lưu giá trị chính xác
+
+                                    // ** Gọi updateChangeAmount() sau khi finalPrice được cập nhật **
+                                    updateChangeAmount();
                                 }
+
+                                function updateChangeAmount() {
+                                    let customerPaidInput = document.getElementById("customerPaid");
+                                    let changeAmountElement = document.getElementById("changeAmount");
+                                    let finalPriceElement = document.getElementById("finalPrice");
+                                    let confirmOrderBtn1 = document.getElementById("confirmOrderBtn1");
+
+                                    // Kiểm tra nút có tồn tại không
+                                    if (!confirmOrderBtn1) {
+                                        console.error("Không tìm thấy nút xác nhận đơn hàng! Kiểm tra ID confirmOrderBtn1.");
+                                        return; // Dừng hàm nếu không tìm thấy nút
+                                    }
+
+                                    let customerPaid = parseCurrency(customerPaidInput.value);
+                                    let finalPrice = parseCurrency(finalPriceElement.getAttribute("data-final-price")) || parseCurrency(finalPriceElement.textContent);
+
+                                    console.log("Khách đưa:", customerPaid);
+                                    console.log("Tổng tiền sau giảm giá:", finalPrice);
+
+                                    let changeAmount = customerPaid - finalPrice;
+
+                                    // Cập nhật tiền khách đưa theo định dạng
+                                    customerPaidInput.value = customerPaid > 0 ? formatCurrency(customerPaid) : "";
+
+                                    // Cập nhật tiền thừa
+                                    changeAmountElement.textContent = changeAmount >= 0
+                                        ? formatCurrency(changeAmount) + " VND"
+                                        : "0 VND";
+
+                                    // 🔹 Chỉ disable nút nếu tồn tại
+                                    if (confirmOrderBtn1) {
+                                        confirmOrderBtn1.disabled = customerPaid <= 0 || customerPaid < finalPrice;
+                                    }
+                                }
+                                function parseCurrency(value) {
+                                    if (!value) return 0;
+                                    return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
+                                }
+                                
+                                function formatCurrency(value) {
+                                    return new Intl.NumberFormat("vi-VN").format(value);
+                                }
+
+
                             </script>
 
                         </div>
