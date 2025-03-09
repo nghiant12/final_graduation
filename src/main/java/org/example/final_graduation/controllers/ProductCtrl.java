@@ -201,6 +201,9 @@ public class ProductCtrl {
         model.addAttribute("size", size);
  //       model.addAttribute("page", page);
         model.addAttribute("product", product);
+
+        List<ProductDetail> tuongTu = productDetailRepo.find4TuongTu(product.getCategory().getId(), id, PageRequest.of(0, 4));
+        model.addAttribute("tuongTu", tuongTu);
         return "product/detail";
     }
 

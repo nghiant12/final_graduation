@@ -48,24 +48,21 @@
   </div>
 
   <div class="description">
-    <h4>CHI TIẾT SẢN PHẨM.</h4>
+    <h4>Chi tiết sản phẩm</h4>
     <p>[[${product.product.name}]]</p>
   </div>
-  <div class="feedback" th:product-id="${product.id}">
-    <h4>ĐÁNH GIÁ SẢN PHẨM (5 <i class="fa-solid fa-star"></i>)</h4>
-    <span class="w3-text-red">5</span> <span> đánh giá</span><br>
-    <div class="feedback-container-detail" ng-if="reviewProduct.length === 0">
-      <p>Chưa có đánh giá nào.</p>
-    </div>
-    <div class="feedback-container-detail" ng-repeat="feedback in reviewProduct">
-      <i class="fa-solid fa-user-tie"></i>
-
-    </div>
-  </div>
-
   <div class="recommend-product">
-    <h4>SẢN PHẨM TƯƠNG TỰ</h4>
-
+    <h4>Sản phẩm tương tự <span style="font-size: large; color: red; font-weight: bold">[[${product.category.name}]]</span></h4>
+    <div class="new-arrival">
+      <div th:each="productDetail : ${tuongTu}">
+        <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
+          <img th:src="@{${productDetail.image}}" class="card-img-top">
+          <div class="top-card-title">
+            <h5 th:text="${productDetail.product.name}">ChicQuilt</h5>
+          </div>
+        </a>
+      </div>
+    </div>
   </div>
   <script>
     const thumbnails = document.querySelectorAll(".thumbnail-img");
