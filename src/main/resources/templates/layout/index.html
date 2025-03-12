@@ -5,57 +5,75 @@ lấy toàn bộ phần body ở trang này truyền vào phần view có ở la
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
 
 <head>
-   <meta charset="utf-8">
-   <title>Trang chủ</title>
+    <meta charset="utf-8">
+    <title>Trang chủ</title>
 </head>
 
 <body class="main-layout">
-   <div>
-      <img src="/images/home/head-image.png" class="main-banner">
-   </div>
+<div>
+    <img src="/images/home/head-image.png" class="main-banner">
+</div>
 
-   <div class="home-brand">
-      <a href="#"><img class="thuonghieu" src="https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg" alt=""></a>
-      <a href="#"><img class="thuonghieu" src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1000px-Logo_NIKE.svg.png" alt=""></a>
-      <a href="#"><img class="thuonghieu" src="https://logos-world.net/wp-content/uploads/2020/04/Puma-Logo.png" alt=""></a>
-      <a href="#"><img class="thuonghieu" src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Converse_logo.svg/1024px-Converse_logo.svg.png" alt=""></a>
-      <a href="#"><img class="thuonghieu" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Vans-logo.svg/2560px-Vans-logo.svg.png"
-            alt=""></a>
-   </div>
+<div class="home-brand">
+    <a href="#"><img class="thuonghieu" src="https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg"
+                     alt=""></a>
+    <a href="#"><img class="thuonghieu"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Logo_NIKE.svg/1000px-Logo_NIKE.svg.png"
+                     alt=""></a>
+    <a href="#"><img class="thuonghieu" src="https://logos-world.net/wp-content/uploads/2020/04/Puma-Logo.png"
+                     alt=""></a>
+    <a href="#"><img class="thuonghieu"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Converse_logo.svg/1024px-Converse_logo.svg.png"
+                     alt=""></a>
+    <a href="#"><img class="thuonghieu"
+                     src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Vans-logo.svg/2560px-Vans-logo.svg.png"
+                     alt=""></a>
+</div>
 
-   <strong class="new-arrival-title">NEW ARRIVALS</strong>
-   <div class="new-arrival">
-      <div th:each="product : ${top4Product}">
-         <a th:href="@{/product/{id}(id=${product.id})}" class="top-link">
-            <img th:src="@{${product.latestProductDetail.image}}" class="card-img-top">
+<strong class="new-arrival-title">NEW ARRIVALS</strong>
+<div class="new-arrival">
+    <div th:each="productDetail : ${top4Product}">
+        <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
+            <img th:src="@{${productDetail.image}}" class="card-img-top">
             <div class="top-card-title">
-               <h5 th:text="${product.name}">ChicQuilt</h5>
+                <h5 th:text="${productDetail.product.name}">ChicQuilt</h5>
+                <h5 th:text="${productDetail.color.name}">Color</h5>
+                <h5 th:text="${productDetail.size.name}">Size</h5>
+                <h5 th:text="${productDetail.category.name}">Category</h5>
             </div>
-         </a>
-      </div>
-   </div>
+        </a>
+    </div>
+</div>
 
-   <strong class="new-arrival-title">FEATURED</strong>
-   <div class="new-arrival-container">
-      <div th:each="product : ${top4DacSac}">
-         <a th:href="@{/product/{id}(id=${product.id})}" class="top-link">
-            <img th:src="@{${product.latestProductDetail.image}}" class="card-img-top">
+<strong class="new-arrival-title">FEATURED</strong>
+<div class="new-arrival-container">
+    <div th:each="productDetail : ${top4DacSac}">
+        <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
+            <img th:src="@{${productDetail.image}}" class="card-img-top">
             <div class="top-card-title">
-               <h5 th:text="${product.name}">ChicQuilt</h5>
-               <p>Thoải mái và thời trang, giày sneaker là lựa chọn hoàn hảo cho mọi hoạt động hàng ngày</p>
+                <div>
+                    <h5 style="display: inline;" th:text="${productDetail.product.name}">ChicQuilt</h5>
+                    <span style="font-size: x-large;"> - </span>
+                    <h5 style="display: inline;" th:text="${productDetail.color.name}">Color</h5>
+                    <span style="font-size: x-large;"> - </span>
+                    <h5 style="display: inline;" th:text="${productDetail.size.name}">Size</h5>
+                    <span style="font-size: x-large;"> - </span>
+                    <h5 style="display: inline;" th:text="${productDetail.category.name}">Category</h5>
+                </div>
+                <p>Thoải mái và thời trang, giày sneaker là lựa chọn hoàn hảo cho mọi hoạt động hàng ngày</p>
             </div>
-         </a>
-      </div>
-   </div>
+        </a>
+    </div>
+</div>
 
-   <div class="register-container">
-      <h2>ĐĂNG KÍ THÀNH VIÊN, NHẬN VÔ VÀNG ƯU ĐÃI</h2>
-      <h5>Nhận thông tin và các chương trình khuyến mãi sắp tới</h5>
-      <div class="form-register">
-         <input placeholder="Nhập email của bạn ...">
-         <button class="btn btn-outline-dark" type="email" style="width: 100px;">Gửi</button>
-      </div>
-   </div>
+<div class="register-container">
+    <h2>ĐĂNG KÍ THÀNH VIÊN, NHẬN VÔ VÀNG ƯU ĐÃI</h2>
+    <h5>Nhận thông tin và các chương trình khuyến mãi sắp tới</h5>
+    <div class="form-register">
+        <input placeholder="Nhập email của bạn ...">
+        <button class="btn btn-outline-dark" type="email" style="width: 100px;">Gửi</button>
+    </div>
+</div>
 
 </body>
 

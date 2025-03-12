@@ -27,18 +27,10 @@ public class HomeCtrl {
 
     @RequestMapping("/")
     public String index(Model model) {
-        List<Product> top4Product = productRepository.findTopProducts(PageRequest.of(0, 4));
-        for (Product product : top4Product) {
-            Optional<ProductDetail> latestDetail = productDetailRepository.findLatestProductDetailByProductId(product.getId());
-            latestDetail.ifPresent(product::setLatestProductDetail); // Lưu `ProductDetail` mới nhất vào `Product`
-        }
+        List<ProductDetail> top4Product = productDetailRepository.findTop4Products(PageRequest.of(0, 4));
         model.addAttribute("top4Product", top4Product);
 
-        List<Product> top4DacSac = productRepository.findTopProductsByTotalQuantity(PageRequest.of(0, 4));
-        for (Product product : top4DacSac) {
-            Optional<ProductDetail> latestDetail = productDetailRepository.findLatestProductDetailByProductId(product.getId());
-            latestDetail.ifPresent(product::setLatestProductDetail); // Lưu `ProductDetail` mới nhất vào `Product`
-        }
+        List<ProductDetail> top4DacSac = productDetailRepository.findTop4DacSac(PageRequest.of(0, 4));
         model.addAttribute("top4DacSac", top4DacSac);
 
         return "layout/index";

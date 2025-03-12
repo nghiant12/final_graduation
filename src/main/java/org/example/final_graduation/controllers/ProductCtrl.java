@@ -194,20 +194,10 @@ public class ProductCtrl {
 
     @GetMapping("{id}")
     public String getMethodName(@PathVariable Integer id, Model model) {
+        ProductDetail productDetail = productDetailRepo.findByID(id);
+        model.addAttribute("productDetail", productDetail);
 
-        List<ProductDetail> productDetails = productDetailRepo.findByProductID(id);
-        Product product = productRepository.findByID(id);
-//        Pageable pageable = PageRequest.of(0, 5);
-//        Page<ProductDetail> page = productDetailRepo.findByCategoryId(product.getCategory().getId().toString(), pageable);
-
-        List<Size> size = sizeRepository.findAll();
-
-        model.addAttribute("size", size);
- //       model.addAttribute("page", page);
-        model.addAttribute("productDetails", productDetails);
-        model.addAttribute("product", product);
-
-        List<ProductDetail> tuongTu = productDetailRepo.find4TuongTu(product.getName(), id, PageRequest.of(0, 4));
+        List<ProductDetail> tuongTu = productDetailRepo.find4TuongTu(productDetail.getProduct().getName(), id, PageRequest.of(0, 4));
         model.addAttribute("tuongTu", tuongTu);
         return "product/detail";
     }

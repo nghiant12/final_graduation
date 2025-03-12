@@ -2,90 +2,96 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chi Tiết Sản Phẩm</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Sản Phẩm</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 </head>
 
 <body>
-  <div class="breadcrumb">
+<div class="breadcrumb">
     <a href="/">Trang chủ</a>
     <span>&nbsp;>&nbsp;</span>
     <a href="/product/list">Sản phẩm</a>
     <span>&nbsp;>&nbsp;</span>
-    <span>[[${product.name}]]</span>
-  </div>
-  <div class="detail-container">
+    <span>[[${productDetail.product.name}]]</span>
+</div>
+<div class="detail-container">
     <div class="flex-left">
-<!--      <img th:src="@{${product.latestProductDetail.image}|}" alt="" class="main-img">-->
-      <div th:each="productDetail : ${productDetails}" class="thumbnail-container">
-        <img th:src="@{${productDetail.image}|}" alt="" class="thumbnail-img">
-      </div>
+        <img th:src="@{${productDetail.image}|}" alt="" class="main-img">
+        <div class="thumbnail-container">
+            <img th:src="@{${productDetail.image}|}" alt="" class="thumbnail-img add-border">
+            <img th:src="@{${productDetail.image}|}" alt="" class="thumbnail-img">
+            <img th:src="@{${productDetail.image}|}" alt="" class="thumbnail-img">
+            <img th:src="@{${productDetail.image}|}" alt="" class="thumbnail-img">
+        </div>
     </div>
     <div class="flex-right">
-      <h1 class="home-product-name">[[${product.product.name}]]</h1>
-      <strike>$[[${product.price + 1000}]]</strike>
-      <h1 class="home-product-price w3-text-red">$[[${product.price}]]</h1>
-      <div>
-        <select name="size-product" id="size-product">
-          <option th:each="s : ${size}" th:text="${s.name}">
-            </option>
-        </select>
-        <input type="number" value="1" id="quantity-product" min="1">
+        <h1 class="home-product-name">[[${productDetail.product.name}]]</h1>
+        <h5 class="product-color">[[${productDetail.color.name}]]</h5>
+        <h5 class="product-size">[[${productDetail.size.name}]]</h5>
+        <h5 class="product-category">[[${productDetail.category.name}]]</h5>
+        <h1 class="home-product-price w3-text-red">$[[${productDetail.price}]]</h1>
         <div>
-          <button class="add-to-cart"
-            th:attr="ng-click=@{|cart.add(${product.id}, cart.getsize(), cart.getquantity())|}">Thêm
-            vào giỏ hàng</button>
+            <input type="number" value="1" id="quantity-product" min="1">
+            <div>
+                <button class="add-to-cart">
+                    Thêm vào giỏ hàng
+                </button>
+            </div>
         </div>
-        <div> <button class="buy-product"
-            th:attr="ng-click=@{|cart.addAndPay(${product.id}, cart.getsize(), cart.getquantity())|}">Mua ngay</button>
-        </div>
-      </div>
     </div>
-  </div>
+</div>
 
-  <div class="description">
+<div class="description">
     <h4>Chi tiết sản phẩm</h4>
-    <p>[[${product.product.name}]]</p>
-  </div>
-  <div class="recommend-product">
-    <h4>Sản phẩm tương tự <span style="font-size: large; color: red; font-weight: bold">[[${product.category.name}]]</span></h4>
+    <p>[[${productDetail.product.name}]] là một đôi giày được thiết kế để mang lại sự thoải mái và phong cách cho
+        người sử dụng. Với chất liệu cao cấp như da, vải hoặc tổng hợp, [[${productDetail.product.name}]] giúp bảo vệ
+        đôi chân và tạo cảm giác êm ái
+        suốt cả ngày. Đế giày chắc chắn, chống trơn trượt, hỗ trợ di chuyển linh hoạt trên nhiều bề mặt. Kiểu dáng đa
+        dạng phù hợp với nhiều phong cách, từ thể thao, công sở đến thời trang thường ngày. Thiết kế thông thoáng giúp
+        hạn chế mồ hôi, mang đến sự dễ chịu khi mang. [[${productDetail.product.name}]] là lựa chọn hoàn hảo cho mọi
+        hoạt động.</p>
+</div>
+<div class="recommend-product">
+    <h4>Sản phẩm tương tự <span style="font-size: large; color: red; font-weight: bold">[[${productDetail.product.name}]]</span>
+    </h4>
     <div class="new-arrival">
-      <div th:each="productDetail : ${tuongTu}">
-        <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
-          <img th:src="@{${productDetail.image}}" class="card-img-top">
-          <div class="top-card-title">
-            <h5 th:text="${productDetail.product.name}">ChicQuilt</h5>
-          </div>
-        </a>
-      </div>
+        <div th:each="productDetail : ${tuongTu}">
+            <a th:href="@{/product/{id}(id=${productDetail.id})}" class="top-link">
+                <img th:src="@{${productDetail.image}}" class="card-img-top">
+                <div class="top-card-title">
+                    <h5 th:text="${productDetail.product.name}">ChicQuilt</h5>
+                </div>
+            </a>
+        </div>
     </div>
-  </div>
-  <script>
+</div>
+<script>
     const thumbnails = document.querySelectorAll(".thumbnail-img");
 
     thumbnails.forEach(function (thumbnail) {
-      thumbnail.addEventListener("click", function () {
-        const imagePath = this.getAttribute("src");
-        thumbnails.forEach(e => e.classList.remove('add-border'));
-        this.classList.add('add-border');
-        document.querySelector(".main-img").setAttribute("src", imagePath);
-      });
+        thumbnail.addEventListener("click", function () {
+            const imagePath = this.getAttribute("src");
+            thumbnails.forEach(e => e.classList.remove('add-border'));
+            this.classList.add('add-border');
+            document.querySelector(".main-img").setAttribute("src", imagePath);
+        });
     });
 
-    $(document).ready(function() {
-      $(".description p").each(function() {
-        var text = $(this).text();
-        var newText = text.replace(/\.\s*/g, ".- ");
-        newText = "- " + newText;
-        newText = newText.replace(/- $/, "");
-        newText = newText.replace(/\.$/, "");
-        newText = newText.replace(/\./g, "<br>");
-        $(this).html(newText);
-      });
+    $(document).ready(function () {
+        $(".description p").each(function () {
+            var text = $(this).text();
+            var newText = text.replace(/\.\s*/g, ".- ");
+            newText = "- " + newText;
+            newText = newText.replace(/- $/, "");
+            newText = newText.replace(/\.$/, "");
+            newText = newText.replace(/\./g, "<br>");
+            $(this).html(newText);
+        });
     });
-  </script>
-  <script th:src="@{/admin/js/cart.js}"></script>
+</script>
+<script th:src="@{/admin/js/cart.js}"></script>
 </body>
 
 </html>
