@@ -23,6 +23,7 @@ function handleAddToCart(event) {
 }
 
 function addToCart() {
+    var id = document.querySelector(".product-detail-id")?.textContent || "Không có dữ liệu";
     var productName = document.querySelector(".home-product-name")?.textContent || "Không có dữ liệu";
     var productColor = document.querySelector(".product-color")?.textContent || "Không có dữ liệu";
     var productSize = document.querySelector(".product-size")?.textContent || "Không có dữ liệu";
@@ -37,11 +38,12 @@ function addToCart() {
         quantityInput.value = 1;
     }
 
-    var existingProduct = gioHang.find(item => item.productName === productName && item.productColor === productColor && item.productSize === productSize);
+    var existingProduct = gioHang.find(item => item.productName === productName && item.productColor === productColor && item.productSize === productSize && item.productCategory === productCategory);
     if (existingProduct) {
         existingProduct.soLuong += soLuong;
     } else {
         var pro = {
+            "id": id,
             "productName": productName,
             "productColor": productColor,
             "productSize": productSize,
@@ -102,7 +104,7 @@ function showCard() {
         document.getElementById("empty-cart").style.display = "block";
     }
 
-    totalPrice();
+    totalPricea();
 }
 
 function count() {
@@ -119,7 +121,7 @@ function count() {
     return totalProducts;
 }
 
-function totalPrice() {
+function totalPricea() {
     var cart = JSON.parse(localStorage.getItem("cart")) || [];
     var total = cart.reduce((sum, item) => sum + (item.productPrice * item.soLuong), 0);
     var totalPriceElement = document.getElementById("total-price");
@@ -145,7 +147,7 @@ function updateQuantity(index, newQuantity) {
     localStorage.setItem("cart", JSON.stringify(cart));
     showCard();
     count();
-    totalPrice();
+    totalPricea();
 }
 
 function removeItem(index) {
@@ -154,5 +156,75 @@ function removeItem(index) {
     localStorage.setItem("cart", JSON.stringify(cart));
     showCard();
     count();
-    totalPrice();
+    totalPricea();
 }
+
+async function purchaseOrder() {
+    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    if (cart.length === 0) {
+        alert("Giỏ hàng trống! Vui lòng thêm sản phẩm trước khi đặt hàng.");
+        return;
+    }
+
+    var customerId = Number(document.getElementById("username")?.value) || 1;
+    var employeeId = 1;
+    var address = document.getElementById("user-address")?.value.trim();
+    var paymentMethod = document.getElementById("payment")?.value;
+    var totalPrice = cart.reduce((sum, item) => sum + (item.productPrice * item.soLuong), 0);
+
+    if (!address) {
+        alert("Vui lòng nhập địa chỉ!");
+        return;
+    }
+
+    var orderDetails = cart.map(item => ({
+        productDetailId: Number(item.id),
+        price: item.productPrice,
+        quantity: item.soLuong
+    }));
+
+    var orderRequest = {
+        customerId: customerId,
+        employeeId: employeeId,
+        address: address,
+        paymentMethod: paymentMethod,
+        totalPrice: totalPrice,
+        type: "Online",
+        status: "Processing",
+        orderDetails: orderDetails
+    };
+
+    console.log("Dữ liệu gửi đi:", JSON.stringify(orderRequest, null, 2));
+
+    // Hiển thị thông báo loading
+    document.getElementById("loading-message").style.display = "block";
+    document.getElementById("order-btn").disabled = true;
+
+    try {
+        let response = await fetch("http://localhost:8080/api/ordersAA", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json", // ✅ Đảm bảo đúng kiểu JSON
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(orderRequest)
+        });
+
+        if (!response.ok) {
+            alert("Đặt hàng thành công!");
+            localStorage.removeItem("cart");
+            showCard();
+            totalPricea();
+            count();
+            document.getElementById("order-form").reset();
+        }
+    } catch (error) {
+        console.error("Lỗi khi gửi đơn hàng:", error);
+        alert("Có lỗi xảy ra khi đặt hàng!");
+    } finally {
+        document.getElementById("loading-message").style.display = "none";
+        document.getElementById("order-btn").disabled = false;
+    }
+}
+
+
