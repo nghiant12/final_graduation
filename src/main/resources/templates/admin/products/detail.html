@@ -72,93 +72,6 @@
                                 data-bs-target="#addProductDetailModal">
                             Thêm mới
                         </button>
-
-                        <!-- Modal for Adding New ProductDetail -->
-                        <div class="modal fade" id="addProductDetailModal" tabindex="-1" aria-labelledby="addModalLabel"
-                             aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form th:action="@{/admin/products/addDetail}" method="post">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="addModalLabel">Thêm Sản phẩm chi tiết</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="product.id" th:value="${idProduct}"/>
-                                            <!-- Combobox Category -->
-                                            <div class="mb-3">
-                                                <label for="brand" class="form-label">Danh mục sản phẩm</label>
-                                                <select class="form-select" id="category" name="category.id">
-                                                    <option th:each="category : ${categories}"
-                                                            th:value="${category.id}"
-                                                            th:text="${category.name}">
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <!-- Combobox Brand -->
-                                            <div class="mb-3">
-                                                <label for="brand" class="form-label">Thương hiệu</label>
-                                                <select class="form-select" id="brand" name="brand.id">
-                                                    <option th:each="brand : ${brands}"
-                                                            th:value="${brand.id}"
-                                                            th:text="${brand.name}">
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <!-- Combobox Color -->
-                                            <div class="mb-3">
-                                                <label for="color" class="form-label">Màu sắc</label>
-                                                <select class="form-select" id="color" name="color.id">
-                                                    <option th:each="color : ${colors}"
-                                                            th:value="${color.id}"
-                                                            th:text="${color.name}">
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <!-- Combobox Size -->
-                                            <div class="mb-3">
-                                                <label for="size" class="form-label">Size</label>
-                                                <select class="form-select" id="size" name="size.id">
-                                                    <option th:each="size : ${sizes}"
-                                                            th:value="${size.id}"
-                                                            th:text="${size.name}">
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="price" class="form-label">Giá</label>
-                                                <input type="text" class="form-control" id="price" name="price"
-                                                       required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="quantity" class="form-label">Số lượng</label>
-                                                <input type="number" class="form-control" id="quantity" name="quantity"
-                                                       required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="image" class="form-label">Image URL</label>
-                                                <input type="text" class="form-control" id="image" name="image">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="available" class="form-label">Trạng thái</label>
-                                                <select class="form-select" id="available" name="available">
-                                                    <option value="true">Đang kinh doanh</option>
-                                                    <option value="false">Ngừng kinh doanh</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                Đóng
-                                            </button>
-                                            <button type="submit" class="btn btn-primary">Lưu</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="card mb-4">
@@ -229,13 +142,87 @@
         </footer>
     </div>
 </div>
+<div class="modal fade" id="addProductDetailModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form th:action="@{/admin/products/addDetail}" method="post" class="needs-validation" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm sản phẩm chi tiết</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id"/>
+
+                    <!-- Combobox Brand -->
+                    <div class="mb-3">
+                        <label class="form-label">Thương hiệu</label>
+                        <select class="form-select" name="brand.id">
+                            <option th:each="brand : ${brands}" th:value="${brand.id}" th:text="${brand.name}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Combobox Color -->
+                    <div class="mb-3">
+                        <label class="form-label">Màu sắc</label>
+                        <select class="form-select" name="color.id">
+                            <option th:each="color : ${colors}" th:value="${color.id}" th:text="${color.name}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Combobox Size -->
+                    <div class="mb-3">
+                        <label class="form-label">Size</label>
+                        <select class="form-select" name="size.id">
+                            <option th:each="size : ${sizes}" th:value="${size.id}" th:text="${size.name}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Giá -->
+                    <div class="mb-3">
+                        <label class="form-label">Giá</label>
+                        <input type="text" class="form-control" name="price" required oninput="validatePrice(this)">
+                        <div class="invalid-feedback">Giá phải là số hợp lệ và lớn hơn 0 (tối đa 2 số thập phân).</div>
+                    </div>
+
+                    <!-- Số lượng -->
+                    <div class="mb-3">
+                        <label class="form-label">Số lượng</label>
+                        <input type="number" class="form-control" name="quantity" min="1" step="1" required
+                               oninput="validateQuantity(this)">
+                        <div class="invalid-feedback">Số lượng phải là số nguyên dương.</div>
+                    </div>
+
+                    <!-- Image URL -->
+                    <div class="mb-3">
+                        <label class="form-label">Image URL</label>
+                        <input type="text" class="form-control" name="image">
+                    </div>
+
+                    <!-- Trạng thái -->
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-select" name="available">
+                            <option value="true" selected>Đang kinh doanh</option>
+                            <option value="false">Ngừng kinh doanh</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Lưu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Loop qua từng sản phẩm chi tiết để tạo modal -->
 <th:block th:each="detail : ${productDetails}">
     <div class="modal fade" th:id="'editModal-' + ${detail.id}" tabindex="-1" aria-labelledby="editModalLabel"
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form th:action="@{/admin/products/updateDetail}" method="post">
+                <form th:action="@{/admin/products/updateDetail}" method="post" class="needs-validation" novalidate>
                     <div class="modal-header">
                         <h5 class="modal-title">Chỉnh sửa sản phẩm chi tiết</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -281,13 +268,20 @@
 
                         <div class="mb-3">
                             <label class="form-label">Giá</label>
-                            <input type="text" class="form-control" name="price" th:value="${detail.price}" required>
+                            <input type="text" class="form-control" name="price" th:value="${detail.price}"
+                                   pattern="^\d+(\.\d{1,2})?$" required oninput="validatePrice(this)">
+                            <div class="invalid-feedback">
+                                Giá phải là số hợp lệ và lớn hơn 0 (tối đa 2 số thập phân).
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Số lượng</label>
                             <input type="number" class="form-control" name="quantity" th:value="${detail.quantity}"
-                                   required>
+                                   min="1" step="1" required oninput="validateQuantity(this)">
+                            <div class="invalid-feedback">
+                                Số lượng phải là số nguyên dương.
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -319,6 +313,80 @@
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
         crossorigin="anonymous"></script>
 <script th:src="@{/admin/js/datatables-simple-demo.js}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        'use strict';
+
+        // Bootstrap validation
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Validate Giá sản phẩm (Chỉ số, tối đa 2 số thập phân)
+        function validatePrice(input) {
+            let value = input.value.replace(/[^0-9.]/g, ''); // Loại bỏ ký tự không hợp lệ
+            if (value.includes('.')) {
+                let parts = value.split('.');
+                if (parts.length > 2) {
+                    value = parts[0] + '.' + parts.slice(1).join('');
+                }
+                if (parts[1] && parts[1].length > 2) {
+                    value = parts[0] + '.' + parts[1].substring(0, 2);
+                }
+            }
+            if (value !== "" && parseFloat(value) <= 0) {
+                value = "";
+            }
+            input.value = value;
+        }
+
+        // Validate Số lượng sản phẩm (Chỉ số nguyên dương)
+        function validateQuantity(input) {
+            let value = input.value.replace(/[^0-9]/g, ''); // Chỉ cho phép số nguyên
+            if (value !== "" && parseInt(value) <= 0) {
+                value = "";
+            }
+            input.value = value;
+        }
+
+        // Gán sự kiện input vào các ô nhập liệu
+        let priceInput = document.querySelector("input[name='price']");
+        let quantityInput = document.querySelector("input[name='quantity']");
+
+        if (priceInput) {
+            priceInput.addEventListener("input", function () {
+                validatePrice(this);
+            });
+        }
+
+        if (quantityInput) {
+            quantityInput.addEventListener("input", function () {
+                validateQuantity(this);
+            });
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let addProductModal = document.getElementById("addProductDetailModal");
+
+        if (addProductModal) {
+            addProductModal.addEventListener("shown.bs.modal", function () {
+                let form = addProductModal.querySelector("form");
+                if (form) {
+                    form.reset(); // Xóa dữ liệu form khi mở modal
+                    form.querySelector("select[name='available']").value = "true"; // Mặc định trạng thái "Đang kinh doanh"
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
 

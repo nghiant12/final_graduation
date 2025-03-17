@@ -62,12 +62,16 @@
                 <div class="card mb-4">
                     <div class="card-body">
                         <div th:if="${error}" class="alert alert-danger">Lỗi: <span th:text="${error}"></span></div>
-                        <div th:if="${success}" class="alert alert-success">Thành công: <span th:text="${success}"></span></div>
-                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">Thêm Nhân viên</button>
+                        <div th:if="${success}" class="alert alert-success">Thành công: <span
+                                th:text="${success}"></span></div>
+                        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                            Thêm Nhân viên
+                        </button>
 
 
                         <!-- Modal Thêm nhân viên -->
-                        <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeLabel" aria-hidden="true">
+                        <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeLabel"
+                             aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -75,38 +79,59 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/employees/add}" method="post" th:object="${employee}" enctype="multipart/form-data">
+                                        <form th:action="@{/admin/employees/add}" method="post" th:object="${employee}"
+                                              enctype="multipart/form-data" class="needs-validation" novalidate>
                                             <div class="mb-3">
                                                 <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" th:field="*{fullname}" placeholder="Nhập họ tên" required/>
+                                                <input type="text" class="form-control" th:field="*{fullname}" required
+                                                       minlength="3" maxlength="100">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập họ và tên (từ 3 đến 100 ký tự).
+                                                </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Tên đăng nhập</label>
-                                                <input type="text" class="form-control" th:field="*{username}" placeholder="Nhập username" required pattern="^[a-zA-Z0-9]{5,}$"/>
-                                                <div class="invalid-feedback">Tên đăng nhập phải có ít nhất 5 ký tự, không chứa khoảng trắng.</div>
+                                                <input type="text" class="form-control" th:field="*{username}" required
+                                                       pattern="^[a-zA-Z0-9]{5,}$"/>
+                                                <div class="invalid-feedback">Tên đăng nhập phải có ít nhất 5 ký tự,
+                                                    không chứa khoảng trắng.
+                                                </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Mật khẩu</label>
-                                                <input type="password" class="form-control" th:field="*{password}" placeholder="Nhập mật khẩu" required/>
+                                                <input type="password" class="form-control" th:field="*{password}"
+                                                       required/>
+                                                <div class="invalid-feedback">Mật khẩu phải có ít nhất 8 ký tự.</div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" th:field="*{email}" required/>
-                                                <div class="invalid-feedback">Email phải chứa ký tự '@' và đúng định dạng.</div>
+                                                <input type="email" class="form-control" th:field="*{email}" required
+                                                       pattern="^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ email hợp lệ.
+                                                </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Số điện thoại</label>
-                                                <input type="text" class="form-control" th:field="*{phoneNumber}" placeholder="Nhập số điện thoại" required pattern="^\d{10,15}$"/>
-                                                <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10-15 số).</div>
+                                                <input type="text" class="form-control" th:field="*{phoneNumber}"
+                                                       required pattern="^\d{10,15}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập số điện thoại hợp lệ (từ 10 đến 15 chữ số).
+                                                </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Địa chỉ</label>
-                                                <input type="text" class="form-control" th:field="*{address}" required/>
+                                                <input type="text" class="form-control" th:field="*{address}" required
+                                                       minlength="5" maxlength="200">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ (từ 5 đến 200 ký tự).
+                                                </div>
                                             </div>
                                             <!-- Ảnh đại diện -->
                                             <div class="mb-3">
                                                 <label for="photo" class="form-label">Ảnh đại diện</label>
-                                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*" />
+                                                <input type="file" class="form-control" id="photo" name="photo"
+                                                       accept="image/*"/>
                                             </div>
 
                                             <div class="text-end">
@@ -119,7 +144,8 @@
                         </div>
 
                         <!-- Modal Sửa Nhân viên -->
-                        <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeLabel" aria-hidden="true">
+                        <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeLabel"
+                             aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -127,33 +153,56 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/employees/update}" method="post" th:object="${employee}">
+                                        <form th:action="@{/admin/employees/update}" method="post"
+                                              class="needs-validation" novalidate
+                                              th:object="${employee}">
                                             <!-- Trường ẩn để giữ ID nhân viên -->
                                             <input type="hidden" name="id" th:field="*{id}"/>
 
-
-                                            <div class="mb-3">
-                                                <label class="form-label">Tên đăng nhập</label>
-                                                <input type="text" class="form-control" th:field="*{username}" readonly/>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" th:field="*{email}" required/>
-                                                <div class="invalid-feedback">Email phải chứa ký tự '@' và đúng định dạng.</div>
-                                            </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Họ tên</label>
-                                                <input type="text" class="form-control" th:field="*{fullname}" required/>
+                                                <input type="text" class="form-control" th:field="*{fullname}" required
+                                                       minlength="3" maxlength="100">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập họ và tên (từ 3 đến 100 ký tự).
+                                                </div>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">Địa chỉ</label>
-                                                <input type="text" class="form-control" th:field="*{address}" required/>
+                                                <label class="form-label">Tên đăng nhập</label>
+                                                <input type="text" class="form-control" th:field="*{username}" required
+                                                       pattern="^[a-zA-Z0-9]{5,}$"/>
+                                                <div class="invalid-feedback">Tên đăng nhập phải có ít nhất 5 ký tự,
+                                                    không chứa khoảng trắng.
+                                                </div>
+                                            </div>
+                                            <!--                                            <div class="mb-3">-->
+                                            <!--                                                <label class="form-label">Mật khẩu</label>-->
+                                            <!--                                                <input type="password" class="form-control" th:field="*{password}"-->
+                                            <!--                                                       placeholder="Nhập mật khẩu" required/>-->
+                                            <!--                                                <div class="invalid-feedback">Mật khẩu phải có ít nhất 8 ký tự.</div>-->
+                                            <!--                                            </div>-->
+                                            <div class="mb-3">
+                                                <label class="form-label">Email</label>
+                                                <input type="email" class="form-control" th:field="*{email}" required
+                                                       pattern="^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ email hợp lệ.
+                                                </div>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Số điện thoại</label>
-                                                <input type="text" class="form-control" th:field="*{phoneNumber}" required pattern="^\d{10,15}$">
+                                                <input type="text" class="form-control" th:field="*{phoneNumber}"
+                                                       required pattern="^\d{10,15}$">
                                                 <div class="invalid-feedback">
                                                     Vui lòng nhập số điện thoại hợp lệ (từ 10 đến 15 chữ số).
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Địa chỉ</label>
+                                                <input type="text" class="form-control" th:field="*{address}" required
+                                                       minlength="5" maxlength="200">
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập địa chỉ (từ 5 đến 200 ký tự).
                                                 </div>
                                             </div>
 
@@ -197,20 +246,23 @@
                                         <td th:text="${employee.email}"></td>
                                         <td th:text="${employee.address}"></td>
                                         <td>
-                                            <a href="#" class="text-dark" data-bs-toggle="modal" data-bs-target="#editEmployeeModal"
+                                            <a href="#" class="text-dark" data-bs-toggle="modal"
+                                               data-bs-target="#editEmployeeModal"
                                                th:attr="data-id=${employee.id}, data-fullname=${employee.fullname}, data-username=${employee.username}, data-phone=${employee.phoneNumber},data-email=${employee.email}, data-address=${employee.address}, data-role=${employee.role.id}">
                                                 <i class="fa-solid fa-pen"></i>
                                             </a>
-                                            &nbsp;
-                                            <a href="#" class="text-danger delete-employee" th:attr="data-id=${employee.id}, data-fullname=${employee.fullname}">
-                                                <i class="fa-solid fa-trash"></i>
-                                            </a>
+                                            <!--                                            &nbsp;-->
+                                            <!--                                            <a href="#" class="text-danger delete-employee"-->
+                                            <!--                                               th:attr="data-id=${employee.id}, data-fullname=${employee.fullname}">-->
+                                            <!--                                                <i class="fa-solid fa-trash"></i>-->
+                                            <!--                                            </a>-->
                                         </td>
                                     </tr>
                                     </tbody>
                                 </table>
                                 <!-- Form Xóa Ẩn -->
-                                <form id="deleteEmployeeForm" method="post" th:action="@{/admin/employees/delete}" style="display:none;">
+                                <form id="deleteEmployeeForm" method="post" th:action="@{/admin/employees/delete}"
+                                      style="display:none;">
                                     <input type="hidden" name="id" id="deleteEmployeeId"/>
                                 </form>
                             </div>
@@ -269,18 +321,6 @@
             });
         }
 
-        // Xác nhận Xóa nhân viên
-        document.querySelectorAll('.delete-employee').forEach(button => {
-            button.addEventListener('click', function () {
-                const id = this.getAttribute('data-id');
-                const fullname = this.getAttribute('data-fullname');
-                if (confirm(`Bạn có chắc chắn muốn xóa nhân viên "${fullname}" không?`)) {
-                    document.querySelector('#deleteEmployeeId').value = id;
-                    document.querySelector('#deleteEmployeeForm').submit();
-                }
-            });
-        });
-
         // --- Bổ sung kiểm tra dữ liệu đầu vào ---
         function validateForm(form) {
             let valid = true;
@@ -337,6 +377,27 @@
             });
         }
     });
+
+    // Custom Bootstrap validation
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"

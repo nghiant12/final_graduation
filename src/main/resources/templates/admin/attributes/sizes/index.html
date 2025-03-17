@@ -81,14 +81,17 @@
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <!-- Form thêm thương hiệu hoặc chỉnh sửa thương hiệu -->
                                         <form action="#" th:action="@{/admin/sizes/add}" method="post"
+                                              class="needs-validation" novalidate
                                               th:object="${size}">
                                             <input type="hidden" th:field="*{id}"/>
                                             <div class="mb-3">
                                                 <label for="name" class="form-label">Tên kích thước</label>
                                                 <input type="text" class="form-control" id="name" th:field="*{name}"
                                                        placeholder="Nhập tên kích thước" maxlength="100" required>
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập tên kích thước
+                                                </div>
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -111,12 +114,16 @@
                                                 aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form th:action="@{/admin/sizes/update}" method="post">
+                                        <form th:action="@{/admin/sizes/update}" method="post" class="needs-validation"
+                                              novalidate>
                                             <input type="hidden" name="id"/>
                                             <div class="mb-3">
                                                 <label for="name" class="form-label">Tên kích thước</label>
                                                 <input type="text" class="form-control" name="name"
                                                        placeholder="Nhập tên kích thước" maxlength="100" required/>
+                                                <div class="invalid-feedback">
+                                                    Vui lòng nhập tên kích thước
+                                                </div>
                                             </div>
                                             <div class="text-end">
                                                 <button type="submit" class="btn btn-primary">
@@ -194,6 +201,27 @@
             form.querySelector('input[name="name"]').value = name;
         });
     });
+
+    // Custom Bootstrap validation
+    (function () {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"

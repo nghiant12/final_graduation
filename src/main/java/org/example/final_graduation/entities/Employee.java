@@ -164,4 +164,9 @@ public class Employee {
     public void setRole(@NotNull Role role) {
         this.role = role;
     }
+
+    public String getRoleName() {
+        return role != null ? role.getName() : "ROLE_USER";
+    }
+
 }
