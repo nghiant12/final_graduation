@@ -29,7 +29,6 @@ public class OrderService {
     }
 
     public void createNewOrder() {
-
         Order newOrder = new Order();
         newOrder.setEmployee(employeeRepository.findByID(4));
         newOrder.setCreatedDate(LocalDateTime.now());

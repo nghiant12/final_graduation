@@ -1,6 +1,7 @@
 package org.example.final_graduation.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -122,18 +123,5 @@ public class Promotion {
 
     public void setActive(Boolean active) {
         isActive = active;
-    }
-
-    @Override
-    public String toString() {
-        return "Promotion{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", discount=" + discount +
-                ", startDate=" + startDate +
-                ", endDate=" + endDate +
-                ", isActive=" + isActive +
-                '}';
     }
 }

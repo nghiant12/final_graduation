@@ -2,7 +2,9 @@ package org.example.final_graduation.services;
 
 import org.example.final_graduation.entities.Promotion;
 import org.example.final_graduation.repositories.PromotionRepository;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,5 +44,12 @@ public class PromotionService {
         } else {
             return promotionRepository.findAll();
         }
+    }
+
+    @Scheduled(cron = "0 * * * * ?") // Chạy mỗi phút
+    @Transactional
+    public void checkAndDeactivateExpiredPromotions() {
+        promotionRepository.deactivateExpiredPromotions();
+        System.out.println("Kiểm tra và cập nhật trạng thái khuyến mãi: " + LocalDateTime.now());
     }
 }

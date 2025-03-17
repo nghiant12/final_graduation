@@ -107,7 +107,7 @@
                     </li>
                 </ul>
                 <!-- Product Section -->
-                <div class="mb-4">
+                <div class="mb-4 order-container">
                     <div class="row">
                         <div class="col-8">
                             <div id="orderDetailsContainer" th:if="${orderDetails != null and orderDetails.size() > 0}">
@@ -131,31 +131,47 @@
                                            th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
                                     </div>
                                     <div class="ms-auto d-flex align-items-center">
-                                        <form class="orderForm d-flex align-items-center"
-                                              th:attr="data-url=@{/admin/orders/updateQuantity}">
-                                            <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"
-                                                   class="orderDetailId"/>
                                             <!-- Nút giảm (-) -->
-                                            <button type="button" class="btn btn-icon decrease-btn"
-                                                    th:disabled="${orderDetail.quantity == 1}">
-                                                <i class="fas fa-minus"></i>
-                                            </button>
-                                            <span class="fw-bold mx-4 quantity-text"
-                                                  th:text="${orderDetail.quantity}"></span>
-                                            <!-- Nút tăng (+) -->
-                                            <button type="button" class="btn btn-icon increase-btn"
-                                                    th:disabled="${orderDetail.productDetail.quantity == 0}">
-                                                <i class="fas fa-plus"></i>
-                                            </button>
-                                        </form>
+                                            <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
+                                                  method="post">
+                                                <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}">
+                                                <input type="hidden" name="idOrder" th:value="${order.id}">
+                                                <button type="submit" name="action" value="decrease"
+                                                        class="btn btn-icon decrease-btn"
+                                                        th:disabled="${orderDetail.quantity == 1}">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+                                            </form>
 
-                                        <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
-                                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
-                                            <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
-                                            <button type="submit" class="btn btn-danger">
-                                                <i class="fas fa-trash me-1"></i>
-                                            </button>
-                                        </form>
+                                            <!-- Ô nhập số lượng -->
+                                            <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
+                                                  method="post">
+                                                <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}">
+                                                <input type="hidden" name="idOrder" th:value="${order.id}">
+                                                <input type="number" name="quantity"
+                                                       class="form-control text-center quantity-input"
+                                                       th:value="${orderDetail.quantity}" min="1"
+                                                       style="width: 60px;"
+                                                       onkeydown="if(event.key === 'Enter') this.form.submit();"/>
+                                            </form>
+                                            <!-- Nút tăng (+) -->
+                                            <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
+                                                  method="post">
+                                                <input type="hidden" name="idOrder" th:value="${order.id}">
+                                                <button type="submit" name="action" value="increase"
+                                                        class="btn btn-icon increase-btn"
+                                                        th:disabled="${orderDetail.productDetail.quantity == 0}">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </form>
+
+                                            <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
+                                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                                                <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-trash me-1"></i>
+                                                </button>
+                                            </form>
                                     </div>
                                 </div>
                             </div>
@@ -191,8 +207,8 @@
                                     <p>Tổng số tiền sản phẩm:
                                         <span class="text-danger fw-bold" id="totalPrice"
                                               th:data-total-price="${totalPrice}"
-                                              th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}">
-            </span>
+                                              th:text="${totalPrice != null ?
+                                              #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
                                     </p>
 
                                     <p>Chọn mã giảm giá:</p>
@@ -223,8 +239,6 @@
 
                                     <input type="text" id="customerPaid" class="form-control my-2"
                                            placeholder="Tiền khách đưa..." oninput="updateChangeAmount()">
-
-
                                     <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
 
                                     <br><br>
@@ -296,11 +310,12 @@
                                         confirmOrderBtn1.disabled = customerPaid <= 0 || customerPaid < finalPrice;
                                     }
                                 }
+
                                 function parseCurrency(value) {
                                     if (!value) return 0;
                                     return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
                                 }
-                                
+
                                 function formatCurrency(value) {
                                     return new Intl.NumberFormat("vi-VN").format(value);
                                 }
@@ -379,7 +394,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/admin/js/order_product_quantity.js}"></script>
 <script th:src="@{/admin/js/order_customer.js}"></script>
-<script th:src="@{/admin/js/order_customer_paid.js}"></script>
+<!--<script th:src="@{/admin/js/order_customer_paid.js}"></script>-->
 <script th:src="@{/admin/js/order_customer_search.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>

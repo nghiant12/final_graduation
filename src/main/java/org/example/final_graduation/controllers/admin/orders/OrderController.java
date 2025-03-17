@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -207,80 +208,83 @@ public class OrderController {
         return "redirect:/admin/orders/detail?idOrder=" + orderId;
     }
 
-    // Xử lý tăng/giảm số lượng sản phẩm trong đơn hàng
-    @PostMapping("/updateQuantity")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> updateQuantity(@RequestParam("orderDetailId") Integer orderDetailId,
-                                                              @RequestParam("action") String action) {
-        Map<String, Object> response = new HashMap<>();
+    @PostMapping("/updateQuantity/{orderDetailId}")
+    public String updateQuantity(
+            @PathVariable("orderDetailId") Integer orderDetailId,
+            @RequestParam(value = "quantity", required = false) Integer newQuantity,
+            @RequestParam(value = "idOrder", required = true) Integer orderId,
+            @RequestParam(value = "action", required = false) String action,
+            RedirectAttributes redirectAttributes
+    ) {
         try {
             Optional<OrderDetail> optionalOrderDetail = orderDetailRepository.findById(orderDetailId);
+            if (!optionalOrderDetail.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy chi tiết đơn hàng.");
+                return "redirect:/admin/orders/detail?idOrder=" + orderId;
+            }
 
-            if (optionalOrderDetail.isPresent()) {
-                OrderDetail orderDetail = optionalOrderDetail.get();
-                Order order = orderDetail.getOrder();
-                Integer orderId = order.getId();
-                ProductDetail productDetail = orderDetail.getProductDetail();
+            OrderDetail orderDetail = optionalOrderDetail.get();
+            ProductDetail productDetail = orderDetail.getProductDetail();
+            Order order = orderDetail.getOrder();
 
-                if (orderId == null || productDetail == null) {
-                    response.put("success", false);
-                    response.put("message", "Không tìm thấy đơn hàng hoặc sản phẩm.");
-                    return ResponseEntity.badRequest().body(response);
-                }
+            // Kiểm tra số lượng tồn kho hợp lệ
+            int currentQuantity = orderDetail.getQuantity();
+            int quantityInStock = productDetail.getQuantity();
 
-                int currentQuantity = orderDetail.getQuantity();
-                int quantityInStock = productDetail.getQuantity();
-                BigDecimal unitPrice = productDetail.getPrice(); // Đơn giá của sản phẩm
-
-                // Xử lý tăng hoặc giảm số lượng
+            if (action != null) {
                 if ("increase".equals(action)) {
                     if (quantityInStock > 0) {
-                        orderDetail.setQuantity(currentQuantity + 1);
-                        productDetail.setQuantity(quantityInStock - 1);
+                        newQuantity = currentQuantity + 1;
                     } else {
-                        response.put("success", false);
-                        response.put("message", "Sản phẩm đã hết hàng!");
-                        return ResponseEntity.badRequest().body(response);
+                        redirectAttributes.addFlashAttribute("error", "Sản phẩm không đủ số lượng trong kho.");
+                        return "redirect:/admin/orders/detail?idOrder=" + orderId;
                     }
                 } else if ("decrease".equals(action) && currentQuantity > 1) {
-                    orderDetail.setQuantity(currentQuantity - 1);
-                    productDetail.setQuantity(quantityInStock + 1);
+                    newQuantity = currentQuantity - 1;
                 } else {
-                    response.put("success", false);
-                    response.put("message", "Yêu cầu không hợp lệ!");
-                    return ResponseEntity.badRequest().body(response);
+                    redirectAttributes.addFlashAttribute("error", "Yêu cầu không hợp lệ.");
+                    return "redirect:/admin/orders/detail?idOrder=" + orderId;
                 }
-
-                // Cập nhật lại giá của OrderDetail theo số lượng mới
-                BigDecimal newPrice = unitPrice.multiply(BigDecimal.valueOf(orderDetail.getQuantity()));
-                orderDetail.setPrice(newPrice);
-
-                // Cập nhật tổng giá trị đơn hàng
-                BigDecimal totalPrice = orderDetailRepository.tongTien(orderId);
-                order.setTotalPrice(totalPrice);
-
-                // Lưu thay đổi vào DB
-                productDetailService.saveProductDetail(productDetail);
-                orderDetailRepository.save(orderDetail);
-                orderService.saveOrder(order);
-
-                response.put("success", true);
-                response.put("newQuantity", orderDetail.getQuantity());
-                response.put("totalPrice", totalPrice);
-                response.put("stockRemaining", productDetail.getQuantity());
-                response.put("productDetailId", productDetail.getId()); // Thêm ID sản phẩm
-                response.put("message", "Số lượng sản phẩm đã được cập nhật!");
-                return ResponseEntity.ok(response);
-            } else {
-                response.put("success", false);
-                response.put("message", "Không tìm thấy chi tiết đơn hàng.");
-                return ResponseEntity.badRequest().body(response);
             }
+
+            // Đảm bảo số lượng tối thiểu là 1
+            if (newQuantity == null || newQuantity < 1) {
+                newQuantity = 1;
+            }
+
+            // Kiểm tra số lượng tồn kho
+            if (productDetail.getQuantity() + currentQuantity < newQuantity) {
+                redirectAttributes.addFlashAttribute("error", "Số lượng tồn kho không đủ.");
+                return "redirect:/admin/orders/detail?idOrder=" + orderId;
+            }
+
+            // Cập nhật lại số lượng trong OrderDetail và tồn kho sản phẩm
+            int stockRemaining = productDetail.getQuantity() + currentQuantity - newQuantity;
+            orderDetail.setQuantity(newQuantity);
+            productDetail.setQuantity(stockRemaining);
+
+            // Cập nhật tổng tiền của từng sản phẩm
+            BigDecimal newPrice = productDetail.getPrice().multiply(BigDecimal.valueOf(newQuantity));
+            orderDetail.setPrice(newPrice);
+
+            // Cập nhật tổng tiền của đơn hàng
+            BigDecimal totalPrice = orderDetailRepository.tongTien(order.getId());
+            order.setTotalPrice(totalPrice);
+
+            // Lưu vào DB
+            productDetailService.saveProductDetail(productDetail);
+            orderDetailRepository.save(orderDetail);
+            orderService.saveOrder(order);
+
+            // Lưu thông báo thành công vào session
+            redirectAttributes.addFlashAttribute("success", "Số lượng đã được cập nhật!");
+            redirectAttributes.addFlashAttribute("totalPrice", totalPrice);
+
         } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Lỗi khi cập nhật số lượng: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật số lượng: " + e.getMessage());
         }
+
+        return "redirect:/admin/orders/detail?idOrder=" + orderId;
     }
 
     // Xử lý xóa sản phẩm khỏi đơn hàng
@@ -328,6 +332,7 @@ public class OrderController {
     }
 
     // Xử lý xác nhận đặt hàng
+    @Transactional
     @PostMapping("/confirm/{id}")
     public String confirmOrder(@PathVariable("id") Integer id,
                                @RequestParam("paymentMethod") String paymentMethod,
@@ -403,7 +408,6 @@ public class OrderController {
 
         return "redirect:/admin/orders";
     }
-
 
 
     // Xử lý chọn khách hàng từ modal

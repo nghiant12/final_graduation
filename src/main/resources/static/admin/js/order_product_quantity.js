@@ -3,77 +3,84 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".increase-btn, .decrease-btn").forEach(button => {
         button.addEventListener("click", function () {
             let form = this.closest(".orderForm");
-            let quantityElement = form.querySelector(".quantity-text");
             let orderDetailId = form.querySelector(".orderDetailId").value;
-            let isIncrease = this.classList.contains("increase-btn");
-            let totalPriceElement = document.getElementById("totalPrice");
-            let finalPriceElement = document.getElementById("finalPrice");
+            let action = this.classList.contains("increase-btn") ? "increase" : "decrease";
 
-            // Chuyển đổi số lượng hiện tại
-            let currentQuantity = parseInt(quantityElement.innerText);
-            let newQuantity = isIncrease ? currentQuantity + 1 : currentQuantity - 1;
-
-            if (newQuantity < 1) return; // Không cho giảm xuống 0
-
-            // Cập nhật số lượng hiển thị
-            quantityElement.innerText = newQuantity;
-
-            // Cập nhật số lượng trong bảng sản phẩm
-            let productQuantityElement = document.getElementById(`product-quantity-${orderDetailId}`);
-            if (productQuantityElement) {
-                productQuantityElement.innerText = parseInt(productQuantityElement.innerText) - (isIncrease ? 1 : -1);
-            }
-
-            // Lấy giá sản phẩm từ `data-price`
-            let itemPrice = parseFloat(form.closest(".d-flex").querySelector(".text-danger").getAttribute("data-price"));
-            let newTotalPrice = parseFloat(totalPriceElement.getAttribute("data-total-price")) + (isIncrease ? itemPrice : -itemPrice);
-            totalPriceElement.setAttribute("data-total-price", newTotalPrice);
-            totalPriceElement.innerText = newTotalPrice.toLocaleString("vi-VN") + " VND";
-
-            // Cập nhật tổng số tiền cần thanh toán
-            let discountSelect = document.querySelector("select[name='promotionId']");
-            updateTotalPrice(discountSelect);
-
-            // Cập nhật tiền thừa nếu khách đã nhập tiền
-            calculateChange();
-
-            // Gửi AJAX để cập nhật số lượng trên server
-            updateOrderQuantity(orderDetailId, newQuantity);
+            fetch(`/admin/orders/updateQuantity/${orderDetailId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ action: action })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Reload để cập nhật giao diện
+                    } else {
+                        alert("Lỗi: " + data.message);
+                    }
+                })
+                .catch(error => console.error("Lỗi AJAX:", error));
         });
     });
 
-    // Cập nhật tiền thừa khi khách nhập số tiền đưa
-    document.getElementById("customerPaid").addEventListener("input", calculateChange);
+    // Xử lý sự kiện nhập số tiền khách đưa
+    let customerPaidInput = document.getElementById("customerPaid");
+    if (customerPaidInput) {
+        customerPaidInput.addEventListener("input", calculateChange);
+    }
 });
 
-// Hàm tính tiền thừa
+// 📌 Hàm tính tiền thừa
 function calculateChange() {
     let customerPaidInput = document.getElementById("customerPaid");
     let changeAmountElement = document.getElementById("changeAmount");
     let finalPriceElement = document.getElementById("finalPrice");
 
-    let customerPaid = parseCurrency(customerPaidInput.value);
-    let finalPrice = parseCurrency(finalPriceElement.getAttribute("data-final-price")); // Lấy giá trị chính xác
+    if (!customerPaidInput || !changeAmountElement || !finalPriceElement) {
+        console.error("Không tìm thấy các phần tử cần thiết để tính tiền thừa.");
+        return;
+    }
 
+    let customerPaid = parseCurrency(customerPaidInput.value);
+    let finalPrice = parseCurrency(finalPriceElement.getAttribute("data-final-price")) || 0;
     let changeAmount = customerPaid - finalPrice;
 
     customerPaidInput.value = customerPaid > 0 ? formatCurrency(customerPaid) : "";
     changeAmountElement.innerText = (changeAmount >= 0 ? formatCurrency(changeAmount) : "0 VND");
 }
 
+// 📌 Hàm cập nhật tổng tiền sau khi áp dụng mã giảm giá
+function updateTotalPrice(discountSelect) {
+    let totalPriceElement = document.getElementById("totalPrice");
+    let finalPriceElement = document.getElementById("finalPrice");
 
-// Cập nhật tổng tiền sau khi áp dụng mã giảm giá
+    if (!totalPriceElement || !finalPriceElement || !discountSelect) {
+        console.error("Không tìm thấy các phần tử tính tổng tiền.");
+        return;
+    }
 
+    let totalPrice = parseCurrency(totalPriceElement.getAttribute("data-total-price"));
+    let discountPercentage = parseFloat(discountSelect.options[discountSelect.selectedIndex].getAttribute("data-discount")) || 0;
 
+    let discountAmount = (totalPrice * discountPercentage) / 100;
+    let finalPrice = totalPrice - discountAmount;
 
-// Gửi yêu cầu AJAX cập nhật số lượng sản phẩm trên server
+    finalPriceElement.setAttribute("data-final-price", finalPrice);
+    finalPriceElement.innerText = finalPrice.toLocaleString("vi-VN") + " VND";
+
+    // Cập nhật tiền thừa nếu khách đã nhập tiền
+    calculateChange();
+}
+
+// 📌 Gửi AJAX cập nhật số lượng sản phẩm trên server
 function updateOrderQuantity(orderDetailId, newQuantity) {
     fetch(`/admin/orders/updateQuantity/${orderDetailId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ quantity: newQuantity }),
+        body: JSON.stringify({ action: "increase" })
+        // body: new URLSearchParams({ action: "increase" })
     })
         .then(response => response.json())
         .then(data => {
@@ -84,4 +91,11 @@ function updateOrderQuantity(orderDetailId, newQuantity) {
         .catch(error => console.error("Lỗi khi gửi AJAX:", error));
 }
 
-// Chuyển đổi định dạng tiền tệ
+// 📌 Chuyển đổi định dạng tiền tệ
+function parseCurrency(value) {
+    return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
+}
+
+function formatCurrency(value) {
+    return value.toLocaleString("vi-VN") + " VND";
+}

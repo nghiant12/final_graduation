@@ -1,23 +1,23 @@
 package org.example.final_graduation.controllers.admin;
 
+import jakarta.validation.Valid;
 import org.example.final_graduation.entities.Promotion;
 import org.example.final_graduation.services.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/promotions")
@@ -68,9 +68,7 @@ public class PromotionController {
         return "admin/promotions/index";
     }
 
-
-
-
+    @Transactional
     @PostMapping("add")
     public String add(
             @RequestParam("name") String name,
@@ -81,9 +79,31 @@ public class PromotionController {
             @RequestParam("minOrderValue") BigDecimal minOrderValue,
             @RequestParam("remainingQuantity") Integer remainingQuantity,
             Model model,
+            @Valid @ModelAttribute("promotion") Promotion promotion,
+            BindingResult result,
             RedirectAttributes redirectAttributes
     ) {
         try {
+            if (result.hasErrors()) {
+                redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
+                return "redirect:/admin/promotions";
+            }
+
+
+            LocalDateTime now = LocalDateTime.now();
+
+            // Kiểm tra ngày bắt đầu phải lớn hơn hiện tại
+            if (promotion.getStartDate().isBefore(now)) {
+                redirectAttributes.addFlashAttribute("error", "Ngày bắt đầu phải lớn hơn thời điểm hiện tại.");
+                return "redirect:/admin/promotions";
+            }
+
+            // Kiểm tra ngày kết thúc phải lớn hơn ngày bắt đầu
+            if (promotion.getEndDate().isBefore(promotion.getStartDate())) {
+                redirectAttributes.addFlashAttribute("error", "Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+                return "redirect:/admin/promotions";
+            }
+
             Promotion newPromotion = new Promotion();
             newPromotion.setName(name);
             newPromotion.setDescription(description);
@@ -104,4 +124,55 @@ public class PromotionController {
             return "admin/promotions/index";
         }
     }
+
+    @PostMapping("/update")
+    public String update(@Valid @ModelAttribute("promotion") Promotion promotion, BindingResult result, RedirectAttributes redirectAttributes) {
+        if (result.hasErrors()) {
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
+            return "redirect:/admin/promotions";
+        }
+
+        Optional<Promotion> existingPromotion = promotionService.getPromotionById(promotion.getId());
+        if (existingPromotion.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khuyến mãi.");
+            return "redirect:/admin/promotions";
+        }
+
+        Promotion updatedPromotion = existingPromotion.get();
+
+        // Không cho sửa ngày bắt đầu
+        promotion.setStartDate(updatedPromotion.getStartDate());
+
+        // Kiểm tra ngày kết thúc phải lớn hơn ngày bắt đầu
+        if (promotion.getEndDate().isBefore(updatedPromotion.getStartDate())) {
+            redirectAttributes.addFlashAttribute("error", "Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+            return "redirect:/admin/promotions";
+        }
+
+        updatedPromotion.setName(promotion.getName());
+        updatedPromotion.setDescription(promotion.getDescription());
+        updatedPromotion.setDiscount(promotion.getDiscount());
+        updatedPromotion.setMinOrderValue(promotion.getMinOrderValue());
+        updatedPromotion.setRemainingQuantity(promotion.getRemainingQuantity());
+        updatedPromotion.setEndDate(promotion.getEndDate());
+
+        promotionService.savePromotion(updatedPromotion);
+        redirectAttributes.addFlashAttribute("success", "Cập nhật khuyến mãi thành công!");
+        return "redirect:/admin/promotions";
+    }
+
+    @PostMapping("/deactivate/{id}")
+    public String deactivatePromotion(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Promotion> optionalPromotion = promotionService.getPromotionById(id);
+        if (optionalPromotion.isPresent()) {
+            Promotion promotion = optionalPromotion.get();
+            promotion.setActive(false);
+            promotionService.savePromotion(promotion);
+            redirectAttributes.addFlashAttribute("success", "Mã khuyến mãi đã ngừng hoạt động.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy mã khuyến mãi.");
+        }
+        return "redirect:/admin/promotions";
+    }
+
 }

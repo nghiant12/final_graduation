@@ -61,9 +61,11 @@
                         <div class="mb-4">
                             <div th:if="${error}" class="alert alert-danger" role="alert">
                                 <span th:text="${error}">Lỗi</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                             <div th:if="${success}" class="alert alert-success" role="alert">
                                 <span th:text="${success}">Thành công</span>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                             <button type="button" class="btn btn-success"
                                     data-bs-toggle="modal"
@@ -79,7 +81,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form th:action="@{/admin/promotions/add}" method="post"
+                                            <form id="promotionForm" th:action="@{/admin/promotions/add}" method="post"
                                                   th:object="${promotion}" class="needs-validation" novalidate>
 
                                                 <!-- Tên Khuyến Mãi -->
@@ -132,23 +134,21 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Ngày Bắt Đầu -->
                                                 <div class="mb-3">
                                                     <label class="form-label">Ngày Bắt Đầu</label>
-                                                    <input type="datetime-local" class="form-control"
-                                                           th:field="*{startDate}" required>
-                                                    <div class="invalid-feedback">
-                                                        Vui lòng chọn ngày bắt đầu.
+                                                    <input type="datetime-local" class="form-control" id="start_date"
+                                                           name="startDate" required>
+                                                    <div class="invalid-feedback">Ngày bắt đầu phải từ thời điểm hiện
+                                                        tại trở đi.
                                                     </div>
                                                 </div>
 
-                                                <!-- Ngày Kết Thúc -->
                                                 <div class="mb-3">
                                                     <label class="form-label">Ngày Kết Thúc</label>
-                                                    <input type="datetime-local" class="form-control"
-                                                           th:field="*{endDate}" required>
-                                                    <div class="invalid-feedback">
-                                                        Vui lòng chọn ngày kết thúc.
+                                                    <input type="datetime-local" class="form-control" id="end_date"
+                                                           name="endDate" required>
+                                                    <div class="invalid-feedback">Ngày kết thúc phải lớn hơn ngày hiện
+                                                        tại.
                                                     </div>
                                                 </div>
 
@@ -227,11 +227,137 @@
                                 <td th:text="${promotion.description}"></td>
                                 <td th:text="${#temporals.format(promotion.startDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
                                 <td th:text="${#temporals.format(promotion.endDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                                <td th:text="${promotion.active ? 'Đang hoạt động' : 'Ngừng hoạt động'}"></td>
+<!--                                <td>-->
+<!--                                    <span th:classappend="${promotion.active} ? 'badge text-bg-primary' : 'badge text-bg-secondary'"-->
+<!--                                          th:text="${promotion.active ? 'Đang hoạt động' : 'Ngừng hoạt động'}">-->
+<!--                                    </span>-->
+<!--                                </td>-->
                                 <td>
-                                    <a th:href="@{/}" style="color: black; text-decoration: none">
-                                        <i class="fa-solid fa-eye"></i>
+                                <form th:action="@{/admin/promotions/deactivate/{id}(id=${promotion.id})}"
+                                      method="post"
+                                      th:if="${promotion.active}">
+                                    <button type="submit" class="badge text-bg-primary"
+                                            onclick="return confirm('Bạn có chắc chắn muốn ngừng hoạt động mã khuyến mãi này?')">
+                                        Đang hoạt động
+                                    </button>
+                                </form>
+
+                                <span th:unless="${promotion.active}" class="badge text-bg-secondary">Ngừng hoạt động</span>
+                                </td>
+                                <!--                                <td>-->
+                                <!--                                    <form th:action="@{/admin/promotions/toggle-status}" method="post" th:if="${promotion.active}">-->
+                                <!--                                        <input type="hidden" name="id" th:value="${promotion.id}">-->
+                                <!--                                        <input type="hidden" name="newStatus" th:value="${!promotion.active}">-->
+
+                                <!--                                        <div class="form-check form-switch">-->
+                                <!--                                            <input class="form-check-input" type="checkbox"-->
+                                <!--                                                   onchange="this.form.submit()"-->
+                                <!--                                                   th:checked="${promotion.active}">-->
+                                <!--                                            <label class="form-check-label"-->
+                                <!--                                                   th:text="${promotion.active} ? 'Đang hoạt động' : 'Ngừng hoạt động'"></label>-->
+                                <!--                                        </div>-->
+                                <!--                                    </form>-->
+                                <!--                                </td>-->
+                                <td>
+                                    <a style="color: black; text-decoration: none" type="button"
+                                       th:if="${promotion.active}"
+                                       data-bs-toggle="modal"
+                                       data-bs-target="#editPromotionModal"
+                                       th:attr="data-id=${promotion.id},
+                                                data-name=${promotion.name},
+                                                data-description=${promotion.description},
+                                                data-discount=${promotion.discount},
+                                                data-startDate=${promotion.startDate},
+                                                data-endDate=${promotion.endDate},
+                                                data-minOrderValue=${promotion.minOrderValue},
+                                                data-remainingQuantity=${promotion.remainingQuantity}"
+                                       onclick="openEditModal(this)">
+                                        <i class="fa-solid fa-pen"></i>
                                     </a>
+                                    <!-- Modal Sửa Khuyến Mãi -->
+                                    <div class="modal fade" id="editPromotionModal" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Sửa Khuyến Mãi</h5>
+                                                    <button type="button" class="btn-close"
+                                                            data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form th:action="@{/admin/promotions/update}" method="post" id="editPromotionForm"
+                                                          class="needs-validation" novalidate>
+                                                        <input type="hidden" id="editId" name="id">
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Tên Khuyến Mãi</label>
+                                                            <input type="text" class="form-control" id="editName"
+                                                                   name="name" required minlength="3" maxlength="255">
+                                                            <div class="invalid-feedback">Tên khuyến mãi phải từ 3 đến
+                                                                255 ký tự.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Mô Tả</label>
+                                                            <textarea class="form-control" id="editDescription"
+                                                                      name="description" maxlength="500"></textarea>
+                                                            <div class="invalid-feedback">Mô tả không được vượt quá 500
+                                                                ký tự.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Giảm Giá (%)</label>
+                                                            <input type="number" class="form-control" id="editDiscount"
+                                                                   name="discount" required min="1" max="100">
+                                                            <div class="invalid-feedback">Giảm giá phải từ 1% đến
+                                                                100%.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Giá Trị Tối Thiểu (VND)</label>
+                                                            <input type="number" class="form-control"
+                                                                   name="minOrderValue" id="editMinOrderValue" required
+                                                                   min="0">
+                                                            <div class="invalid-feedback">
+                                                                Giá trị tối thiểu không được âm.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Số Lượng Mã</label>
+                                                            <input type="number" class="form-control"
+                                                                   name="remainingQuantity" id="editRemainingQuantity"
+                                                                   required min="1">
+                                                            <div class="invalid-feedback">
+                                                                Số lượng mã phải lớn hơn hoặc bằng 1.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Ngày Bắt Đầu</label>
+                                                            <input type="datetime-local" class="form-control"
+                                                                   id="editStartDate" name="startDate" required>
+                                                            <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu.
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Ngày Kết Thúc</label>
+                                                            <input type="datetime-local" class="form-control"
+                                                                   id="editEndDate" name="endDate" required>
+                                                            <div class="invalid-feedback">Vui lòng chọn ngày kết thúc.
+                                                            </div>
+                                                        </div>
+
+                                                        <button type="submit" class="btn btn-primary">Cập Nhật</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </td>
                             </tr>
                             </tbody>
@@ -270,6 +396,107 @@
             });
         }, false);
     })();
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let now = new Date();
+        let minDateTime = now.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
+
+        // Set min date cho input ngày bắt đầu trong modal thêm
+        document.getElementById("start_date").setAttribute("min", minDateTime);
+        document.getElementById("end_date").setAttribute("min", minDateTime);
+
+        // Set min date cho input ngày bắt đầu trong modal sửa
+        document.getElementById("editStartDate").setAttribute("min", minDateTime);
+        document.getElementById("editEndDate").setAttribute("min", minDateTime);
+
+        // Khi chọn ngày bắt đầu, cập nhật min của ngày kết thúc
+        function updateMinEndDate(startDateInput, endDateInput) {
+            startDateInput.addEventListener("change", function () {
+                endDateInput.setAttribute("min", this.value);
+            });
+        }
+
+        updateMinEndDate(document.getElementById("start_date"), document.getElementById("end_date"));
+        updateMinEndDate(document.getElementById("editStartDate"), document.getElementById("editEndDate"));
+
+        function validatePromotionForm(formId, startDateId, endDateId) {
+            let form = document.getElementById(formId);
+            let startDateField = document.getElementById(startDateId);
+            let endDateField = document.getElementById(endDateId);
+
+            // Kiểm tra nếu các phần tử không tồn tại => Báo lỗi và dừng lại
+            if (!form) {
+                console.error(`Không tìm thấy form với ID: ${formId}`);
+                return;
+            }
+            if (!startDateField) {
+                console.error(`Không tìm thấy input startDate với ID: ${startDateId}`);
+                return;
+            }
+            if (!endDateField) {
+                console.error(`Không tìm thấy input endDate với ID: ${endDateId}`);
+                return;
+            }
+
+            form.addEventListener("submit", function (event) {
+                let startDate = new Date(startDateField.value);
+                let endDate = new Date(endDateField.value);
+                let now = new Date();
+                let valid = true;
+
+                // Kiểm tra ngày bắt đầu
+                if (startDate <= now) {
+                    startDateField.classList.add("is-invalid");
+                    startDateField.nextElementSibling.textContent = "Ngày bắt đầu phải lớn hơn thời điểm hiện tại.";
+                    valid = false;
+                } else {
+                    startDateField.classList.remove("is-invalid");
+                    startDateField.classList.add("is-valid");
+                }
+
+                // Kiểm tra ngày kết thúc
+                if (endDate <= startDate) {
+                    endDateField.classList.add("is-invalid");
+                    endDateField.nextElementSibling.textContent = "Ngày kết thúc phải lớn hơn ngày bắt đầu.";
+                    valid = false;
+                } else {
+                    endDateField.classList.remove("is-invalid");
+                    endDateField.classList.add("is-valid");
+                }
+
+                // Ngăn chặn form submit nếu có lỗi
+                if (!valid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add("was-validated");
+            });
+        }
+
+        // Gọi hàm với ID chính xác từ HTML
+        validatePromotionForm("promotionForm", "start_date", "end_date");
+        validatePromotionForm("editPromotionForm", "editStartDate", "editEndDate");
+    });
+
+    // Mở modal sửa và điền dữ liệu
+    function openEditModal(button) {
+        document.getElementById("editId").value = button.getAttribute("data-id");
+        document.getElementById("editName").value = button.getAttribute("data-name");
+        document.getElementById("editDescription").value = button.getAttribute("data-description");
+        document.getElementById("editDiscount").value = button.getAttribute("data-discount");
+        document.getElementById("editMinOrderValue").value = button.getAttribute("data-minOrderValue");
+        document.getElementById("editRemainingQuantity").value = button.getAttribute("data-remainingQuantity");
+
+        let startDate = button.getAttribute("data-startDate");
+        let endDate = button.getAttribute("data-endDate");
+
+        document.getElementById("editStartDate").value = startDate ? startDate.substring(0, 16) : "";
+        document.getElementById("editEndDate").value = endDate ? endDate.substring(0, 16) : "";
+
+        // Chỉ cho phép chỉnh sửa ngày kết thúc
+        document.getElementById("editStartDate").setAttribute("disabled", "true");
+    }
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
