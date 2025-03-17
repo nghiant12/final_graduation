@@ -73,7 +73,7 @@
 					<label for="eximbank"><img src="/images/eximbank.png" style="width: 70px;"></label>
 				</p>
 				<div>
-					<b id="total-amount"> Total : {{cart.amount | number:1 }}$</b>
+					<b id="total-amount"> Total : <span id="total-price">0 VND</span>$</b>
 					<button class="pay-button" ng-click="order.purchase()" ng-disabled="cart.amount === 0">Đặt hàng</button>
 				</div>
 			</form>
