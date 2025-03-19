@@ -82,7 +82,7 @@ public class ProductDetailController {
 
         try {
             if (!imageFile.isEmpty()) {
-                String uploadDir = "uploads/products/";
+                String uploadDir = "static/images/";
                 Path uploadPath = Paths.get(uploadDir);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
@@ -93,7 +93,7 @@ public class ProductDetailController {
 
                 try (InputStream inputStream = imageFile.getInputStream()) {
                     Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                    productDetail.setImage("/uploads/products/" + filename);
+                    productDetail.setImage("/images/" + filename);
                 }
             }
 
