@@ -49,10 +49,11 @@ public class ProductController {
             long totalQuantity = productDetailRepository.sumQuantityByProductId(product.getId());
             productQuantities.put(product.getId(), totalQuantity);
         }
-
+        Product p = new Product();
+        p.setStatus(true);
         model.addAttribute("products", products);
         model.addAttribute("productQuantities", productQuantities);
-        model.addAttribute("product", new Product());
+        model.addAttribute("product", p);
 
         return "admin/products/index";
     }

@@ -17,6 +17,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     Optional<Employee> findByUsername(String username);
 
+    Optional<Employee> findByEmail(String email);
+
     // Truy vấn danh sách nhân viên có role_id = 1 (staff)
     @Query("SELECT e FROM Employee e WHERE e.role.id = :roleId")
     List<Employee> findByRoleId(@Param("roleId") int roleId);

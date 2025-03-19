@@ -19,22 +19,15 @@
 <body>
     <div class="container" id="container">
         <div class="form-container sign-up">
-            <form th:action="@{/login/signup}" th:object="${account}" method="post">
-                <div class="social-icons">
-                    <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-github"></i></a>
-                    <a href="#" class="icon"><i class="fa-brands fa-linkedin-in"></i></a>
-                </div>
-                <input th:field="*{username}" type="text" placeholder="Username">
-                <input th:field="*{password}" type="password" id="password" class="form-control" placeholder="Password">
-                <input th:field="*{confirmPassword}" type="password" id="confirm-password" class="form-control"
-                    placeholder="Confirm-password" />
-                <input th:field="*{fullname}" type="text" id="full-name" class="form-control" placeholder="Full-name" />
-                <input th:field="*{email}" type="email" id="email" class="form-control" placeholder="Email" />
-                <input th:field="*{sdt}" type="tel" id="phone-number" class="form-control" placeholder="Phone-number" />
-                <input th:field="*{address}" type="text" id="address" class="form-control" placeholder="Address" />
-                <button type="submit">Sign Up</button>
+            <form th:action="@{/login/signup/customer}" th:object="${account}" method="post">
+                <input th:field="*{username}" type="text" placeholder="Username" required>
+                <input th:field="*{password}" type="password" placeholder="Password" required>
+                <input name="confirmPassword" type="password" placeholder="Confirm Password" required>
+                <input th:field="*{fullname}" type="text" placeholder="Full Name" required>
+                <input th:field="*{email}" type="email" placeholder="Email" required>
+                <input th:field="*{phoneNumber}" type="tel" placeholder="Phone Number" required>
+                <input th:field="*{address}" type="text" placeholder="Address">
+                <button type="submit">Sign Up as Customer</button>
             </form>
         </div>
         <div class="form-container sign-in">

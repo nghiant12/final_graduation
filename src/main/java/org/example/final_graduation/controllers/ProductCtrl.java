@@ -1,19 +1,15 @@
 package org.example.final_graduation.controllers;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.example.final_graduation.entities.Category;
-import org.example.final_graduation.entities.Product;
 import org.example.final_graduation.entities.ProductDetail;
-import org.example.final_graduation.entities.Size;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
-import org.example.final_graduation.repositories.products.ProductRepository;
 import org.example.final_graduation.repositories.products.attributes.CategoryRepository;
-import org.example.final_graduation.repositories.products.attributes.SizeRepository;
 import org.example.final_graduation.services.CategoryService;
-import org.example.final_graduation.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.data.domain.Page;
@@ -33,10 +29,6 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 @RequestMapping("product")
 public class ProductCtrl {
-
-    @Autowired
-    ProductService productService;
-
     @Autowired
     CategoryService categoryService;
 
@@ -48,10 +40,6 @@ public class ProductCtrl {
 
     @Autowired
     HttpSession session;
-    @Autowired
-    private SizeRepository sizeRepository;
-    @Autowired
-    private ProductRepository productRepository;
 
     @ModelAttribute("categoryCounts")
     public Map<Category, Long> categoryCounts() {
@@ -69,10 +57,10 @@ public class ProductCtrl {
         if (sortType.isPresent() && sortType.get().equalsIgnoreCase("desc")) {
             sort = Sort.by(Sort.Direction.DESC, "price");
             model.addAttribute("sortType", sortType.get());
-        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")){
+        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")) {
             sort = Sort.by(Sort.Direction.ASC, "price");
             model.addAttribute("sortType", sortType.get());
-        } else{
+        } else {
             sort = Sort.by(Sort.Direction.ASC, "product.name");
         }
 
@@ -106,10 +94,10 @@ public class ProductCtrl {
         if (sortType.isPresent() && sortType.get().equalsIgnoreCase("desc")) {
             sort = Sort.by(Sort.Direction.DESC, "price");
             model.addAttribute("sortType", sortType.get());
-        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")){
+        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")) {
             sort = Sort.by(Sort.Direction.ASC, "price");
             model.addAttribute("sortType", sortType.get());
-        } else{
+        } else {
             sort = Sort.by(Sort.Direction.ASC, "category.name");
         }
 
@@ -133,11 +121,11 @@ public class ProductCtrl {
             page = productDetailRepo.findByPriceBetweenAndCategoryIn(fromPrice, toPrice, categoryEntities, pageable);
         } else {
 
-            page = productDetailRepo.findByPriceBetween(fromPrice,toPrice, pageable);
+            page = productDetailRepo.findByPriceBetween(fromPrice, toPrice, pageable);
         }
 
         for (Category category : categoryEntities) {
-            if(category == categoryEntities.get(categoryEntities.size() - 1)) {
+            if (category == categoryEntities.get(categoryEntities.size() - 1)) {
                 showCondition += category.getName();
             } else {
                 showCondition += category.getName() + ", ";
@@ -151,7 +139,7 @@ public class ProductCtrl {
 
         if (categoryIds == null) {
             model.addAttribute("cname", "$" + fromPrice + " to " + "$" + toPrice);
-        } else if(categoryIds != null && (fromPrice != 0 || toPrice != 5000000)) {
+        } else if (categoryIds != null && (fromPrice != 0 || toPrice != 5000000)) {
             model.addAttribute("cname", showCondition + " $" + fromPrice + " to " + "$" + toPrice);
         } else {
             model.addAttribute("cname", showCondition);
@@ -169,10 +157,10 @@ public class ProductCtrl {
         if (sortType.isPresent() && sortType.get().equalsIgnoreCase("desc")) {
             sort = Sort.by(Sort.Direction.DESC, "price");
             model.addAttribute("sortType", sortType.get());
-        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")){
+        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")) {
             sort = Sort.by(Sort.Direction.ASC, "price");
             model.addAttribute("sortType", sortType.get());
-        } else{
+        } else {
             sort = Sort.by(Sort.Direction.ASC, "product.name");
         }
 
@@ -181,9 +169,9 @@ public class ProductCtrl {
 
         model.addAttribute("page", page);
 
-        if(name.isEmpty()) {
+        if (name.isEmpty()) {
             model.addAttribute("cname", "ALL");
-        }else {
+        } else {
             model.addAttribute("cname", name);
         }
 

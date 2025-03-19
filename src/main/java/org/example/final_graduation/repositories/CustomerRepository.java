@@ -14,6 +14,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     // Tìm khách hàng theo username
     Optional<Customer> findByUsername(String username);
 
+    Optional<Customer> findByEmail(String email);
+
     // Kiểm tra username đã tồn tại chưa
     boolean existsByUsername(String username);
 
@@ -22,26 +24,26 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
     // Tìm tài khoản theo ID
     @Query("""
-        SELECT c FROM Customer c WHERE c.id = :id
-    """)
+                SELECT c FROM Customer c WHERE c.id = :id
+            """)
     Customer findByID(@Param("id") Integer id);
 
     // Tìm kiếm tài khoản theo từ khóa (username, fullname, hoặc email)
     @Query("""
-        SELECT c FROM Customer c
-        WHERE LOWER(c.username) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(c.fullname) LIKE LOWER(CONCAT('%', :keyword, '%'))
-           OR LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
-    """)
+                SELECT c FROM Customer c
+                WHERE LOWER(c.username) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                   OR LOWER(c.fullname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                   OR LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            """)
     List<Customer> searchByKeyword(@Param("keyword") String keyword);
 
     @Query("""
-        SELECT c FROM Customer c
-        WHERE (c.email LIKE CONCAT('%', :query, '%')
-            OR c.fullname LIKE CONCAT('%', :query, '%')
-            OR c.phoneNumber LIKE CONCAT('%', :query, '%'))
-        AND c.id <> 1
-    """)
+                SELECT c FROM Customer c
+                WHERE (c.email LIKE CONCAT('%', :query, '%')
+                    OR c.fullname LIKE CONCAT('%', :query, '%')
+                    OR c.phoneNumber LIKE CONCAT('%', :query, '%'))
+                AND c.id <> 1
+            """)
     List<Customer> findCustomers(@Param("query") String query);
 
 }

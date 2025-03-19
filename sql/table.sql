@@ -155,10 +155,13 @@ ALTER TABLE orders
 ADD promotion_id INT NULL;
 
 ALTER TABLE orders 
+ADD payment_method NVARCHAR(50) NULL;
+
+ALTER TABLE orders 
 ADD CONSTRAINT FK_orders_promotions FOREIGN KEY (promotion_id) 
 REFERENCES promotions(id);
 
-ALTER TABLE promotions ALTER COLUMN min_order_value NUMERIC(38,2);
+ALTER TABLE promotions ADD min_order_value NUMERIC(38,2);
 
 ALTER TABLE promotions 
 ADD remaining_quantity INT NOT NULL DEFAULT 0;
