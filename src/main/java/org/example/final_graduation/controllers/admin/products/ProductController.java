@@ -11,13 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("admin/products")
@@ -136,42 +140,101 @@ public class ProductController {
             @RequestParam("size.id") Integer sizeId,
             @RequestParam("price") BigDecimal price,
             @RequestParam("quantity") Integer quantity,
-            @RequestParam("image") String image,
+            @RequestParam(value = "image", required = false) String image,
             @RequestParam("available") Boolean available,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            @RequestParam(value = "imageFile", required = false) MultipartFile imageFile) {
 
-        // Kiểm tra sản phẩm chi tiết có bị trùng không
-        long count = productDetailRepository.countExistingProductDetail(productId, brandId, colorId, sizeId);
-        if (count > 0) {
-            redirectAttributes.addFlashAttribute("error", "Sản phẩm chi tiết đã tồn tại!");
-            return "redirect:/admin/products/detail?idProduct=" + productId;
+        try {
+            // Kiểm tra sản phẩm chi tiết có bị trùng không
+            long count = productDetailRepository.countExistingProductDetail(productId, brandId, colorId, sizeId);
+            if (count > 0) {
+                redirectAttributes.addFlashAttribute("error", "Sản phẩm chi tiết đã tồn tại!");
+                return "redirect:/admin/products/detail?idProduct=" + productId;
+            }
+
+            // Kiểm tra xem sản phẩm có tồn tại không
+            Product product = productRepository.findById(productId).orElse(null);
+            if (product == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm!");
+                return "redirect:/admin/products";
+            }
+
+            // Kiểm tra các thuộc tính liên quan
+            Category category = categoryRepository.findById(categoryId).orElse(null);
+            if (category == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy danh mục!");
+                return "redirect:/admin/products";
+            }
+
+            Brand brand = brandRepository.findById(brandId).orElse(null);
+            if (brand == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy thương hiệu!");
+                return "redirect:/admin/products";
+            }
+
+            Color color = colorRepository.findById(colorId).orElse(null);
+            if (color == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy màu sắc!");
+                return "redirect:/admin/products";
+            }
+
+            Size size = sizeRepository.findById(sizeId).orElse(null);
+            if (size == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy kích thước!");
+                return "redirect:/admin/products";
+            }
+
+            // Tạo đối tượng ProductDetail mới
+            ProductDetail productDetail = new ProductDetail();
+            productDetail.setProduct(product);
+            productDetail.setCategory(category);
+            productDetail.setBrand(brand);
+            productDetail.setColor(color);
+            productDetail.setSize(size);
+            productDetail.setPrice(price);
+            productDetail.setQuantity(quantity);
+            productDetail.setAvailable(available);
+            productDetail.setCreatedDate(LocalDateTime.now());
+
+            // Xử lý ảnh
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String uploadDir = "uploads/products/";
+                String fileName = UUID.randomUUID().toString() + "_" + Paths.get(imageFile.getOriginalFilename()).getFileName().toString();
+                Path uploadPath = Paths.get(uploadDir);
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                // Kiểm tra định dạng file
+                String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+                if (!allowedExtensions.contains(fileExtension)) {
+                    redirectAttributes.addFlashAttribute("error", "Chỉ cho phép tải lên file JPG, PNG hoặc GIF.");
+                    return "redirect:/admin/products/detail?idProduct=" + productId;
+                }
+
+                // Lưu file
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                productDetail.setImage("/" + uploadDir + fileName);
+            } else if (image != null && !image.isEmpty()) {
+                productDetail.setImage(image);
+            } else {
+                productDetail.setImage("/uploads/products/default.png"); // Ảnh mặc định
+            }
+
+            // Lưu vào database
+            productDetailRepository.save(productDetail);
+
+            redirectAttributes.addFlashAttribute("success", "Thêm sản phẩm chi tiết thành công!");
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi tải lên file!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi!");
         }
-
-        // Tạo đối tượng ProductDetail từ tham số nhận được
-        ProductDetail productDetail = new ProductDetail();
-
-        // Lấy Product từ database
-        Product product = productRepository.findById(productId).orElse(null);
-        if (product == null) {
-            redirectAttributes.addFlashAttribute("error", "Product not found!");
-            return "redirect:/admin/products";
-        }
-        productDetail.setProduct(product);
-
-        productDetail.setCategory(categoryRepository.findById(categoryId).orElse(null));
-        productDetail.setBrand(brandRepository.findById(brandId).orElse(null));
-        productDetail.setColor(colorRepository.findById(colorId).orElse(null));
-        productDetail.setSize(sizeRepository.findById(sizeId).orElse(null));
-
-        // Gán các giá trị còn lại
-        productDetail.setPrice(price);
-        productDetail.setQuantity(quantity);
-        productDetail.setImage(image);
-        productDetail.setAvailable(available);
-        productDetail.setCreatedDate(LocalDateTime.now());
-
-        // Lưu vào database
-        productDetailRepository.save(productDetail);
 
         return "redirect:/admin/products/detail?idProduct=" + productId;
     }
@@ -184,28 +247,72 @@ public class ProductController {
             @RequestParam("size.id") Integer sizeId,
             @RequestParam("price") BigDecimal price,
             @RequestParam("quantity") Integer quantity,
-            @RequestParam("image") String image,
+            @RequestParam(value = "image", required = false) String image,
             @RequestParam("available") Boolean available,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            @RequestParam("imageFile") MultipartFile imageFile) {
 
-        // Tìm sản phẩm chi tiết cần cập nhật
         ProductDetail productDetail = productDetailRepository.findById(id).orElse(null);
         if (productDetail == null) {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm chi tiết!");
             return "redirect:/admin/products";
         }
 
-        // Cập nhật thông tin
-        productDetail.setBrand(brandRepository.findById(brandId).orElse(null));
-        productDetail.setColor(colorRepository.findById(colorId).orElse(null));
-        productDetail.setSize(sizeRepository.findById(sizeId).orElse(null));
-        productDetail.setPrice(price);
-        productDetail.setQuantity(quantity);
-        productDetail.setImage(image);
-        productDetail.setAvailable(available);
+        try {
+            if (imageFile != null && !imageFile.isEmpty()) {
+                String uploadDir = "uploads/products/";
+                String fileName = UUID.randomUUID().toString() + "_" + Paths.get(imageFile.getOriginalFilename()).getFileName().toString();
+                Path uploadPath = Paths.get(uploadDir);
 
-        // Lưu vào database
-        productDetailRepository.save(productDetail);
+                if (!Files.exists(uploadPath)) {
+                    Files.createDirectories(uploadPath);
+                }
+
+                String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+                List<String> allowedExtensions = Arrays.asList("jpg", "jpeg", "png", "gif");
+                if (!allowedExtensions.contains(fileExtension)) {
+                    redirectAttributes.addFlashAttribute("error", "Invalid file type! Only JPG, PNG, and GIF are allowed.");
+                    return "redirect:/admin/products";
+                }
+
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(imageFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                productDetail.setImage("/" + uploadDir + fileName);
+            } else if (image != null && !image.isEmpty()) {
+                productDetail.setImage(image);
+            }
+
+            Brand brand = brandRepository.findById(brandId).orElse(null);
+            if (brand == null) {
+                redirectAttributes.addFlashAttribute("error", "Brand not found!");
+                return "redirect:/admin/products";
+            }
+
+            Color color = colorRepository.findById(colorId).orElse(null);
+            if (color == null) {
+                redirectAttributes.addFlashAttribute("error", "Color not found!");
+                return "redirect:/admin/products";
+            }
+
+            Size size = sizeRepository.findById(sizeId).orElse(null);
+            if (size == null) {
+                redirectAttributes.addFlashAttribute("error", "Size not found!");
+                return "redirect:/admin/products";
+            }
+
+            productDetail.setBrand(brand);
+            productDetail.setColor(color);
+            productDetail.setSize(size);
+            productDetail.setPrice(price);
+            productDetail.setQuantity(quantity);
+            productDetail.setAvailable(available);
+
+            productDetailRepository.save(productDetail);
+
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "File upload failed!");
+            return "redirect:/admin/products";
+        }
 
         return "redirect:/admin/products/detail?idProduct=" + productDetail.getProduct().getId();
     }

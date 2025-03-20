@@ -201,13 +201,13 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mb-3">
-                                                <label class="form-label">Ảnh đại diện</label>
-                                                <input type="file" class="form-control" name="photo" accept="image/*"
-                                                       onchange="previewEditImage(event)">
-                                                <img id="previewEdit" src="#" alt="Xem trước ảnh"
-                                                     style="width: 50px; height: 50px; border-radius: 50%; display: none;"/>
-                                            </div>
+<!--                                            <div class="mb-3">-->
+<!--                                                <label class="form-label">Ảnh đại diện</label>-->
+<!--                                                <input type="file" class="form-control" name="photo" accept="image/*"-->
+<!--                                                       onchange="previewEditImage(event)">-->
+<!--                                                <img id="previewEdit" src="#" alt="Xem trước ảnh"-->
+<!--                                                     style="width: 50px; height: 50px; border-radius: 50%; display: none;"/>-->
+<!--                                            </div>-->
 
                                             <div class="modal-footer">
                                                 <button type="submit" class="btn btn-primary">Cập nhật</button>
@@ -237,7 +237,7 @@
                                 <th>Email</th>
                                 <th>Địa chỉ</th>
                                 <th>Số điện thoại</th>
-                                <th>Ảnh đại diện</th>
+<!--                                <th>Ảnh đại diện</th>-->
                                 <th>Thao tác</th>
                             </tr>
                             </thead>
@@ -249,11 +249,11 @@
                                 <td th:text="${customer.email}"></td>
                                 <td th:text="${customer.address}"></td>
                                 <td th:text="${customer.phoneNumber}"></td>
-                                <td>
-                                    <img th:if="${customer.photo}" th:src="${customer.photo}" alt="Ảnh đại diện"
-                                         style="width: 50px; height: 50px; border-radius: 50%;"/>
-                                    <span th:unless="${customer.photo}">Không có ảnh</span>
-                                </td>
+<!--                                <td>-->
+<!--                                    <img th:if="${customer.photo}" th:src="${customer.photo}" alt="Ảnh đại diện"-->
+<!--                                         style="width: 50px; height: 50px; border-radius: 50%;"/>-->
+<!--                                    <span th:unless="${customer.photo}">Không có ảnh</span>-->
+<!--                                </td>-->
                                 <td>
                                     <a href="#" class="btn btn-link btn-sm" data-bs-toggle="modal"
                                        data-bs-target="#editCustomerModal"

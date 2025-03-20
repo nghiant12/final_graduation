@@ -1,5 +1,6 @@
 package org.example.final_graduation.controllers.admin.orders;
 
+import jakarta.servlet.http.HttpSession;
 import org.example.final_graduation.entities.*;
 import org.example.final_graduation.repositories.CustomerRepository;
 import org.example.final_graduation.repositories.EmployeeRepository;
@@ -71,6 +72,8 @@ public class OrderController {
 
     @Autowired
     private OrderDetailService orderDetailService;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     // Hiển thị form tạo đơn hàng mới
     @GetMapping("")
@@ -78,7 +81,6 @@ public class OrderController {
         Order order = new Order();
         // Giả sử bạn có người dùng đang đăng nhập (user)
         // Bạn có thể lấy từ session hoặc security context
-        // Ví dụ đơn giản:
         // Thiết lập admin nếu cần
         Optional<Employee> adminUser = empolyeeService.getEmployeeById(4); // Giả sử admin ID = 2
         adminUser.ifPresent(order::setEmployee);

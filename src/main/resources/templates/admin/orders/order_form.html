@@ -337,6 +337,7 @@
                                 <thead>
                                 <tr>
                                     <th>STT</th>
+                                    <th>Ảnh</th>
                                     <th>Tên SP</th>
                                     <th>Thương hiệu</th>
                                     <th>Màu</th>
@@ -350,6 +351,10 @@
                                 <tr th:each="productDetail, stat : ${productDetails}">
                                     <td th:text="${stat.index+1}"></td>
                                     <!--                                    <td th:text="${productDetail.id}"></td>-->
+                                    <td>
+                                        <img th:src="${productDetail.image}" alt="Product Image"
+                                             style="width: 100px; height: auto;">
+                                    </td>
                                     <td th:text="${productDetail.product.name}"></td>
                                     <td th:text="${productDetail.brand.name}"></td>
                                     <td th:text="${productDetail.color.name}"></td>

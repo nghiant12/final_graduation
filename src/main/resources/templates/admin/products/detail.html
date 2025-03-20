@@ -93,7 +93,7 @@
                                 <th>Kích thước</th>
                                 <th>Màu sắc</th>
                                 <th>Thương hiệu</th>
-                                <th>Thông tin chi tiết</th>
+                                <th>Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -120,7 +120,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(productDetails)}">
-                                <td colspan="3">Không có sản phẩm nào.</td>
+                                <td colspan="6">Không có sản phẩm nào.</td>
                             </tr>
                             </tbody>
                         </table>
@@ -145,13 +145,22 @@
 <div class="modal fade" id="addProductDetailModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form th:action="@{/admin/products/addDetail}" method="post" class="needs-validation" novalidate>
+            <form th:action="@{/admin/products/addDetail}" method="post" class="needs-validation" novalidate
+                  enctype="multipart/form-data">
+                <input type="hidden" name="product.id" th:value="${idProduct}"/>
                 <div class="modal-header">
                     <h5 class="modal-title">Thêm sản phẩm chi tiết</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="id"/>
+                    <!-- Combobox Categories -->
+                    <div class="mb-3">
+                        <label class="form-label">Danh mục sản phẩm</label>
+                        <select class="form-select" name="category.id">
+                            <option th:each="category : ${categories}" th:value="${category.id}"
+                                    th:text="${category.name}"></option>
+                        </select>
+                    </div>
 
                     <!-- Combobox Brand -->
                     <div class="mb-3">
@@ -192,12 +201,17 @@
                         <div class="invalid-feedback">Số lượng phải là số nguyên dương.</div>
                     </div>
 
-                    <!-- Image URL -->
+                    <!--                    &lt;!&ndash; Image URL &ndash;&gt;-->
+                    <!--                    <div class="mb-3">-->
+                    <!--                        <label class="form-label">Image URL</label>-->
+                    <!--                        <input type="text" class="form-control" name="image">-->
+                    <!--                    </div>-->
                     <div class="mb-3">
-                        <label class="form-label">Image URL</label>
-                        <input type="text" class="form-control" name="image">
+                        <label for="imageFile" class="form-label">Chọn ảnh:</label>
+                        <input type="file" class="form-control imageFileInput" name="imageFile" accept="image/*"
+                               onchange="previewImage(this);">
+                        <input type="hidden" name="image" value="">
                     </div>
-
                     <!-- Trạng thái -->
                     <div class="mb-3">
                         <label class="form-label">Trạng thái</label>
@@ -222,13 +236,26 @@
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form th:action="@{/admin/products/updateDetail}" method="post" class="needs-validation" novalidate>
+                <form th:action="@{/admin/products/updateDetail}" method="post" class="needs-validation" novalidate
+                      enctype="multipart/form-data">
                     <div class="modal-header">
                         <h5 class="modal-title">Chỉnh sửa sản phẩm chi tiết</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="id" th:value="${detail.id}"/>
+
+                        <!-- Combobox Categories -->
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục sản phẩm</label>
+                            <select class="form-select" name="category.id">
+                                <option th:each="category : ${categories}"
+                                        th:value="${category.id}"
+                                        th:text="${category.name}"
+                                        th:selected="${category.id == detail.category.id}">
+                                </option>
+                            </select>
+                        </div>
 
                         <!-- Combobox Brand -->
                         <div class="mb-3">
@@ -284,9 +311,18 @@
                             </div>
                         </div>
 
+                        <!--                        <div class="mb-3">-->
+                        <!--                            <label class="form-label">Image URL</label>-->
+                        <!--                            <input type="text" class="form-control" name="image" th:value="${detail.image}">-->
+                        <!--                        </div>-->
+
                         <div class="mb-3">
-                            <label class="form-label">Image URL</label>
-                            <input type="text" class="form-control" name="image" th:value="${detail.image}">
+                            <label for="imageFile" class="form-label">Chọn ảnh:</label>
+                            <input type="file" class="form-control" id="imageFile" name="imageFile" accept="image/*"
+                                   onchange="previewImage(this);">
+                            <input type="hidden" name="image" value="">
+                            <img class="previewImage" th:src="@{${detail.image}}" alt="Preview"
+                                 style="max-width: 200px; display: block;">
                         </div>
 
                         <div class="mb-3">
@@ -386,6 +422,24 @@
             });
         }
     });
+
+    function previewImage(input) {
+        let file = input.files[0];
+        let modal = input.closest(".modal"); // Tìm modal chứa input
+        let preview = modal.querySelector(".previewImage"); // Tìm ảnh trong modal đó
+
+        if (file && preview) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "";
+            preview.style.display = "none";
+        }
+    }
 </script>
 </body>
 </html>
