@@ -8,44 +8,36 @@
     <meta name="author" content=""/>
     <title>Bán hàng</title>
     <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet"/>
-    <!--    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">-->
-    <!--    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" defer></script>-->
     <link th:href="@{/admin/css/styles.css}" rel="stylesheet"/>
     <link th:href="@{/admin/css/order.css}" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        #orderDetailsContainer {
+            max-height: 260px; /* Giới hạn chiều cao */
+            overflow-y: auto; /* Bật thanh cuộn dọc */
+            /*padding-right: 5px;*/
+        }
+
+        /* Ẩn thanh cuộn trên trình duyệt Webkit (Chrome, Edge) */
+        #orderDetailsContainer::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #orderDetailsContainer::-webkit-scrollbar-thumb {
+            background-color: #888;
+            border-radius: 3px;
+        }
+
+        #orderDetailsContainer::-webkit-scrollbar-thumb:hover {
+            background-color: #555;
+        }
+
+    </style>
 </head>
 <body class="sb-nav-fixed">
-<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="#">Start Bootstrap</a>
-    <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
-            class="fas fa-bars"></i></button>
-    <!-- Navbar Search-->
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
-                   aria-describedby="btnNavbarSearch"/>
-            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-        </div>
-    </form>
-    <!-- Navbar-->
-    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
-               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#!">Settings</a></li>
-                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                <li>
-                    <hr class="dropdown-divider"/>
-                </li>
-                <li><a class="dropdown-item" href="#!">Logout</a></li>
-            </ul>
-        </li>
-    </ul>
-</nav>
+
+<div th:replace="navbar :: navbar"></div> <!-- Sidebar Menu -->
 
 <!-- Menu Sidebar -->
 <div id="layoutSidenav">
@@ -57,325 +49,356 @@
     <div id="layoutSidenav_content">
         <main>
             <div class="container-fluid px-4">
-                <h1 class="mt-4">Bán hàng</h1>
+                <h1 class="mt-4">NOW SNEAKER</h1>
                 <ol class="breadcrumb mb-4">
                     <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
                     <li class="breadcrumb-item active">Bán hàng</li>
                 </ol>
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <!-- Thông báo lỗi -->
-                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                            <span th:text="${error}">Lỗi</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                <div class="my-4 order-container row">
+                    <div class="col-6">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <!-- Thông báo lỗi -->
+                                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show"
+                                     role="alert">
+                                    <span th:text="${error}">Lỗi</span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                </div>
+
+                                <!-- Thông báo thành công -->
+                                <div th:if="${success}" class="alert alert-success alert-dismissible fade show"
+                                     role="alert">
+                                    <span th:text="${success}">Thành công</span>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                            aria-label="Close"></button>
+                                </div>
+
+
+                                <div class="d-flex align-items-center">
+                                    <form th:action="@{/admin/orders/create}" method="post" style="display: inline;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn thêm hóa đơn mới không?');">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-plus-circle me-1"></i>Thêm hóa đơn
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/orders/cancel/{id}(id=${order.id})}" method="post"
+                                          style="display: inline; margin-left: 10px;"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này không?');">
+                                        <button type="submit" class="btn btn-danger"
+                                                th:disabled="${order.id == null}">
+                                            <i class="fas fa-times-circle me-1"></i>Hủy hóa đơn
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
                         </div>
-
-                        <!-- Thông báo thành công -->
-                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                            <span th:text="${success}">Thành công</span>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-
-
-                        <div class="d-flex align-items-center mb-3">
-                            <form th:action="@{/admin/orders/create}" method="post" style="display: inline;"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn thêm hóa đơn mới không?');">
-                                <button type="submit" class="btn btn-success">
-                                    <i class="fas fa-plus-circle me-1"></i>Thêm hóa đơn
-                                </button>
-                            </form>
-                            <form th:action="@{/admin/orders/cancel/{id}(id=${order.id})}" method="post"
-                                  style="display: inline; margin-left: 10px;"
-                                  onsubmit="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này không?');">
-                                <button type="submit" class="btn btn-danger"
-                                        th:disabled="${order.id == null}">
-                                    <i class="fas fa-times-circle me-1"></i>Hủy hóa đơn
-                                </button>
-                            </form>
-                        </div>
-
-                    </div>
-                </div>
-                <!-- Tabs -->
-                <ul class="nav nav-tabs mb-4">
-                    <li class="nav-item" th:each="order, stat : ${orders}">
-                        <a class="nav-link"
-                           th:classappend="${order.id == idOrder} ? 'active' : ''"
-                           th:href="@{'/admin/orders/detail'(idOrder=${order.id})}" style="color: black">
-                            Hóa đơn <span th:text="${stat.index +1}"></span>
-                        </a>
-                    </li>
-                </ul>
-                <!-- Product Section -->
-                <div class="mb-4 order-container">
-                    <div class="row">
-                        <div class="col-8">
-                            <div id="orderDetailsContainer" th:if="${orderDetails != null and orderDetails.size() > 0}">
-                                <div th:each="orderDetail : ${orderDetails}"
-                                     class="d-flex align-items-center border rounded-3 p-3 mb-3">
-                                    <img th:src="@{${orderDetail.productDetail.image}}" alt="Product" class="me-3"
-                                         width="100"
-                                         height="100">
-                                    <div>
-                                        <div style="display: flex; align-items: center;">
-                                            <h6 th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</h6>
-                                            <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
-                                            <h6 th:text="${orderDetail.productDetail.size.name}">Size</h6>
-                                            <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
-                                            <h6 th:text="${orderDetail.productDetail.color.name}">Color</h6>
-                                            <h6 style="margin-left: 10px; margin-right: 10px">-</h6>
-                                            <h6 th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
-                                                Price</h6>
-                                        </div>
-                                        <p class="text-danger fw-bold"
-                                           th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></p>
+                        <!-- Tabs -->
+                        <ul class="nav nav-tabs mb-4">
+                            <li class="nav-item" th:each="order, stat : ${orders}">
+                                <a class="nav-link"
+                                   th:classappend="${order.id == idOrder} ? 'active' : ''"
+                                   th:href="@{'/admin/orders/detail'(idOrder=${order.id})}" style="color: black">
+                                    Hóa đơn <span th:text="${stat.index +1}"></span>
+                                </a>
+                            </li>
+                        </ul>
+                        <div id="orderDetailsContainer" th:if="${orderDetails != null and orderDetails.size() > 0}">
+                            <div th:each="orderDetail : ${orderDetails}"
+                                 class="order-item
+                                        d-flex align-items-center
+                                        border rounded-3 pt-2 pb-1 mb-2">
+                                <img th:src="@{${orderDetail.productDetail.image}}"
+                                     alt="Product" class="mx-3" width="45" height="45">
+                                <div>
+                                    <div style="display: flex; align-items: center;">
+                                        <p th:text="${orderDetail.productDetail.product.name}">Tên sản phẩm</p>
+                                        <p style="margin-left: 10px; margin-right: 10px">-</p>
+                                        <p th:text="${orderDetail.productDetail.size.name}">Size</p>
+                                        <p style="margin-left: 10px; margin-right: 10px">-</p>
+                                        <p th:text="${orderDetail.productDetail.color.name}">Color</p>
+                                        <p style="margin-left: 10px; margin-right: 10px">-</p>
+                                        <p th:text="${#numbers.formatDecimal(orderDetail.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'">
+                                            Price</p>
                                     </div>
-                                    <div class="ms-auto d-flex align-items-center">
-                                            <!-- Nút giảm (-) -->
-                                            <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
-                                                  method="post">
-                                                <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}">
-                                                <input type="hidden" name="idOrder" th:value="${order.id}">
-                                                <button type="submit" name="action" value="decrease"
-                                                        class="btn btn-icon decrease-btn"
-                                                        th:disabled="${orderDetail.quantity == 1}">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                            </form>
+                                    <span class="text-danger fw-bold"
+                                          th:text="${#numbers.formatDecimal(orderDetail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                                </div>
 
-                                            <!-- Ô nhập số lượng -->
-                                            <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
-                                                  method="post">
-                                                <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}">
-                                                <input type="hidden" name="idOrder" th:value="${order.id}">
-                                                <input type="number" name="quantity"
-                                                       class="form-control text-center quantity-input"
-                                                       th:value="${orderDetail.quantity}" min="1"
-                                                       style="width: 60px;"
-                                                       onkeydown="if(event.key === 'Enter') this.form.submit();"/>
-                                            </form>
-                                            <!-- Nút tăng (+) -->
-                                            <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
-                                                  method="post">
-                                                <input type="hidden" name="idOrder" th:value="${order.id}">
-                                                <button type="submit" name="action" value="increase"
-                                                        class="btn btn-icon increase-btn"
-                                                        th:disabled="${orderDetail.productDetail.quantity == 0}">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
-                                            </form>
+                                <div class="ms-auto d-flex align-items-center">
+                                    <!-- Nút giảm (-) -->
+                                    <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
+                                          method="post">
+                                        <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}">
+                                        <input type="hidden" name="idOrder" th:value="${order.id}">
+                                        <button type="submit" name="action" value="decrease"
+                                                class="btn btn-icon decrease-btn"
+                                                th:disabled="${orderDetail.quantity == 1}">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                    </form>
 
-                                            <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-3"
-                                                  onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
-                                                <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
-                                                <button type="submit" class="btn btn-danger">
-                                                    <i class="fas fa-trash me-1"></i>
-                                                </button>
-                                            </form>
-                                    </div>
+                                    <!-- Ô nhập số lượng -->
+                                    <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
+                                          method="post">
+                                        <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}">
+                                        <input type="hidden" name="idOrder" th:value="${order.id}">
+                                        <input type="number" name="quantity"
+                                               class="form-control text-center quantity-input"
+                                               th:value="${orderDetail.quantity}" min="1"
+                                               style="width: 60px;"
+                                               onkeydown="if(event.key === 'Enter') this.form.submit();"/>
+                                    </form>
+                                    <!-- Nút tăng (+) -->
+                                    <form th:action="@{/admin/orders/updateQuantity/{id}(id=${orderDetail.id})}"
+                                          method="post">
+                                        <input type="hidden" name="idOrder" th:value="${order.id}">
+                                        <button type="submit" name="action" value="increase"
+                                                class="btn btn-icon increase-btn"
+                                                th:disabled="${orderDetail.productDetail.quantity == 0}">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </form>
+
+                                    <form th:action="@{/admin/orders/removeProduct}" method="post" class="ms-1"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                                        <input type="hidden" name="orderDetailId" th:value="${orderDetail.id}"/>
+                                        <button type="submit" class="btn">
+                                            <i class="fas fa-trash" style="color: #DC3545"></i>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
-                            <!-- Thông báo khi không có sản phẩm -->
-                            <div id="noProductsMessage" th:if="${orderDetails == null or orderDetails.isEmpty()}">
-                                <h3>Chưa có sản phẩm</h3>
-                            </div>
                         </div>
-                        <div class="col-4">
-                            <!-- Customer Section -->
-                            <div class="mb-4" style="position: relative;">
-                                <h5>Khách hàng</h5>
-                                <input type="text" id="customerSearch" th:disabled="${order.id == null}"
-                                       class="form-control"
-                                       placeholder="Tìm kiếm khách hàng..." autocomplete="off">
-                                <div id="customerResults" class="dropdown-content"></div>
-                            </div>
 
-                            <!-- Order Info -->
-                            <div class="border p-3">
-                                <form th:action="@{/admin/orders/confirm/{id}(id=${order.id})}" method="post"
+                        <!-- Thông báo khi không có sản phẩm -->
+                        <div id="noProductsMessage" th:if="${orderDetails == null or orderDetails.isEmpty()}">
+                            <h3>Chưa có sản phẩm</h3>
+                        </div>
+
+                        <!-- Order Info -->
+                        <div class="card mt-2">
+                            <div class="card-header"><i class="fa-solid fa-cart-shopping"></i> Thông tin đơn hàng</div>
+                            <div class="card-body">
+                                <form id="addOrderForm" th:action="@{/admin/orders/confirm/{id}(id=${order.id})}" method="post"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xác nhận đơn hàng không?');">
-                                    <h5>Thông tin đơn hàng</h5>
 
-                                    <p>Khách hàng: <span
-                                            th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span>
-                                    </p>
-                                    <p>Nhân viên: <span
-                                            th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span>
-                                    </p>
-
-                                    <!-- Tổng tiền sản phẩm -->
-                                    <p>Tổng số tiền sản phẩm:
-                                        <span class="text-danger fw-bold" id="totalPrice"
-                                              th:data-total-price="${totalPrice}"
-                                              th:text="${totalPrice != null ?
+                                    <!--                                    <p>Nhân viên: <span th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></span></p>-->
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="mb-3" style="position: relative;">
+                                                <input type="text" id="customerSearch" th:disabled="${order.id == null}"
+                                                       class="form-control"
+                                                       placeholder="Tìm kiếm khách hàng..." autocomplete="off">
+                                                <div id="customerResults" class="dropdown-content"></div>
+                                            </div>
+                                            <p>Khách hàng:
+                                                <span class="fw-bold ms-1"
+                                                      th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span>
+                                            </p>
+                                            <select name="promotionId" class="form-control mb-3"
+                                                    onchange="updateTotalPrice(this)" th:disabled="${order.id == null}">
+                                                <option value="" data-discount="0" data-min-value="0">-- Không áp dụng
+                                                    --
+                                                </option>
+                                                <option th:each="promotion : ${promotions}"
+                                                        th:value="${promotion.id}"
+                                                        th:data-discount="${promotion.discount}"
+                                                        th:data-min-value="${promotion.minOrderValue}"
+                                                        th:data-remaining="${promotion.remainingQuantity}"
+                                                        th:text="${promotion.name} + ' (-' + ${promotion.discount} + '%) - Tối thiểu ' + ${#numbers.formatDecimal(promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND (' + ${promotion.remainingQuantity} + ' còn lại)'">
+                                                </option>
+                                            </select>
+                                            <!-- Phương thức thanh toán -->
+                                            <select name="paymentMethod" class="form-control mb-3">
+                                                <option value="">-- Chọn phương thức thanh toán --</option>
+                                                <option value="Tiền mặt">Tiền mặt</option>
+                                                <option value="Chuyển khoản">Chuyển khoản</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <!-- Tổng tiền sản phẩm -->
+                                            <p>Tổng số tiền sản phẩm:
+                                                <span class="text-danger fw-bold" id="totalPrice"
+                                                      th:data-total-price="${totalPrice}"
+                                                      th:text="${totalPrice != null ?
                                               #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
-                                    </p>
+                                            </p>
 
-                                    <p>Chọn mã giảm giá:</p>
-                                    <select name="promotionId" class="form-control mb-3"
-                                            onchange="updateTotalPrice(this)" th:disabled="${order.id == null}">
-                                        <option value="" data-discount="0" data-min-value="0">Không áp dụng</option>
-                                        <option th:each="promotion : ${promotions}"
-                                                th:value="${promotion.id}"
-                                                th:data-discount="${promotion.discount}"
-                                                th:data-min-value="${promotion.minOrderValue}"
-                                                th:data-remaining="${promotion.remainingQuantity}"
-                                                th:text="${promotion.name} + ' (-' + ${promotion.discount} + '%) - Tối thiểu ' + ${#numbers.formatDecimal(promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND (' + ${promotion.remainingQuantity} + ' còn lại)'">
-                                        </option>
-                                    </select>
+                                            <!-- Tổng số tiền cần thanh toán -->
+                                            <p>Tổng số tiền cần thanh toán:
+                                                <span class="text-danger fw-bold" id="finalPrice"
+                                                      th:text="${(totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') : '0')} + ' VND'"></span>
+                                            </p>
+                                            <input type="text" id="customerPaid" class="form-control mt-2 mb-3"
+                                                   placeholder="Tiền khách đưa..." oninput="updateChangeAmount()">
+                                            <span>Tiền thừa: <span id="changeAmount"
+                                                                   class="text-primary fw-bold">0 VND</span></span>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary w-100 mt-3" id="confirmOrderBtn1"
+                                            th:disabled="${order.id == null}">Thanh toán
+                                    </button>
 
-                                    <!-- Tổng số tiền cần thanh toán -->
-                                    <p>Tổng số tiền cần thanh toán:
-                                        <span class="text-danger fw-bold" id="finalPrice"
-                                              th:text="${totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
-                                    </p>
+<!--                                    <button class="btn btn-secondary w-100 mt-3" onclick="printInvoice()">-->
+<!--                                        In hóa đơn-->
+<!--                                    </button>-->
 
-                                    <!-- Phương thức thanh toán -->
-                                    <select name="paymentMethod" class="form-control my-3">
-                                        <option value="">--Chọn phương thức thanh toán--</option>
-                                        <option value="Cash">Tiền mặt</option>
-                                        <option value="Transfer">Chuyển khoản</option>
-                                    </select>
+                                    <!-- Nội dung hóa đơn -->
+                                    <div id="invoiceContent" style="display: none;">
+                                        <h2 class="text-center">HÓA ĐƠN BÁN HÀNG</h2>
+                                        <p><strong>Mã hóa đơn:</strong> #<span th:text="${order.id}"></span></p>
+                                        <p><strong>Khách hàng:</strong> <span
+                                                th:text="${order.customer != null ? order.customer.fullname : 'Khách lẻ'}"></span>
+                                        </p>
+                                        <p>Ngày tạo: <strong
+                                                th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm')}"></strong>
+                                        </p>
 
-                                    <input type="text" id="customerPaid" class="form-control my-2"
-                                           placeholder="Tiền khách đưa..." oninput="updateChangeAmount()">
-                                    <span>Tiền thừa: <span id="changeAmount">0 VND</span></span>
 
-                                    <br><br>
-                                    <button class="btn btn-primary w-100" id="confirmOrderBtn1">Thanh toán</button>
+                                        <table border="1" width="100%"
+                                               style="border-collapse: collapse; text-align: center;">
+                                            <thead>
+                                            <tr>
+                                                <th>Sản phẩm</th>
+                                                <th>Số lượng</th>
+                                                <th>Giá</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="detail : ${order.orderDetails}">
+                                                <td th:text="${detail.productDetail.product.name}"></td>
+                                                <td th:text="${detail.quantity}"></td>
+                                                <td th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT') + ' VND'}"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <p><strong>Tổng tiền:</strong> <span
+                                                th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></span>
+                                        </p>
+                                        <p><strong>Thanh toán:</strong> <span th:text="${order.paymentMethod}"></span>
+                                        </p>
+                                    </div>
                                 </form>
                             </div>
-
-                            <script>
-                                function updateTotalPrice(select) {
-                                    let selectedOption = select.options[select.selectedIndex];
-                                    let discount = parseFloat(selectedOption.getAttribute("data-discount")) || 0;
-                                    let minValue = parseCurrency(selectedOption.getAttribute("data-min-value")) || 0;
-                                    let remaining = parseInt(selectedOption.getAttribute("data-remaining")) || 0;
-
-                                    let totalPriceElement = document.getElementById("totalPrice");
-                                    let finalPriceElement = document.getElementById("finalPrice");
-
-                                    let totalPrice = parseCurrency(totalPriceElement.getAttribute("data-total-price"));
-
-                                    // Kiểm tra điều kiện mã giảm giá hợp lệ
-                                    if (totalPrice < minValue || remaining <= 0) {
-                                        alert("Mã giảm giá không hợp lệ! Vui lòng chọn mã khác.");
-                                        select.value = "";
-                                        return;
-                                    }
-
-                                    // Tính toán giá sau giảm giá
-                                    let discountAmount = (totalPrice * discount) / 100;
-                                    let finalPrice = totalPrice - discountAmount;
-
-                                    // Cập nhật giá trên giao diện
-                                    finalPriceElement.innerText = formatCurrency(finalPrice);
-                                    finalPriceElement.setAttribute("data-final-price", finalPrice); // Lưu giá trị chính xác
-
-                                    // ** Gọi updateChangeAmount() sau khi finalPrice được cập nhật **
-                                    updateChangeAmount();
-                                }
-
-                                function updateChangeAmount() {
-                                    let customerPaidInput = document.getElementById("customerPaid");
-                                    let changeAmountElement = document.getElementById("changeAmount");
-                                    let finalPriceElement = document.getElementById("finalPrice");
-                                    let confirmOrderBtn1 = document.getElementById("confirmOrderBtn1");
-
-                                    // Kiểm tra nút có tồn tại không
-                                    if (!confirmOrderBtn1) {
-                                        console.error("Không tìm thấy nút xác nhận đơn hàng! Kiểm tra ID confirmOrderBtn1.");
-                                        return; // Dừng hàm nếu không tìm thấy nút
-                                    }
-
-                                    let customerPaid = parseCurrency(customerPaidInput.value);
-                                    let finalPrice = parseCurrency(finalPriceElement.getAttribute("data-final-price")) || parseCurrency(finalPriceElement.textContent);
-
-                                    console.log("Khách đưa:", customerPaid);
-                                    console.log("Tổng tiền sau giảm giá:", finalPrice);
-
-                                    let changeAmount = customerPaid - finalPrice;
-
-                                    // Cập nhật tiền khách đưa theo định dạng
-                                    customerPaidInput.value = customerPaid > 0 ? formatCurrency(customerPaid) : "";
-
-                                    // Cập nhật tiền thừa
-                                    changeAmountElement.textContent = changeAmount >= 0
-                                        ? formatCurrency(changeAmount) + " VND"
-                                        : "0 VND";
-
-                                    // 🔹 Chỉ disable nút nếu tồn tại
-                                    if (confirmOrderBtn1) {
-                                        confirmOrderBtn1.disabled = customerPaid <= 0 || customerPaid < finalPrice;
-                                    }
-                                }
-
-                                function parseCurrency(value) {
-                                    if (!value) return 0;
-                                    return parseFloat(value.replace(/[^\d.-]/g, "")) || 0;
-                                }
-
-                                function formatCurrency(value) {
-                                    return new Intl.NumberFormat("vi-VN").format(value);
-                                }
-
-
-                            </script>
-
                         </div>
                     </div>
-                    <div class="card my-4">
-                        <div class="card-header">
-                            <i class="fas fa-table me-1"></i>
-                            Sản phẩm
-                        </div>
-                        <div class="card-body">
-                            <!-- Đặt input ẩn chứa orderId (để sử dụng cho các form) -->
+                    <div class="col-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                Sản phẩm
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <form id="addProductsForm" method="post"
+                                          action="/admin/orders/addMultipleProductsToOrder"
+                                          onsubmit="return confirmBeforeSubmit();">
+                                        <input type="hidden" name="orderId" th:value="${order.id}">
 
-                            <table id="datatablesSimple">
-                                <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Ảnh</th>
-                                    <th>Tên SP</th>
-                                    <th>Thương hiệu</th>
-                                    <th>Màu</th>
-                                    <th>Kích thước</th>
-                                    <th>Giá (VND)</th>
-                                    <th>Số lượng</th>
-                                    <th>Thao tác</th>
-                                </tr>
-                                </thead>
-                                <tbody id="productList">
-                                <tr th:each="productDetail, stat : ${productDetails}">
-                                    <td th:text="${stat.index+1}"></td>
-                                    <!--                                    <td th:text="${productDetail.id}"></td>-->
-                                    <td>
-                                        <img th:src="${productDetail.image}" alt="Product Image"
-                                             style="width: 100px; height: auto;">
-                                    </td>
-                                    <td th:text="${productDetail.product.name}"></td>
-                                    <td th:text="${productDetail.brand.name}"></td>
-                                    <td th:text="${productDetail.color.name}"></td>
-                                    <td th:text="${productDetail.size.name}"></td>
-                                    <td th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')}"></td>
-                                    <td id="product-quantity-[[${productDetail.id}]]"
-                                        th:text="${productDetail.quantity}"></td>
-                                    <td>
-                                        <form action="/admin/orders/addProductToOrder" method="post">
-                                            <input type="hidden" name="orderId" th:value="${order.id}">
-                                            <input type="hidden" name="productDetailId" th:value="${productDetail.id}">
-                                            <input type="hidden" name="quantity" value="1">
-                                            <button type="submit" class="btn btn-primary"
-                                                    th:disabled="${order.id == null}">Thêm vào hóa đơn
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
+                                        <button type="submit" class="btn btn-outline-primary mb-3"
+                                                th:disabled="${order.id == null}">Thêm vào hóa đơn
+                                        </button>
 
+                                        <table id="datatablesSimple" class="table table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th><input type="checkbox" id="select-all"></th>
+                                                <th>Ảnh</th>
+                                                <th>Tên SP</th>
+                                                <th>Thương hiệu</th>
+                                                <th>Màu</th>
+                                                <th>Kích thước</th>
+                                                <th>Giá (VND)</th>
+                                                <th>Kho</th>
+                                                <th>Số lượng</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="productDetail : ${productDetails}">
+                                                <td>
+                                                    <input type="checkbox" class="product-checkbox"
+                                                           th:data-quantity-id="'quantity-' + ${productDetail.id}"
+                                                           th:value="${productDetail.id}">
+                                                </td>
+                                                <td>
+                                                    <img th:src="${productDetail.image}" alt="Product Image"
+                                                         style="width: 45px; height: 45px;">
+                                                </td>
+                                                <td th:text="${productDetail.product.name}"></td>
+                                                <td th:text="${productDetail.brand.name}"></td>
+                                                <td th:text="${productDetail.color.name}"></td>
+                                                <td th:text="${productDetail.size.name}"></td>
+                                                <td th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')}"></td>
+                                                <td th:text="${productDetail.quantity}"></td>
+                                                <td>
+                                                    <input type="number" class="form-control product-quantity"
+                                                           th:id="'quantity-' + ${productDetail.id}"
+                                                           value="1" min="1" th:max="${productDetail.quantity}">
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </form>
+
+                                    <script>
+                                        document.getElementById("select-all").addEventListener("change", function () {
+                                            let checkboxes = document.querySelectorAll(".product-checkbox");
+                                            checkboxes.forEach(checkbox => {
+                                                checkbox.checked = this.checked;
+                                                let quantityInput = document.getElementById(checkbox.getAttribute("data-quantity-id"));
+                                                quantityInput.disabled = !checkbox.checked; // Kích hoạt/khóa input số lượng
+                                            });
+                                        });
+
+                                        document.querySelectorAll(".product-checkbox").forEach(checkbox => {
+                                            checkbox.addEventListener("change", function () {
+                                                let quantityInput = document.getElementById(this.getAttribute("data-quantity-id"));
+                                                quantityInput.disabled = !this.checked; // Kích hoạt/khóa input số lượng
+                                            });
+                                        });
+
+                                        document.getElementById("addProductsForm").addEventListener("submit", function (event) {
+                                            let checkboxes = document.querySelectorAll(".product-checkbox:checked");
+                                            if (checkboxes.length === 0) {
+                                                alert("Vui lòng chọn ít nhất một sản phẩm!");
+                                                event.preventDefault();
+                                                return;
+                                            }
+
+                                            let form = this;
+                                            checkboxes.forEach(checkbox => {
+                                                let productIdInput = document.createElement("input");
+                                                productIdInput.type = "hidden";
+                                                productIdInput.name = "productDetailIds";
+                                                productIdInput.value = checkbox.value;
+                                                form.appendChild(productIdInput);
+
+                                                let quantityInput = document.getElementById(checkbox.getAttribute("data-quantity-id"));
+                                                let quantityHiddenInput = document.createElement("input");
+                                                quantityHiddenInput.type = "hidden";
+                                                quantityHiddenInput.name = "quantities";
+                                                quantityHiddenInput.value = quantityInput.value;
+                                                form.appendChild(quantityHiddenInput);
+                                            });
+                                        });
+
+                                        function confirmBeforeSubmit() {
+                                            let checkboxes = document.querySelectorAll(".product-checkbox:checked");
+                                            let totalSelected = checkboxes.length;
+
+                                            if (totalSelected === 0) {
+                                                alert("Vui lòng chọn ít nhất một sản phẩm!");
+                                                return false;
+                                            }
+
+                                            return confirm(`Bạn có chắc chắn muốn thêm ${totalSelected} sản phẩm vào hóa đơn không?`);
+                                        }
+                                    </script>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -397,10 +420,13 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script th:src="@{/admin/js/order_product_quantity.js}"></script>
 <script th:src="@{/admin/js/order_customer.js}"></script>
-<!--<script th:src="@{/admin/js/order_customer_paid.js}"></script>-->
+<script th:src="@{/admin/js/order_customer_paid.js}"></script>
 <script th:src="@{/admin/js/order_customer_search.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script th:src="@{/admin/js/print-invoice.js}"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
 <script th:src="@{/admin/js/scripts.js}"></script>

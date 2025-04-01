@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -26,7 +27,9 @@ public class PromotionController {
     private PromotionService promotionService;
 
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         model.addAttribute("promotions", promotionService.getAllPromotions());
         model.addAttribute("promotion", new Promotion()); // Để modal có đối tượng rỗng
         return "admin/promotions/index";

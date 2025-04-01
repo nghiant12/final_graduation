@@ -11,37 +11,7 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
 <body class="sb-nav-fixed">
-<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
-    <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
-            class="fas fa-bars"></i></button>
-    <!-- Navbar Search-->
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
-                   aria-describedby="btnNavbarSearch"/>
-            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-        </div>
-    </form>
-    <!-- Navbar-->
-    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
-               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#!">Settings</a></li>
-                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                <li>
-                    <hr class="dropdown-divider"/>
-                </li>
-                <li><a class="dropdown-item" href="#!">Logout</a></li>
-            </ul>
-        </li>
-    </ul>
-</nav>
-
+<div th:replace="navbar :: navbar"></div>
 <!-- Menu Sidebar -->
 <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
@@ -61,11 +31,13 @@
                         <div class="mb-4">
                             <div th:if="${error}" class="alert alert-danger" role="alert">
                                 <span th:text="${error}">Lỗi</span>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
                             </div>
                             <div th:if="${success}" class="alert alert-success" role="alert">
                                 <span th:text="${success}">Thành công</span>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
                             </div>
                             <button type="button" class="btn btn-success"
                                     data-bs-toggle="modal"
@@ -104,51 +76,64 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- Giảm Giá -->
-                                                <div class="mb-3">
-                                                    <label class="form-label">Giảm Giá (%)</label>
-                                                    <input type="number" class="form-control" th:field="*{discount}"
-                                                           required min="1" max="100">
-                                                    <div class="invalid-feedback">
-                                                        Giảm giá phải từ 1% đến 100%.
+                                                <div class="row">
+                                                    <!-- Cột 1: Giảm Giá -->
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Giảm Giá (%)</label>
+                                                            <input type="number" class="form-control" th:field="*{discount}"
+                                                                   required min="1" max="100">
+                                                            <div class="invalid-feedback">
+                                                                Giảm giá phải từ 1% đến 100%.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Cột 2: Giá Trị Tối Thiểu -->
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">GT Tối Thiểu</label>
+                                                            <input type="number" class="form-control"
+                                                                   placeholder="VND"
+                                                                   th:field="*{minOrderValue}" required min="0">
+                                                            <div class="invalid-feedback">
+                                                                Giá trị tối thiểu không được âm.
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Cột 3: Số Lượng Mã -->
+                                                    <div class="col-md-4">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Số Lượng Mã</label>
+                                                            <input type="number" class="form-control"
+                                                                   th:field="*{remainingQuantity}" required min="1">
+                                                            <div class="invalid-feedback">
+                                                                Số lượng mã phải lớn hơn hoặc bằng 1.
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
-                                                <!-- Giá Trị Tối Thiểu -->
-                                                <div class="mb-3">
-                                                    <label class="form-label">Giá Trị Tối Thiểu (VND)</label>
-                                                    <input type="number" class="form-control"
-                                                           th:field="*{minOrderValue}" required min="0">
-                                                    <div class="invalid-feedback">
-                                                        Giá trị tối thiểu không được âm.
+                                                <div class="row">
+                                                    <!-- Cột 1: Ngày Bắt Đầu -->
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Ngày Bắt Đầu</label>
+                                                            <input type="datetime-local" class="form-control" id="start_date"
+                                                                   name="startDate" required>
+                                                            <div class="invalid-feedback">Ngày bắt đầu phải từ thời điểm hiện tại trở đi.</div>
+                                                        </div>
                                                     </div>
-                                                </div>
 
-                                                <!-- Số Lượng Mã -->
-                                                <div class="mb-3">
-                                                    <label class="form-label">Số Lượng Mã</label>
-                                                    <input type="number" class="form-control"
-                                                           th:field="*{remainingQuantity}" required min="1">
-                                                    <div class="invalid-feedback">
-                                                        Số lượng mã phải lớn hơn hoặc bằng 1.
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="form-label">Ngày Bắt Đầu</label>
-                                                    <input type="datetime-local" class="form-control" id="start_date"
-                                                           name="startDate" required>
-                                                    <div class="invalid-feedback">Ngày bắt đầu phải từ thời điểm hiện
-                                                        tại trở đi.
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3">
-                                                    <label class="form-label">Ngày Kết Thúc</label>
-                                                    <input type="datetime-local" class="form-control" id="end_date"
-                                                           name="endDate" required>
-                                                    <div class="invalid-feedback">Ngày kết thúc phải lớn hơn ngày hiện
-                                                        tại.
+                                                    <!-- Cột 2: Ngày Kết Thúc -->
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Ngày Kết Thúc</label>
+                                                            <input type="datetime-local" class="form-control" id="end_date"
+                                                                   name="endDate" required>
+                                                            <div class="invalid-feedback">Ngày kết thúc phải lớn hơn ngày hiện tại.</div>
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -158,7 +143,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                         <form id="filterForm" th:action="@{/admin/promotions/filter}" method="get"
                               class="row g-3 align-items-end p-3 border rounded bg-light">
@@ -227,37 +211,18 @@
                                 <td th:text="${promotion.description}"></td>
                                 <td th:text="${#temporals.format(promotion.startDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
                                 <td th:text="${#temporals.format(promotion.endDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
-<!--                                <td>-->
-<!--                                    <span th:classappend="${promotion.active} ? 'badge text-bg-primary' : 'badge text-bg-secondary'"-->
-<!--                                          th:text="${promotion.active ? 'Đang hoạt động' : 'Ngừng hoạt động'}">-->
-<!--                                    </span>-->
-<!--                                </td>-->
                                 <td>
-                                <form th:action="@{/admin/promotions/deactivate/{id}(id=${promotion.id})}"
-                                      method="post"
-                                      th:if="${promotion.active}">
-                                    <button type="submit" class="badge text-bg-primary"
-                                            onclick="return confirm('Bạn có chắc chắn muốn ngừng hoạt động mã khuyến mãi này?')">
-                                        Đang hoạt động
-                                    </button>
-                                </form>
+                                    <form th:action="@{/admin/promotions/deactivate/{id}(id=${promotion.id})}"
+                                          method="post"
+                                          th:if="${promotion.active}">
+                                        <button type="submit" class="badge text-bg-primary"
+                                                onclick="return confirm('Bạn có chắc chắn muốn ngừng hoạt động mã khuyến mãi này?')">
+                                            Đang hoạt động
+                                        </button>
+                                    </form>
 
-                                <span th:unless="${promotion.active}" class="badge text-bg-secondary">Ngừng hoạt động</span>
+                                    <span th:unless="${promotion.active}" class="badge text-bg-secondary">Ngừng hoạt động</span>
                                 </td>
-                                <!--                                <td>-->
-                                <!--                                    <form th:action="@{/admin/promotions/toggle-status}" method="post" th:if="${promotion.active}">-->
-                                <!--                                        <input type="hidden" name="id" th:value="${promotion.id}">-->
-                                <!--                                        <input type="hidden" name="newStatus" th:value="${!promotion.active}">-->
-
-                                <!--                                        <div class="form-check form-switch">-->
-                                <!--                                            <input class="form-check-input" type="checkbox"-->
-                                <!--                                                   onchange="this.form.submit()"-->
-                                <!--                                                   th:checked="${promotion.active}">-->
-                                <!--                                            <label class="form-check-label"-->
-                                <!--                                                   th:text="${promotion.active} ? 'Đang hoạt động' : 'Ngừng hoạt động'"></label>-->
-                                <!--                                        </div>-->
-                                <!--                                    </form>-->
-                                <!--                                </td>-->
                                 <td>
                                     <a style="color: black; text-decoration: none" type="button"
                                        th:if="${promotion.active}"
@@ -284,7 +249,8 @@
                                                             data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form th:action="@{/admin/promotions/update}" method="post" id="editPromotionForm"
+                                                    <form th:action="@{/admin/promotions/update}" method="post"
+                                                          id="editPromotionForm"
                                                           class="needs-validation" novalidate>
                                                         <input type="hidden" id="editId" name="id">
 
@@ -306,48 +272,55 @@
                                                             </div>
                                                         </div>
 
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Giảm Giá (%)</label>
-                                                            <input type="number" class="form-control" id="editDiscount"
-                                                                   name="discount" required min="1" max="100">
-                                                            <div class="invalid-feedback">Giảm giá phải từ 1% đến
-                                                                100%.
+                                                        <div class="row">
+                                                            <div class="col-md-4">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Giảm Giá (%)</label>
+                                                                    <input type="number" class="form-control" id="editDiscount"
+                                                                           name="discount" required min="1" max="100">
+                                                                    <div class="invalid-feedback">Giảm giá phải từ 1% đến 100%.</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">GT Tối Thiểu</label>
+                                                                    <input type="number" class="form-control"
+                                                                           placeholder="VND"
+                                                                           name="minOrderValue" id="editMinOrderValue" required
+                                                                           min="0">
+                                                                    <div class="invalid-feedback">Giá trị tối thiểu không được âm.</div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-md-4">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Số Lượng Mã</label>
+                                                                    <input type="number" class="form-control"
+                                                                           name="remainingQuantity" id="editRemainingQuantity"
+                                                                           required min="1">
+                                                                    <div class="invalid-feedback">Số lượng mã phải lớn hơn hoặc bằng 1.</div>
+                                                                </div>
                                                             </div>
                                                         </div>
 
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Giá Trị Tối Thiểu (VND)</label>
-                                                            <input type="number" class="form-control"
-                                                                   name="minOrderValue" id="editMinOrderValue" required
-                                                                   min="0">
-                                                            <div class="invalid-feedback">
-                                                                Giá trị tối thiểu không được âm.
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Ngày Bắt Đầu</label>
+                                                                    <input type="datetime-local" class="form-control"
+                                                                           id="editStartDate" name="startDate" required>
+                                                                    <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu.</div>
+                                                                </div>
                                                             </div>
-                                                        </div>
 
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Số Lượng Mã</label>
-                                                            <input type="number" class="form-control"
-                                                                   name="remainingQuantity" id="editRemainingQuantity"
-                                                                   required min="1">
-                                                            <div class="invalid-feedback">
-                                                                Số lượng mã phải lớn hơn hoặc bằng 1.
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Ngày Bắt Đầu</label>
-                                                            <input type="datetime-local" class="form-control"
-                                                                   id="editStartDate" name="startDate" required>
-                                                            <div class="invalid-feedback">Vui lòng chọn ngày bắt đầu.
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="mb-3">
-                                                            <label class="form-label">Ngày Kết Thúc</label>
-                                                            <input type="datetime-local" class="form-control"
-                                                                   id="editEndDate" name="endDate" required>
-                                                            <div class="invalid-feedback">Vui lòng chọn ngày kết thúc.
+                                                            <div class="col-md-6">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Ngày Kết Thúc</label>
+                                                                    <input type="datetime-local" class="form-control"
+                                                                           id="editEndDate" name="endDate" required>
+                                                                    <div class="invalid-feedback">Vui lòng chọn ngày kết thúc.</div>
+                                                                </div>
                                                             </div>
                                                         </div>
 

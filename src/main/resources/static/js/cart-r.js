@@ -4,11 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
     addEventListeners(); // Thêm sự kiện cho các nút khi DOM tải xong
 });
 
-var cart = JSON.parse(localStorage.getItem("cart")) || [];
-var gioHang = cart;
+var cartR = JSON.parse(localStorage.getItem("cartR")) || [];
+var gioHang = cartR;
 
 function addEventListeners() {
-    var buttons = document.querySelectorAll(".add-to-cart");
+    var buttons = document.querySelectorAll(".add-to-cartR");
     buttons.forEach(button => {
         button.removeEventListener("click", handleAddToCart);
         button.addEventListener("click", handleAddToCart);
@@ -55,19 +55,19 @@ function addToCart() {
         gioHang.push(pro);
     }
 
-    localStorage.setItem("cart", JSON.stringify(gioHang));
+    localStorage.setItem("cartR", JSON.stringify(gioHang));
     count();
     alert(`Đã thêm vào giỏ hàng: ${productName} - ${productColor} - ${productSize} (${soLuong} cái)`);
 }
 
 function showCard() {
-    var tableBody = document.getElementById("cart-body");
+    var tableBody = document.getElementById("cartR-body");
     if (!tableBody) {
-        console.error("Không tìm thấy phần tử #cart-body. Kiểm tra lại HTML!");
+        console.error("Không tìm thấy phần tử #cartR-body. Kiểm tra lại HTML!");
         return;
     }
 
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    var cart = JSON.parse(localStorage.getItem("cartR")) || [];
     console.log("Giỏ hàng từ localStorage:", cart);
 
     tableBody.innerHTML = "";
@@ -98,31 +98,31 @@ function showCard() {
                 </tr>`;
         }
         tableBody.innerHTML = kq;
-        document.getElementById("empty-cart").style.display = "none";
+        document.getElementById("empty-cartR").style.display = "none";
     } else {
         tableBody.innerHTML = `<tr><td colspan="10">Giỏ hàng trống</td></tr>`;
-        document.getElementById("empty-cart").style.display = "block";
+        document.getElementById("empty-cartR").style.display = "block";
     }
 
     totalPrice();
 }
 
 function count() {
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    var cart = JSON.parse(localStorage.getItem("cartR")) || [];
     var totalProducts = cart.length;
-    var cartCountElement = document.getElementById("cart-count");
+    var cartCountElement = document.getElementById("cartR-count");
 
     if (cartCountElement) {
         cartCountElement.innerText = totalProducts;
     } else {
-        console.error("Không tìm thấy phần tử #cart-count!");
+        console.error("Không tìm thấy phần tử #cartR-count!");
     }
 
     return totalProducts;
 }
 
 function totalPrice() {
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    var cart = JSON.parse(localStorage.getItem("cartR")) || [];
     var total = cart.reduce((sum, item) => sum + (item.productPrice * item.soLuong), 0);
     var totalPriceElement = document.getElementById("total-price");
 
@@ -136,7 +136,7 @@ function totalPrice() {
 }
 
 function updateQuantity(index, newQuantity) {
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    var cart = JSON.parse(localStorage.getItem("cartR")) || [];
     newQuantity = parseInt(newQuantity);
 
     if (newQuantity < 1) {
@@ -144,16 +144,16 @@ function updateQuantity(index, newQuantity) {
     }
 
     cart[index]["soLuong"] = newQuantity;
-    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("cartR", JSON.stringify(cart));
     showCard();
     count();
     totalPrice();
 }
 
 function removeItem(index) {
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    var cart = JSON.parse(localStorage.getItem("cartR")) || [];
     cart.splice(index, 1);
-    localStorage.setItem("cart", JSON.stringify(cart));
+    localStorage.setItem("cartR", JSON.stringify(cart));
     showCard();
     count();
     totalPrice();
@@ -162,7 +162,7 @@ function removeItem(index) {
 document.querySelector(".pay-button").addEventListener("click", function (event) {
     event.preventDefault(); // Ngăn chặn reload trang
 
-    var cart = JSON.parse(localStorage.getItem("cart")) || [];
+    var cart = JSON.parse(localStorage.getItem("cartR")) || [];
     if (cart.length === 0) {
         alert("Giỏ hàng trống!");
         return;
@@ -185,7 +185,7 @@ document.querySelector(".pay-button").addEventListener("click", function (event)
         .then(response => response.json())
         .then(data => {
             alert("Đơn hàng của bạn đã được xử lý!");
-            localStorage.removeItem("cart"); // Xóa giỏ hàng sau khi thanh toán thành công
+            localStorage.removeItem("cartR"); // Xóa giỏ hàng sau khi thanh toán thành công
             window.location.href = "/order/success"; // Chuyển hướng sau khi đặt hàng
         })
         .catch(error => {

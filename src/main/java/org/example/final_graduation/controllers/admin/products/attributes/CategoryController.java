@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -17,7 +18,9 @@ public class CategoryController {
     private CategoryRepository categoryRepository;
 
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Category> categories = categoryRepository.findAll();
         model.addAttribute("categories", categories);
         model.addAttribute("category", new Category());// Truyền đối tượng mới vào model

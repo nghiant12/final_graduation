@@ -10,6 +10,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +25,9 @@ public class CustomerController {
     private CustomerRepository customerRepository;
 
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Customer> customers = customerRepository.findAll();
         if (!model.containsAttribute("customer")) {
             model.addAttribute("customer", new Customer());
@@ -51,7 +54,7 @@ public class CustomerController {
     public String add(@ModelAttribute @Valid Customer customer,
                       BindingResult result, RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Vui lòng điền đầy đủ thông tin!"+ result.getFieldError());
+            redirectAttributes.addFlashAttribute("error", "Vui lòng điền đầy đủ thông tin!" + result.getFieldError());
             return "redirect:/admin/customers";
         }
 
@@ -66,8 +69,15 @@ public class CustomerController {
         }
 
         try {
-            customer.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
-            customerRepository.save(customer);
+            Customer newCustomer = new Customer();
+            newCustomer.setUsername(customer.getUsername());
+            newCustomer.setEmail(customer.getEmail());
+            newCustomer.setAddress(customer.getAddress());
+            newCustomer.setFullname(customer.getFullname());
+            newCustomer.setPhoneNumber(String.valueOf(customer.getPhoneNumber()));
+            newCustomer.setStatus(true);
+            newCustomer.setCreatedDate(Timestamp.valueOf(LocalDateTime.now()));
+            customerRepository.save(newCustomer);
             redirectAttributes.addFlashAttribute("success", "Thêm khách hàng thành công!");
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,6 +95,14 @@ public class CustomerController {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng!");
             return "redirect:/admin/customers";
         }
+
+        Customer customer = customerOpt.get();
+        customer.setUsername(customer.getUsername());
+        customer.setFullname(customer.getFullname());
+        customer.setEmail(customer.getEmail());
+        customer.setAddress(customer.getAddress());
+        customer.setPhoneNumber(customer.getPhoneNumber());
+        customerRepository.save(customer);
 
         model.addAttribute("customer", customerOpt.get());
         return "admin/customers/index";
@@ -125,7 +143,7 @@ public class CustomerController {
             // Giữ nguyên mật khẩu cũ khi cập nhật
             customer.setPassword(existingCustomer.getPassword());
             customer.setCreatedDate(existingCustomer.getCreatedDate()); // Không thay đổi createdDate
-
+            customer.setStatus(existingCustomer.isStatus());
             customerRepository.save(customer);
             redirectAttributes.addFlashAttribute("success", "Cập nhật khách hàng thành công!");
         } catch (Exception e) {
@@ -133,6 +151,34 @@ public class CustomerController {
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật khách hàng: " + e.getMessage());
         }
 
+        return "redirect:/admin/customers";
+    }
+
+    @PostMapping("/activate/{id}")
+    public String activateCustomer(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Customer> optCustomer = customerRepository.findById(id);
+        if (optCustomer.isPresent()) {
+            Customer cus = optCustomer.get();
+            cus.setStatus(true);
+            customerRepository.save(cus);
+            redirectAttributes.addFlashAttribute("success", "Đã kích hoạt khách hàng thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng.");
+        }
+        return "redirect:/admin/customers";
+    }
+
+    @PostMapping("/deactivate/{id}")
+    public String deactivateCustomer(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Customer> optCustomer = customerRepository.findById(id);
+        if (optCustomer.isPresent()) {
+            Customer cus = optCustomer.get();
+            cus.setStatus(false);
+            customerRepository.save(cus);
+            redirectAttributes.addFlashAttribute("success", "Khách hàng đã ngừng hoạt động.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy khách hàng.");
+        }
         return "redirect:/admin/customers";
     }
 }

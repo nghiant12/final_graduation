@@ -69,10 +69,13 @@ public class Employee {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Column(name = "status")
+    private boolean status;
+
     public Employee() {
     }
 
-    public Employee(Integer id, String username, String password, String fullname, String phoneNumber, String email, String address, String photo, Date createdDate, Role role) {
+    public Employee(Integer id, String username, String password, String fullname, String phoneNumber, String email, String address, String photo, Date createdDate, Role role, boolean status) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -83,6 +86,7 @@ public class Employee {
         this.photo = photo;
         this.createdDate = createdDate;
         this.role = role;
+        this.status = status;
     }
 
     public Integer getId() {
@@ -169,4 +173,11 @@ public class Employee {
         return role != null ? role.getName() : "ROLE_USER";
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 }

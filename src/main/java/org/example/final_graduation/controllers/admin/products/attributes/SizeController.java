@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -19,7 +20,9 @@ public class SizeController {
 
     // Hiển thị trang danh sách kích thước và form
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Size> sizes = sizeRepository.findAll();
         model.addAttribute("sizes", sizes); // Truyền danh sách kích thước
         model.addAttribute("size", new Size()); // Truyền đối tượng trống cho form

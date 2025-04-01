@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -45,7 +46,9 @@ public class ProductController {
     private CategoryRepository categoryRepository;
 
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model,  Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Product> products = productRepository.findAll();
         Map<Integer, Long> productQuantities = new HashMap<>();
 
@@ -87,7 +90,13 @@ public class ProductController {
             redirectAttributes.addFlashAttribute("error", "Tên sản phẩm đã tồn tại!");
             return "redirect:/admin/products";
         }
-
+        Optional<Product> existingProductOpt = productRepository.findById(product.getId());
+        if (existingProductOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm để cập nhật.");
+            return "redirect:/admin/products";
+        }
+        Product existingProduct = existingProductOpt.get();
+        existingProduct.setName(product.getName());
         productRepository.save(product);
         redirectAttributes.addFlashAttribute("success", "Chỉnh sửa sản phẩm thành công!");
         return "redirect:/admin/products"; // Quay lại trang danh sách
@@ -110,7 +119,10 @@ public class ProductController {
 
 
     @GetMapping("/detail")
-    public String detail(@RequestParam("idProduct") Integer idProduct, Model model) {
+    public String detail(@RequestParam("idProduct") Integer idProduct, Model model,  Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
+
         List<ProductDetail> productDetails = productDetailRepository.findByProductID(idProduct);
         model.addAttribute("productDetails", productDetails);
 
@@ -317,4 +329,39 @@ public class ProductController {
         return "redirect:/admin/products/detail?idProduct=" + productDetail.getProduct().getId();
     }
 
+    @PostMapping("/activateProduct/{id}")
+    public String activateProduct(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Product> opt = productRepository.findById(id);
+        List<ProductDetail> productDetails = productDetailRepository.findByProductId(id);
+        if (opt.isPresent()) {
+            Product p = opt.get();
+            p.setStatus(true);
+            productDetails.forEach(pd -> {
+                pd.setAvailable(true);
+            });
+            productRepository.save(p);
+            redirectAttributes.addFlashAttribute("success", "Đã kích hoạt sản phẩm thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm.");
+        }
+        return "redirect:/admin/products";
+    }
+
+    @PostMapping("/deactivateProduct/{id}")
+    public String deactivateProduct(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Product> opt = productRepository.findById(id);
+        List<ProductDetail> productDetails = productDetailRepository.findByProductId(id);
+        if (opt.isPresent()) {
+            Product p = opt.get();
+            p.setStatus(false);
+            productDetails.forEach(pd -> {
+                pd.setAvailable(false);
+            });
+            productRepository.save(p);
+            redirectAttributes.addFlashAttribute("success", "Ngừng kinh doanh sản phẩm thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm.");
+        }
+        return "redirect:/admin/products";
+    }
 }

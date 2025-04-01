@@ -8,7 +8,7 @@ filterTitle.on('click', function (e) {
 
 // Initialize slider:
 $(document).ready(function () {
-  // $(".cart-hover").each(function () {
+  // $(".cartR-hover").each(function () {
   //   const itemId = $(this).attr("item-size-id");
   //   const url = "/rest/products/size/" + itemId;
 
@@ -17,7 +17,7 @@ $(document).ready(function () {
   //     type: "GET",
   //     success: function (response) {
   //       response.forEach(data => {
-  //         var li = $('<li></li>').text(`Sizes ${data.size} (${data.quantity})` ).attr('ng-click', 'cart.add(' + itemId + ', \'' + data.size + '\', 1)');
+  //         var li = $('<li></li>').text(`Sizes ${data.size} (${data.quantity})` ).attr('ng-click', 'cartR.add(' + itemId + ', \'' + data.size + '\', 1)');
   //         $(this).append(li);
   //       })
   //     }.bind(this),

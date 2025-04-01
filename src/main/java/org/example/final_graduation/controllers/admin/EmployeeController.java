@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +26,9 @@ public class EmployeeController {
 
     // Danh sách nhân viên (Chỉ hiển thị nhân viên có role_id = 1)
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Employee> employees = employeeRepository.findByRoleId(1);
         model.addAttribute("employees", employees);
         model.addAttribute("employee", new Employee());
@@ -52,6 +55,8 @@ public class EmployeeController {
         if (defaultRole != null) {
             employee.setRole(defaultRole);
         }
+
+        employee.setStatus(true);
 
         // Lưu nhân viên mới
         employeeRepository.save(employee);
@@ -100,6 +105,34 @@ public class EmployeeController {
 
         employeeRepository.deleteById(id);
         redirectAttributes.addFlashAttribute("success", "Xóa nhân viên thành công!");
+        return "redirect:/admin/employees";
+    }
+
+    @PostMapping("/activate/{id}")
+    public String activate(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Employee> optEmployee = employeeRepository.findById(id);
+        if (optEmployee.isPresent()) {
+            Employee em = optEmployee.get();
+            em.setStatus(true);
+            employeeRepository.save(em);
+            redirectAttributes.addFlashAttribute("success", "Đã kích hoạt nhân viên thành công!");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhân viên.");
+        }
+        return "redirect:/admin/employees";
+    }
+
+    @PostMapping("/deactivate/{id}")
+    public String deactivate(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes) {
+        Optional<Employee> optEmployee = employeeRepository.findById(id);
+        if (optEmployee.isPresent()) {
+            Employee em = optEmployee.get();
+            em.setStatus(false);
+            employeeRepository.save(em);
+            redirectAttributes.addFlashAttribute("success", "Nhân viên đã ngừng hoạt động.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Không tìm thấy nhân viên.");
+        }
         return "redirect:/admin/employees";
     }
 }

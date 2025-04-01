@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -18,7 +19,9 @@ public class BrandController {
 
     // Hiển thị trang danh sách thương hiệu và form
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Brand> brands = brandRepository.findAll();
         model.addAttribute("brands", brands); // Truyền danh sách thương hiệu
         model.addAttribute("brand", new Brand()); // Truyền đối tượng trống cho form

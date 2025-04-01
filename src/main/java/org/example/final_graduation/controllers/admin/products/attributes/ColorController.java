@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -17,7 +18,9 @@ public class ColorController {
     private ColorRepository colorRepository;
 
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Color> colors = colorRepository.findAll();
         model.addAttribute("colors", colors);
         model.addAttribute("color", new Color()); // Truyền đối tượng mới vào model

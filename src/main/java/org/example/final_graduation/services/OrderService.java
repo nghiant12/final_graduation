@@ -11,6 +11,7 @@ import org.example.final_graduation.repositories.orders.OrderRepository;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -106,4 +107,48 @@ public class OrderService {
         return new OrderResponse(order.getId(), order.getStatus(), order.getTotalPrice());
     }
 
+    /**
+     * Tìm đơn hàng theo ID
+     */
+    public Order findById(Integer orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + orderId));
+    }
+
+    /**
+     * Thêm một sản phẩm vào đơn hàng
+     */
+    @Transactional
+    public void addProductToOrder(Order order, Integer productDetailId, int quantity) {
+        ProductDetail productDetail = productDetailRepository.findById(productDetailId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + productDetailId));
+
+        // Kiểm tra nếu sản phẩm đã có trong đơn hàng thì cập nhật số lượng
+        Optional<OrderDetail> existingOrderDetail = orderDetailRepository.findByOrderAndProductDetail(order, productDetail);
+        if (existingOrderDetail.isPresent()) {
+            OrderDetail orderDetail = existingOrderDetail.get();
+            orderDetail.setQuantity(orderDetail.getQuantity() + quantity);
+            orderDetailRepository.save(orderDetail);
+        } else {
+            // Nếu sản phẩm chưa có trong đơn hàng, tạo mới
+            OrderDetail newOrderDetail = new OrderDetail();
+            newOrderDetail.setOrder(order);
+            newOrderDetail.setProductDetail(productDetail);
+            newOrderDetail.setQuantity(quantity);
+            newOrderDetail.setPrice(productDetail.getPrice());
+
+            orderDetailRepository.save(newOrderDetail);
+        }
+    }
+
+    /**
+     * Thêm nhiều sản phẩm vào đơn hàng
+     */
+    @Transactional
+    public void addMultipleProductsToOrder(Integer orderId, List<Integer> productDetailIds) {
+        Order order = findById(orderId);
+        for (Integer productDetailId : productDetailIds) {
+            addProductToOrder(order, productDetailId, 1); // Mặc định thêm 1 sản phẩm mỗi loại
+        }
+    }
 }

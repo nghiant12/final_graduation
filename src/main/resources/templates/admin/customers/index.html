@@ -12,36 +12,7 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
 <body class="sb-nav-fixed">
-<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-    <!-- Navbar Brand-->
-    <a class="navbar-brand ps-3" href="index.html">Start Bootstrap</a>
-    <!-- Sidebar Toggle-->
-    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
-            class="fas fa-bars"></i></button>
-    <!-- Navbar Search-->
-    <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0 needs-validation" novalidate>
-        <div class="input-group">
-            <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..."
-                   aria-describedby="btnNavbarSearch"/>
-            <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-        </div>
-    </form>
-    <!-- Navbar-->
-    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-        <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown"
-               aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="#!">Settings</a></li>
-                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
-                <li>
-                    <hr class="dropdown-divider"/>
-                </li>
-                <li><a class="dropdown-item" href="#!">Logout</a></li>
-            </ul>
-        </li>
-    </ul>
-</nav>
+<div th:replace="navbar :: navbar"></div>
 <div id="layoutSidenav">
     <div id="layoutSidenav_nav">
         <div th:replace="menu :: menu"></div> <!-- Sidebar Menu -->
@@ -201,13 +172,13 @@
                                                 </div>
                                             </div>
 
-<!--                                            <div class="mb-3">-->
-<!--                                                <label class="form-label">Ảnh đại diện</label>-->
-<!--                                                <input type="file" class="form-control" name="photo" accept="image/*"-->
-<!--                                                       onchange="previewEditImage(event)">-->
-<!--                                                <img id="previewEdit" src="#" alt="Xem trước ảnh"-->
-<!--                                                     style="width: 50px; height: 50px; border-radius: 50%; display: none;"/>-->
-<!--                                            </div>-->
+                                            <!--                                            <div class="mb-3">-->
+                                            <!--                                                <label class="form-label">Ảnh đại diện</label>-->
+                                            <!--                                                <input type="file" class="form-control" name="photo" accept="image/*"-->
+                                            <!--                                                       onchange="previewEditImage(event)">-->
+                                            <!--                                                <img id="previewEdit" src="#" alt="Xem trước ảnh"-->
+                                            <!--                                                     style="width: 50px; height: 50px; border-radius: 50%; display: none;"/>-->
+                                            <!--                                            </div>-->
 
                                             <div class="modal-footer">
                                                 <button type="submit" class="btn btn-primary">Cập nhật</button>
@@ -237,7 +208,7 @@
                                 <th>Email</th>
                                 <th>Địa chỉ</th>
                                 <th>Số điện thoại</th>
-<!--                                <th>Ảnh đại diện</th>-->
+                                <th>Trạng thái</th>
                                 <th>Thao tác</th>
                             </tr>
                             </thead>
@@ -249,11 +220,16 @@
                                 <td th:text="${customer.email}"></td>
                                 <td th:text="${customer.address}"></td>
                                 <td th:text="${customer.phoneNumber}"></td>
-<!--                                <td>-->
-<!--                                    <img th:if="${customer.photo}" th:src="${customer.photo}" alt="Ảnh đại diện"-->
-<!--                                         style="width: 50px; height: 50px; border-radius: 50%;"/>-->
-<!--                                    <span th:unless="${customer.photo}">Không có ảnh</span>-->
-<!--                                </td>-->
+                                <td>
+                                    <form th:action="@{/admin/customers/{action}/{id}(id=${customer.id}, action=${customer.status ? 'deactivate' : 'activate'})}"
+                                          method="post">
+                                        <button type="submit" class="badge"
+                                                th:classappend="${customer.status} ? 'text-bg-primary' : 'text-bg-secondary'"
+                                                th:attr="onclick='return confirm(\'Bạn có chắc chắn muốn ' + (${customer.status} ? 'ngừng hoạt động' : 'kích hoạt') + ' khách hàng này?\')'">
+                                            <span th:text="${customer.status} ? 'Đang hoạt động' : 'Ngừng hoạt động'"></span>
+                                        </button>
+                                    </form>
+                                </td>
                                 <td>
                                     <a href="#" class="btn btn-link btn-sm" data-bs-toggle="modal"
                                        data-bs-target="#editCustomerModal"

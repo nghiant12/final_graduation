@@ -30,7 +30,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     List<ProductDetail> findALL();
 
     @Query("""
-                SELECT pd 
+                SELECT pd
                 FROM ProductDetail pd
                 JOIN pd.product p
                 WHERE pd.quantity > 0 AND pd.available = true AND p.status = true
@@ -39,7 +39,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     List<ProductDetail> findTop4Products(Pageable pageable);
 
     @Query("""
-                SELECT pd 
+                SELECT pd
                 FROM ProductDetail pd
                 JOIN pd.product p
                 WHERE pd.quantity > 0 AND pd.available = true AND p.status = true

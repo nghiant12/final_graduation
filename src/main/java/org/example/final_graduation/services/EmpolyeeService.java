@@ -20,4 +20,8 @@ public class EmpolyeeService {
     public Optional<Employee> getEmployeeById(Integer id) {
         return employeeRepository.findById(id);
     }
+
+    public Optional<Employee> findByUsername(String username) {
+        return employeeRepository.findByUsername(username);
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,9 @@ public class OrderManagerController {
     private OrderDetailRepository orderDetailRepository;
 
     @GetMapping("")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<Order> orders = orderRepository.findAllOrderManager();
         model.addAttribute("orders", orders);
         return "admin/order_manager/index";
@@ -78,7 +81,9 @@ public class OrderManagerController {
 //
 //
     @GetMapping("/detail")
-    public String detail(@RequestParam("idOrder") Integer idOrder, Model model) {
+    public String detail(@RequestParam("idOrder") Integer idOrder, Model model,  Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(idOrder);
         model.addAttribute("order", orderRepository.findByID(idOrder));
         model.addAttribute("orderDetails", orderDetails);

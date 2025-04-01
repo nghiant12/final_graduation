@@ -166,3 +166,8 @@ ALTER TABLE promotions ADD min_order_value NUMERIC(38,2);
 ALTER TABLE promotions 
 ADD remaining_quantity INT NOT NULL DEFAULT 0;
 
+ALTER TABLE employees 
+ADD status BIT DEFAULT 1 -- 1: Đang hoạt động, 0: Không hoạt động
+
+ALTER TABLE customers 
+ADD status BIT DEFAULT 1 -- 1: Đang hoạt động, 0: Không hoạt động

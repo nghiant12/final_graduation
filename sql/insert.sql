@@ -1,18 +1,20 @@
 ﻿-- Bảng roles (2 dòng)
 INSERT INTO roles ([name]) VALUES
 ('staff'),
-('admin');
+('admin'),
+('ROLE_USER')
+;
 
 -- Bảng employees (5 dòng)
-INSERT INTO employees (role_id, username, [password], fullname, email, [address]) VALUES
-(1, 'staff1', 'staffpass1', 'Pham Minh D', 'staff1@example.com', '111 JKL Street'),
-(1, 'staff2', 'staffpass2', 'Hoang Thi E', 'staff2@example.com', '222 MNO Street'),
-(1, 'staff3', 'staffpass3', 'Le Van H', 'staff3@example.com', '333 ABC Street'),
-(2, 'admin', '123', 'Nguyen Van L', 'admin4@example.com', '444 ABC Street')
+INSERT INTO employees (role_id, username, [password], fullname, email, [address], phone_number) VALUES
+(1, 'staff1', 'staffpass1', 'Pham Minh D', 'staff1@example.com', '111 JKL Street', '0123456789'),
+(1, 'staff2', 'staffpass2', 'Hoang Thi E', 'staff2@example.com', '222 MNO Street', '0987654321'),
+(1, 'staff3', 'staffpass3', 'Le Van H', 'staff3@example.com', '333 ABC Street', '0912345678'),
+(2, 'admin', '123', 'Nguyen Van L', 'admin4@example.com', '444 ABC Street', '0965432187')
 
 -- Bảng customers (5 dòng)
 INSERT INTO customers (username, [password], fullname, email, [address], phone_number) VALUES
-('user1', 'password1', 'Nguyen Van A', 'user1@example.com', '123 ABC Street', '0123456789'),
+('user1', 'password1', 'Khách lẻ', 'user1@example.com', '123 ABC Street', '0123456789'),
 ('user2', 'password2', 'Le Thi B', 'user2@example.com', '456 DEF Street', '0987654321'),
 ('user3', 'password3', 'Tran Van C', 'user3@example.com', '789 GHI Street', '0912345678'),
 ('user4', 'password4', 'Pham Thi E', 'user4@example.com', '115 LKJ Street', '0965432187'),

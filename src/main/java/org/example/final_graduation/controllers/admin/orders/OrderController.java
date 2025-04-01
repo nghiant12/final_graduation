@@ -1,19 +1,13 @@
 package org.example.final_graduation.controllers.admin.orders;
 
-import jakarta.servlet.http.HttpSession;
 import org.example.final_graduation.entities.*;
 import org.example.final_graduation.repositories.CustomerRepository;
-import org.example.final_graduation.repositories.EmployeeRepository;
 import org.example.final_graduation.repositories.PromotionRepository;
 import org.example.final_graduation.repositories.orders.OrderDetailRepository;
 import org.example.final_graduation.repositories.orders.OrderRepository;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
-import org.example.final_graduation.repositories.products.ProductRepository;
-import org.example.final_graduation.repositories.products.attributes.ColorRepository;
 import org.example.final_graduation.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -21,10 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -38,19 +31,10 @@ public class OrderController {
     private ProductDetailService productDetailService;
 
     @Autowired
-    private CustomerService customerService;
-
-    @Autowired
     private EmpolyeeService empolyeeService;
 
     @Autowired
     private OrderRepository orderRepository;
-
-    @Autowired
-    private SizeService sizeService;
-
-    @Autowired
-    private ColorService colorService;
 
     @Autowired
     private OrderDetailRepository orderDetailRepository;
@@ -62,37 +46,34 @@ public class OrderController {
     private PromotionRepository promotionRepository;
 
     @Autowired
-    private BrandService brandService;
-
-    @Autowired
-    private ProductService productService;
-
-    @Autowired
     private ProductDetailRepository productDetailRepository;
 
     @Autowired
     private OrderDetailService orderDetailService;
-    @Autowired
-    private EmployeeRepository employeeRepository;
 
-    // Hiển thị form tạo đơn hàng mới
     @GetMapping("")
-    public String showCreateOrderForm(Model model) {
+    public String showCreateOrderForm(Model model, Principal principal) {
         Order order = new Order();
-        // Giả sử bạn có người dùng đang đăng nhập (user)
-        // Bạn có thể lấy từ session hoặc security context
-        // Thiết lập admin nếu cần
-        Optional<Employee> adminUser = empolyeeService.getEmployeeById(4); // Giả sử admin ID = 2
-        adminUser.ifPresent(order::setEmployee);
-        model.addAttribute("order", order);
 
-        model.addAttribute("productDetails", productDetailRepository.findALL());
+        // Lấy thông tin nhân viên đang đăng nhập
+        String username = principal.getName(); // Lấy username từ session đăng nhập
+        Optional<Employee> currentUser = empolyeeService.findByUsername(username); // Tìm Employee theo username
+
+        // Gán nhân viên hiện tại vào đơn hàng nếu tìm thấy
+        currentUser.ifPresent(order::setEmployee);
+
+        model.addAttribute("order", order);
+        model.addAttribute("productDetails", productDetailRepository.findAll());
 
         List<Order> orders = orderRepository.findAllProcessing();
         model.addAttribute("orders", orders);
 
+        // Truyền tên người dùng vào model để hiển thị trên giao diện
+        model.addAttribute("username", username);
+
         return "admin/orders/order_form";
     }
+
 
     // Xử lý tạo đơn hàng mới
     @PostMapping("/create")
@@ -114,7 +95,9 @@ public class OrderController {
     }
 
     @GetMapping("/detail")
-    public String showOrderDetail(@RequestParam Integer idOrder, Model model) {
+    public String showOrderDetail(@RequestParam Integer idOrder, Model model, Principal principal) {
+        String username = principal.getName();
+        model.addAttribute("username", username);
         // Lấy danh sách hóa đơn
         model.addAttribute("idOrder", idOrder);
 
@@ -447,4 +430,47 @@ public class OrderController {
         return customers;
     }
 
+    @PostMapping("/addMultipleProductsToOrder")
+    public String addMultipleProductsToOrder(
+            @RequestParam Integer orderId,
+            @RequestParam List<Integer> productDetailIds,
+            @RequestParam List<Integer> quantities,
+            RedirectAttributes redirectAttributes
+    ) {
+        if (productDetailIds.isEmpty() || quantities.isEmpty() || productDetailIds.size() != quantities.size()) {
+            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ! Vui lòng chọn ít nhất một sản phẩm.");
+            return "redirect:/admin/orders/detail?idOrder=" + orderId;
+        }
+
+        try {
+            for (int i = 0; i < productDetailIds.size(); i++) {
+                Integer productDetailId = productDetailIds.get(i);
+                Integer quantity = quantities.get(i);
+
+                // Kiểm tra quantity không null và không âm
+                if (quantity == null || quantity <= 0) {
+                    redirectAttributes.addFlashAttribute("error", "Số lượng sản phẩm không hợp lệ!");
+                    return "redirect:/admin/orders/detail?idOrder=" + orderId;
+                }
+
+                ProductDetail productDetail = productDetailService.findById(productDetailId);
+                if (productDetail.getQuantity() < quantity) {
+                    redirectAttributes.addFlashAttribute("error", "Số lượng sản phẩm không đủ!");
+                    return "redirect:/admin/orders/detail?idOrder=" + orderId;
+                }
+
+                // Thêm sản phẩm vào đơn hàng
+                orderDetailService.addProductToOrder(orderId, productDetailId, quantity);
+                productDetail.setQuantity(productDetail.getQuantity() - quantity);
+                productDetailService.saveProductDetail(productDetail);
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào hóa đơn!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm sản phẩm: " + e.getMessage());
+        }
+
+        redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(orderId));
+        return "redirect:/admin/orders/detail?idOrder=" + orderId;
+    }
 }

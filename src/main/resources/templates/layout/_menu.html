@@ -1,48 +1,58 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
-	<meta charset="utf-8">
-	<title>Insert title here</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <meta charset="utf-8">
+    <title>Insert title here</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 </head>
 <body>
 <nav>
-	<a th:href="@{/home/index}">[(#{home})]</a> <a
-		th:href="@{/home/about}" th:text="#{about}"></a> <a
-		th:href="@{/home/contact}" th:text="#{contact}"></a> <a
-		th:href="@{/home/form}" th:text="#{form}"></a> [<a href="?lang=vi">Tiếng
-	Việt</a>] [<a href="?lang=en">English</a>]
+    <a th:href="@{/home/index}">[(#{home})]</a> <a
+        th:href="@{/home/about}" th:text="#{about}"></a> <a
+        th:href="@{/home/contact}" th:text="#{contact}"></a> <a
+        th:href="@{/home/form}" th:text="#{form}"></a>
+    [<a href="?lang=vi">Tiếng Việt</a>] [<a href="?lang=en">English</a>]
 </nav>
 
 <div th:fragment="navbar">
-	<div class="home-nav main-menu">
-		<div class="logo">
-			<a href="/"><img src="/images/logo.png" alt="" style="width: 50px;"></a>
-			<strong sec:authorize="isAuthenticated()">Hi <span  th:text="${name}"></span> <i class="fa-solid fa-hands-clapping"></i></strong>
-		</div>
+    <div class="home-nav main-menu">
+        <div class="logo">
+            <a href="/"><img src="/images/logo.png" alt="" style="width: 50px;"></a>
+            <strong>Hi <span th:text="${username}"></span> <i class="fa-solid fa-hands-clapping"></i></strong>
+        </div>
 
-		<div class="menu">
-			<a href="/info">Giới thiệu</a>
-			<div class="dropdown-home">
-				<a class="dropbtn-home" href="/product/list">Sản Phẩm</a>
-				<div class="dropdown-content-home">
-					<a th:each="c:${cates}" th:href="@{|/product/list?cid=${c.id}|}">[[${c.name}]]</a>
-				</div>
-			</div>
-			<a href="/cart/view" class="cart-relative">Giỏ hàng <span id="cart-count" class="badge bg-danger text-white">0</span></a>
-			<a sec:authorize="!isAuthenticated()" href="/login/form"><i class="fa-regular fa-user"></i>  Đăng Nhập/Đăng kí</a>
-			<div class="dropdown-user" sec:authorize="isAuthenticated()">
-				<a class="dropbtn-user"><i class="fa-solid fa-user-tie"></i></a>
-				<div class="dropdown-content-user">
-					<a sec:authorize="isAuthenticated()" href="/order/list"><i class="fa-solid fa-bag-shopping"></i>  Đơn hàng</a>
-					<a sec:authorize="isAuthenticated()" href="/my-profile"><i class="fa-regular fa-id-card"></i>  Hồ sơ</a>
-					<a sec:authorize="hasAnyRole('STAF','DIRE')" href="/admin"><i class="fa-solid fa-bars-progress"></i>  Admin</a>
-					<a sec:authorize="isAuthenticated()" href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>  Đăng xuất</a>
-				</div>
-			</div>
-		</div>
-	</div>
+        <div class="menu">
+            <a th:href="@{/info}">Giới thiệu</a>
+            <div class="dropdown-home">
+                <a class="dropbtn-home" th:href="@{/product/list}">Sản Phẩm</a>
+                <div class="dropdown-content-home">
+                    <a th:each="c:${cates}" th:href="@{|/product/list?cid=${c.id}|}">[[${c.name}]]</a>
+                </div>
+            </div>
+            <a href="/cart/view" class="cart-relative">Giỏ hàng <span id="cart-count"
+                                                                      class="badge bg-danger text-white">0</span></a>
+            <!-- Nếu người dùng chưa đăng nhập -->
+            <a th:if="${#authorization.expression('!isAuthenticated()')}" href="/login">
+                <i class="fa-regular fa-user"></i> Đăng Nhập/Đăng Kí
+            </a>
+
+            <!-- Nếu người dùng đã đăng nhập -->
+            <div class="dropdown-user" th:if="${#authorization.expression('isAuthenticated()')}">
+                <a class="dropbtn-user"><i class="fa-solid fa-user-tie"></i></a>
+                <div class="dropdown-content-user">
+                    <a href="/order/list"><i class="fa-solid fa-bag-shopping"></i> Đơn hàng</a>
+                    <a href="/my-profile"><i class="fa-regular fa-id-card"></i> Hồ sơ</a>
+                    <a th:if="${#authorization.expression('isAuthenticated()')
+                                and #authorization.expression('hasRole(''ADMIN'')')}"
+                                href="/admin/orders">
+                        <i class="fa-solid fa-bars-progress"></i> Admin
+                    </a>
+                    <a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<script th:src="@{/admin/js/cart.js}"></script>
+<script th:src="@{/admin/js/cartR.js}"></script>
 </body>
 </html>
