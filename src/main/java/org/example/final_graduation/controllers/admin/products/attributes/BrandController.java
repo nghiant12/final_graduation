@@ -21,7 +21,7 @@ public class BrandController {
     @GetMapping("")
     public String index(Model model, Principal principal) {
         String username = principal.getName();
-        model.addAttribute("username", username);
+        model.addAttribute("username", "username");
         List<Brand> brands = brandRepository.findAll();
         model.addAttribute("brands", brands); // Truyền danh sách thương hiệu
         model.addAttribute("brand", new Brand()); // Truyền đối tượng trống cho form

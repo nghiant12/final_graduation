@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
+
+<head>
+  <title>Cảm ơn</title>
+</head>
+
+<body>
+  <div class="info-container">
+    <div class="info-background">
+      <div style="text-align: center; margin-top: 50px;">
+        <h3>CẢM ƠN QUÝ KHÁCH ĐÃ MUA HÀNG ❤️</h3>
+        <img
+                style="height: 500px; cursor: pointer;"
+                src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd25jaXdlaG1hdTlqNjFtamx0NGNxdDRkOGU3NzZ0MXNhNjBidTc0ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kYusl4oQ8gznRSlM8g/giphy.gif"
+                alt="Thank You"
+                onclick="window.location.href='http://localhost:8080/'"
+        />
+
+        <button
+                class="search-button btn-info"
+                style="font-size: 20px; padding: 10px 20px; margin-top: 20px;"
+                onclick="window.location.href='http://localhost:8080/'"
+        >
+          QUAY LẠI TRANG CHỦ
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</body>
+</html>

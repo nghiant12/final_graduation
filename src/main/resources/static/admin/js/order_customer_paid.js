@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
+    updateChangeAmount()
     let customerPaidInput = document.getElementById("customerPaid");
     let changeAmountElement = document.getElementById("changeAmount");
     let finalPriceElement = document.getElementById("finalPrice");
@@ -18,20 +19,29 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     function updateChangeAmount() {
-        let customerPaid = parseCurrency(customerPaidInput.value);
-        let finalPrice = parseCurrency(finalPriceElement.getAttribute("data-final-price")) || parseCurrency(finalPriceElement.textContent);
+        const customerPaidInput = document.getElementById("customerPaid");
+        const finalPriceElement = document.getElementById("finalPrice");
+        const changeAmountElement = document.getElementById("changeAmount");
+        const confirmOrderBtn1 = document.getElementById("confirmOrderBtn1");
+
+        // Lấy giá trị và chuyển đổi về số
+        const customerPaid = parseCurrency(customerPaidInput.value || "0");
+        const finalPrice =
+            parseCurrency(finalPriceElement.getAttribute("data-final-price")) ||
+            parseCurrency(finalPriceElement.textContent || "0");
 
         console.log("Khách đưa:", customerPaid);
         console.log("Tổng tiền cần thanh toán:", finalPrice);
 
-        let changeAmount = customerPaid - finalPrice;
+        const changeAmount = customerPaid - finalPrice;
 
         // Hiển thị tiền thừa
         changeAmountElement.textContent = changeAmount >= 0 ? formatCurrency(changeAmount) + " VND" : "0 VND";
 
-        // Disable nút xác nhận nếu tiền chưa đủ
-        confirmOrderBtn1.disabled = customerPaid < finalPrice;
+        // Disable nút nếu tiền khách đưa không hợp lệ hoặc không đủ
+        confirmOrderBtn1.disabled = isNaN(customerPaid) || customerPaid < finalPrice;
     }
+
 
     function parseCurrency(value) {
         if (!value) return 0;
