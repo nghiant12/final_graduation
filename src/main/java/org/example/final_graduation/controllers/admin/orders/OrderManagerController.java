@@ -25,9 +25,9 @@ public class OrderManagerController {
 
     @GetMapping("")
     public String index(Model model, Principal principal) {
-        String username = principal.getName();
-        model.addAttribute("username", username);
-        List<Order> orders = orderRepository.findAllOrderManager();
+//        String username = principal.getName();
+        model.addAttribute("username", "username");
+        List<Order> orders = orderRepository.findAll();
         model.addAttribute("orders", orders);
         return "admin/order_manager/index";
     }
@@ -82,8 +82,8 @@ public class OrderManagerController {
 //
     @GetMapping("/detail")
     public String detail(@RequestParam("idOrder") Integer idOrder, Model model,  Principal principal) {
-        String username = principal.getName();
-        model.addAttribute("username", username);
+//        String username = principal.getName();
+        model.addAttribute("username", "username");
         List<OrderDetail> orderDetails = orderDetailRepository.findByOrderID(idOrder);
         model.addAttribute("order", orderRepository.findByID(idOrder));
         model.addAttribute("orderDetails", orderDetails);

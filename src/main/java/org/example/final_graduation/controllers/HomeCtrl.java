@@ -73,4 +73,14 @@ public class HomeCtrl {
         return "layout/info";
     }
 
+    @GetMapping("/thank-you")
+    public String thankYou() {
+        return "layout/thank-you";
+    }
+
+    @GetMapping("/checkout")
+    public String checkout() {
+        return "layout/checkout";
+    }
+
 }

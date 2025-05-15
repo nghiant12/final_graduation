@@ -63,4 +63,11 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByType(
             @Param("type") String type
     );
+
+    @Query("""
+    SELECT o FROM Order o 
+    WHERE o.type = 'At the counter' 
+    AND o.status = 'Processing'
+""")
+    List<Order> findAllProcessingAtTheCounter();
 }

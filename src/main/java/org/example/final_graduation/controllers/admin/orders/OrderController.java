@@ -52,12 +52,12 @@ public class OrderController {
     private OrderDetailService orderDetailService;
 
     @GetMapping("")
-    public String showCreateOrderForm(Model model, Principal principal) {
+    public String showCreateOrderForm(Model model) {
         Order order = new Order();
 
         // Lấy thông tin nhân viên đang đăng nhập
-        String username = principal.getName(); // Lấy username từ session đăng nhập
-        Optional<Employee> currentUser = empolyeeService.findByUsername(username); // Tìm Employee theo username
+        // String username = principal.getName(); // Lấy username từ session đăng nhập
+        Optional<Employee> currentUser = empolyeeService.findByUsername("staff1"); // Tìm Employee theo username
 
         // Gán nhân viên hiện tại vào đơn hàng nếu tìm thấy
         currentUser.ifPresent(order::setEmployee);
@@ -65,11 +65,11 @@ public class OrderController {
         model.addAttribute("order", order);
         model.addAttribute("productDetails", productDetailRepository.findAll());
 
-        List<Order> orders = orderRepository.findAllProcessing();
+        List<Order> orders = orderRepository.findAllProcessingAtTheCounter();
         model.addAttribute("orders", orders);
 
         // Truyền tên người dùng vào model để hiển thị trên giao diện
-        model.addAttribute("username", username);
+        model.addAttribute("username", "username");
 
         return "admin/orders/order_form";
     }
@@ -96,8 +96,8 @@ public class OrderController {
 
     @GetMapping("/detail")
     public String showOrderDetail(@RequestParam Integer idOrder, Model model, Principal principal) {
-        String username = principal.getName();
-        model.addAttribute("username", username);
+//        String username = principal.getName();
+        model.addAttribute("username", "username");
         // Lấy danh sách hóa đơn
         model.addAttribute("idOrder", idOrder);
 

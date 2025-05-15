@@ -66,8 +66,7 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     @Query("""
                 SELECT pd
                 FROM ProductDetail pd
-                JOIN pd.product p
-                WHERE pd.quantity > 0 AND p.status = true
+                JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true
             """)
     Page<ProductDetail> paging(Pageable pageable);
 
@@ -91,20 +90,22 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
 
     Page<ProductDetail> findByCategoryId(String categoryId, Pageable pageable);
 
-    @Query(value = "select pd from ProductDetail pd where pd.product.name like ?1")
+    @Query(value = "select pd from ProductDetail pd JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true AND pd.product.name like ?1")
     Page<ProductDetail> findByName(String name, Pageable pageable);
 
+    @Query("SELECT pd FROM ProductDetail pd JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true AND pd.price BETWEEN :minPrice AND :maxPrice AND pd.quantity > 0")
     Page<ProductDetail> findByPriceBetween(double minPrice, double maxPrice, Pageable pageable);
 
+    @Query("SELECT pd FROM ProductDetail pd JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true AND pd.price BETWEEN :minPrice AND :maxPrice AND pd.category IN :categories AND pd.quantity > 0")
     Page<ProductDetail> findByPriceBetweenAndCategoryIn(double minPrice, double maxPrice, List<Category> categories, Pageable pageable);
 
-    @Query("SELECT p.category.id, p.category.name, COUNT(p) FROM ProductDetail p GROUP BY p.category.id, p.category.name")
+    @Query("SELECT pd.category.id, pd.category.name, COUNT(pd) FROM ProductDetail pd JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true GROUP BY pd.category.id, pd.category.name")
     List<Object[]> countProductsByCategory();
 
     @Query("""
-            SELECT COALESCE(SUM(p.quantity), 0)
-            FROM ProductDetail p
-            WHERE p.product.id = :productId
+            SELECT COALESCE(SUM(pd.quantity), 0)
+            FROM ProductDetail pd
+            WHERE pd.product.id = :productId
             """)
     long sumQuantityByProductId(@Param("productId") Integer productId);
 
@@ -122,4 +123,10 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
                                     @Param("colorId") Integer colorId,
                                     @Param("sizeId") Integer sizeId);
 
+    @Query("""
+                SELECT p.quantity
+                FROM ProductDetail p
+                WHERE p.id = :productId
+            """)
+    Integer getStockByProductId(Integer productId);
 }

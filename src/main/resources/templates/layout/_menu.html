@@ -29,30 +29,30 @@
                     <a th:each="c:${cates}" th:href="@{|/product/list?cid=${c.id}|}">[[${c.name}]]</a>
                 </div>
             </div>
-            <a href="/cart/view" class="cart-relative">Giỏ hàng <span id="cart-count"
+            <a href="/cart/view" class="cart-relative">Giỏ hàng <span id="cartR-count"
                                                                       class="badge bg-danger text-white">0</span></a>
             <!-- Nếu người dùng chưa đăng nhập -->
-            <a th:if="${#authorization.expression('!isAuthenticated()')}" href="/login">
-                <i class="fa-regular fa-user"></i> Đăng Nhập/Đăng Kí
-            </a>
+            <!--            <a th:if="${#authorization.expression('!isAuthenticated()')}" href="/login">-->
+            <!--                <i class="fa-regular fa-user"></i> Đăng Nhập/Đăng Kí-->
+            <!--            </a>-->
 
-            <!-- Nếu người dùng đã đăng nhập -->
-            <div class="dropdown-user" th:if="${#authorization.expression('isAuthenticated()')}">
-                <a class="dropbtn-user"><i class="fa-solid fa-user-tie"></i></a>
-                <div class="dropdown-content-user">
-                    <a href="/order/list"><i class="fa-solid fa-bag-shopping"></i> Đơn hàng</a>
-                    <a href="/my-profile"><i class="fa-regular fa-id-card"></i> Hồ sơ</a>
-                    <a th:if="${#authorization.expression('isAuthenticated()')
-                                and #authorization.expression('hasRole(''ADMIN'')')}"
-                                href="/admin/orders">
-                        <i class="fa-solid fa-bars-progress"></i> Admin
-                    </a>
-                    <a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a>
-                </div>
-            </div>
+            <!--            &lt;!&ndash; Nếu người dùng đã đăng nhập &ndash;&gt;-->
+            <!--            <div class="dropdown-user" th:if="${#authorization.expression('isAuthenticated()')}">-->
+            <!--                <a class="dropbtn-user"><i class="fa-solid fa-user-tie"></i></a>-->
+            <!--                <div class="dropdown-content-user">-->
+            <!--                    <a href="/order/list"><i class="fa-solid fa-bag-shopping"></i> Đơn hàng</a>-->
+            <!--                    <a href="/my-profile"><i class="fa-regular fa-id-card"></i> Hồ sơ</a>-->
+            <!--                    <a th:if="${#authorization.expression('isAuthenticated()')-->
+            <!--                                and #authorization.expression('hasRole(''ADMIN'')')}"-->
+            <!--                                href="/admin/orders">-->
+            <!--                        <i class="fa-solid fa-bars-progress"></i> Admin-->
+            <!--                    </a>-->
+            <!--                    <a href="/logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất</a>-->
+            <!--                </div>-->
+            <!--            </div>-->
         </div>
     </div>
 </div>
-<script th:src="@{/admin/js/cartR.js}"></script>
+<script th:src="@{/admin/js/cart-r.js}"></script>
 </body>
 </html>
