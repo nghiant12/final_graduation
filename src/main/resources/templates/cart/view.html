@@ -19,22 +19,23 @@
 
 	<section class="cart-section">
 		<div class="table-responsive cart-table">
-			<table class="w3-table-all">
+			<table class="table">
 				<thead>
-				<tr class="w3-2021-inkwell">
+				<tr>
+					<th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"> All</th>
 					<th>STT</th>
-					<th>Tên sản phẩm</th>
+					<th>Tên SP</th>
 					<th>Hình ảnh</th>
-					<th>Màu sắc</th>
+					<th>Màu</th>
 					<th>Size</th>
 					<th>Danh mục</th>
-					<th>Giá</th>
+					<th>Đơn giá</th>
 					<th>Số lượng</th>
-					<th>Tổng</th>
+					<th>Thành tiền</th>
 					<th>Hành động</th>
 				</tr>
 				</thead>
-				<tbody id="cart-body">
+				<tbody id="cartR-body">
 				<!-- Dữ liệu giỏ hàng sẽ được thêm vào đây bằng JavaScript -->
 				</tbody>
 			</table>
@@ -46,46 +47,22 @@
 
 
 		<div class="cart-pay">
-			<form id="order-form">
-				<p class="w3-center">
-					<b>THÔNG TIN ĐƠN HÀNG</b>
-				</p>
-				<input type="hidden" id="username" th:value="${username}">
-
-				<p>
-					<label>Số điện thoại</label>
-					<input class="w3-input w3-border w3-round" name="sdt" id="user-sdt" th:value="${phone}" required>
-				</p>
-
-				<p>
-					<label>Địa chỉ nhận hàng</label>
-					<input class="w3-input w3-border w3-round" th:value="${address}" id="user-address" name="diachi" required>
-				</p>
-
-				<p>
-					<label>Phương thức thanh toán</label>
-					<select class="w3-select w3-border w3-round" name="option" onchange="changePayMethod(this)" id="payment">
-						<option value="Cash">Thanh toán khi nhận hàng</option>
-						<option value="Transfer">VN Pay</option>
-					</select>
-				</p>
-
-				<p class="vn-pay">
-					<input type="radio" id="ncb" name="bank" value="NCB" checked>
-					<label for="ncb"><img src="/images/ncb.png" style="width: 70px;"></label>
-					<input type="radio" id="eximbank" name="bank" value="EXIMBANK">
-					<label for="eximbank"><img src="/images/eximbank.png" style="width: 70px;"></label>
-				</p>
-
-				<div>
-					<b id="total-amount">Total: <span id="total-price">0 VND</span></b>
-					<button type="button" class="pay-button" onclick="purchaseOrder()" id="order-btn">Đặt hàng</button>
-					<p id="loading-message" style="display: none; color: red;">Đang xử lý đơn hàng...</p>
-				</div>
-			</form>
-
+			<h3><b id="total-amount">Total: <span id="total-price">0 VND</span></b></h3>
+			<a href="/checkout" class="btn btn-primary" id="checkoutBtn">Check out</a>
 		</div>
+
 	</section>
+	<script>
+		document.getElementById("checkoutBtn").addEventListener("click", function(event) {
+			var checkoutCart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
+
+			// Kiểm tra xem giỏ hàng có sản phẩm không
+			if (checkoutCart.length === 0) {
+				event.preventDefault();  // Ngừng chuyển hướng nếu giỏ hàng trống
+				alert("Vui lòng chọn sản phẩm để tiếp tục !");
+			}
+		});
+	</script>
 	<script>
 		function changePayMethod(e) {
 			if(e.value === '2') {
@@ -95,6 +72,6 @@
 			}
 		}
 	</script>
-	<script th:src="@{/admin/js/cartR.js}"></script>
+	<script th:src="@{/admin/js/cart-r.js}"></script>
 </body>
 </html>

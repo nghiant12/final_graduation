@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("""
-            select o from Order o where o.status like "Processing"
+            select o from Order o where o.status like "Processing" AND o.type like "At the counter"
             """)
     List<Order> findAllProcessing();
 

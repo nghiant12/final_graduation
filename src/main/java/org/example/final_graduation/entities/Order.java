@@ -36,9 +36,9 @@ public class Order {
     @JoinColumn(name = "promotion_id")
     private Promotion promotion;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "employee_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @JoinColumn(name = "employee_id")
     @JsonIgnore
     private Employee employee;
 
@@ -132,11 +132,11 @@ public class Order {
         this.customer = customer;
     }
 
-    public @NotNull Employee getEmployee() {
+    public Employee getEmployee() {
         return employee;
     }
 
-    public void setEmployee(@NotNull Employee employee) {
+    public void setEmployee(Employee employee) {
         this.employee = employee;
     }
 
