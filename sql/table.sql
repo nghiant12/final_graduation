@@ -89,7 +89,7 @@ CREATE TABLE product_details (
 CREATE TABLE orders (
     id INT PRIMARY KEY IDENTITY(1,1),
     [customer_id] INT,
-    employee_id INT NOT NULL,
+    employee_id INT,
     created_date DATETIME NOT NULL DEFAULT GETDATE(),
     total_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
     [type] NVARCHAR(50) NOT NULL,
