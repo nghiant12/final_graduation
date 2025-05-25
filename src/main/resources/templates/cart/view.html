@@ -9,69 +9,69 @@
 </head>
 
 <body>
-	<div class="breadcrumb cart-breadcrumb">
-		<a href="/">Trang chủ</a>
-		<span>&nbsp;>&nbsp;</span>
-		<a href="/product/list">Sản phẩm</a>
-		<span>&nbsp;>&nbsp;</span>
-		<span>Cart</span>
+<div class="breadcrumb cart-breadcrumb">
+	<a href="/">Trang chủ</a>
+	<span>&nbsp;>&nbsp;</span>
+	<a href="/product/list">Sản phẩm</a>
+	<span>&nbsp;>&nbsp;</span>
+	<span>Cart</span>
+</div>
+
+<section class="cart-section">
+	<div class="table-responsive cart-table">
+		<table class="table">
+			<thead>
+			<tr>
+				<th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"> All</th>
+				<th>STT</th>
+				<th>Tên SP</th>
+				<th>Hình ảnh</th>
+				<th>Màu</th>
+				<th>Size</th>
+				<th>Danh mục</th>
+				<th>Đơn giá</th>
+				<th>Số lượng</th>
+				<th>Thành tiền</th>
+				<th>Hành động</th>
+			</tr>
+			</thead>
+			<tbody id="cartR-body">
+			<!-- Dữ liệu giỏ hàng sẽ được thêm vào đây bằng JavaScript -->
+			</tbody>
+		</table>
+
+		<div id="empty-cart" class="no-result-found" style="display: none;">
+			<img src="/images/no-cart-image.png">
+		</div>
 	</div>
 
-	<section class="cart-section">
-		<div class="table-responsive cart-table">
-			<table class="table">
-				<thead>
-				<tr>
-					<th><input type="checkbox" id="select-all" onchange="toggleSelectAll(this)"> All</th>
-					<th>STT</th>
-					<th>Tên SP</th>
-					<th>Hình ảnh</th>
-					<th>Màu</th>
-					<th>Size</th>
-					<th>Danh mục</th>
-					<th>Đơn giá</th>
-					<th>Số lượng</th>
-					<th>Thành tiền</th>
-					<th>Hành động</th>
-				</tr>
-				</thead>
-				<tbody id="cartR-body">
-				<!-- Dữ liệu giỏ hàng sẽ được thêm vào đây bằng JavaScript -->
-				</tbody>
-			</table>
 
-			<div id="empty-cart" class="no-result-found" style="display: none;">
-				<img src="/images/no-cart-image.png">
-			</div>
-		</div>
+	<div class="cart-pay">
+		<h3><b id="total-amount">Total: <span id="total-price">0 VND</span></b></h3>
+		<a href="/checkout" class="btn btn-primary" id="checkoutBtn">Check out</a>
+	</div>
 
+</section>
+<script>
+	document.getElementById("checkoutBtn").addEventListener("click", function(event) {
+		var checkoutCart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
 
-		<div class="cart-pay">
-			<h3><b id="total-amount">Total: <span id="total-price">0 VND</span></b></h3>
-			<a href="/checkout" class="btn btn-primary" id="checkoutBtn">Check out</a>
-		</div>
-
-	</section>
-	<script>
-		document.getElementById("checkoutBtn").addEventListener("click", function(event) {
-			var checkoutCart = JSON.parse(localStorage.getItem("checkoutCart")) || [];
-
-			// Kiểm tra xem giỏ hàng có sản phẩm không
-			if (checkoutCart.length === 0) {
-				event.preventDefault();  // Ngừng chuyển hướng nếu giỏ hàng trống
-				alert("Vui lòng chọn sản phẩm để tiếp tục !");
-			}
-		});
-	</script>
-	<script>
-		function changePayMethod(e) {
-			if(e.value === '2') {
-				$('.vn-pay').addClass('active');
-			} else {
-				$('.vn-pay').removeClass('active');
-			}
+		// Kiểm tra xem giỏ hàng có sản phẩm không
+		if (checkoutCart.length === 0) {
+			event.preventDefault();  // Ngừng chuyển hướng nếu giỏ hàng trống
+			alert("Vui lòng chọn sản phẩm để tiếp tục !");
 		}
-	</script>
-	<script th:src="@{/admin/js/cart-r.js}"></script>
+	});
+</script>
+<script>
+	function changePayMethod(e) {
+		if(e.value === '2') {
+			$('.vn-pay').addClass('active');
+		} else {
+			$('.vn-pay').removeClass('active');
+		}
+	}
+</script>
+<script th:src="@{/admin/js/cart-r.js}"></script>
 </body>
 </html>

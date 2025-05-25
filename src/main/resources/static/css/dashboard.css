@@ -1,0 +1,42 @@
+/* Dashboard custom CSS */
+.dashboard-page .dashboard-card {
+    min-width: 150px;
+    border-radius: 12px;
+    transition: box-shadow 0.2s;
+    background: #fff;
+}
+.dashboard-page .dashboard-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.dashboard-page .dashboard-summary .card h3 {
+    font-size: 2rem;
+}
+.dashboard-page .dashboard-summary .card h6 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+.dashboard-page .table th, .dashboard-page .table td {
+    vertical-align: middle !important;
+}
+.dashboard-page .table th {
+    background: #f8f9fa;
+    font-weight: 600;
+}
+.dashboard-page .table td, .dashboard-page .table th {
+    text-align: center;
+}
+.dashboard-page .card {
+    border-radius: 14px;
+}
+@media (max-width: 768px) {
+    .dashboard-page .dashboard-summary .col-6, .dashboard-page .dashboard-summary .col-md-4, .dashboard-page .dashboard-summary .col-lg-2 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+@media (max-width: 576px) {
+    .dashboard-page .dashboard-summary .col-6, .dashboard-page .dashboard-summary .col-md-4, .dashboard-page .dashboard-summary .col-lg-2 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+} 

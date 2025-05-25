@@ -115,6 +115,12 @@ public class PromotionController {
             newPromotion.setRemainingQuantity(remainingQuantity);
             newPromotion.setStartDate(startDate);
             newPromotion.setEndDate(endDate);
+            // Xử lý code: nếu rỗng thì sinh tự động
+            String code = promotion.getCode();
+            if (code == null || code.trim().isEmpty()) {
+                code = "PROMO" + System.currentTimeMillis();
+            }
+            newPromotion.setCode(code);
 
             promotionService.savePromotion(newPromotion);
             redirectAttributes.addFlashAttribute("success", "Thêm khuyến mãi thành công!");
@@ -158,6 +164,10 @@ public class PromotionController {
         updatedPromotion.setMinOrderValue(promotion.getMinOrderValue());
         updatedPromotion.setRemainingQuantity(promotion.getRemainingQuantity());
         updatedPromotion.setEndDate(promotion.getEndDate());
+        // Cho phép cập nhật code nếu truyền lên
+        if (promotion.getCode() != null && !promotion.getCode().trim().isEmpty()) {
+            updatedPromotion.setCode(promotion.getCode().trim());
+        }
 
         promotionService.savePromotion(updatedPromotion);
         redirectAttributes.addFlashAttribute("success", "Cập nhật khuyến mãi thành công!");
@@ -176,6 +186,27 @@ public class PromotionController {
             redirectAttributes.addFlashAttribute("error", "Không tìm thấy mã khuyến mãi.");
         }
         return "redirect:/admin/promotions";
+    }
+
+    // API cho user kiểm tra mã khuyến mãi khi checkout
+    @ResponseBody
+    @PostMapping("/validate")
+    public java.util.Map<String, Object> validatePromotion(@RequestParam("code") String code, @RequestParam("orderTotal") java.math.BigDecimal orderTotal) {
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        var promoOpt = promotionService.validatePromotionForUser(code, orderTotal);
+        if (promoOpt.isPresent()) {
+            var promo = promoOpt.get();
+            java.math.BigDecimal discountAmount = orderTotal.multiply(promo.getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+            result.put("valid", true);
+            result.put("discountAmount", discountAmount);
+            result.put("promotion", promo.getName());
+            result.put("message", "Áp dụng mã thành công! Được giảm " + discountAmount + " VND");
+        } else {
+            result.put("valid", false);
+            result.put("discountAmount", 0);
+            result.put("message", "Mã khuyến mãi không hợp lệ hoặc không áp dụng được.");
+        }
+        return result;
     }
 
 }

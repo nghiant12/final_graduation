@@ -42,4 +42,6 @@ public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
                 WHERE p.id = :id
             """)
     Promotion findByID(Integer id);
+
+    Promotion findByCode(String code);
 }

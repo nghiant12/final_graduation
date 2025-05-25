@@ -70,12 +70,12 @@ public class Employee {
     private Role role;
 
     @Column(name = "status")
-    private Boolean status;
+    private boolean status;
 
     public Employee() {
     }
 
-    public Employee(Integer id, String username, String password, String fullname, String phoneNumber, String email, String address, String photo, Date createdDate, Role role, Boolean status) {
+    public Employee(Integer id, String username, String password, String fullname, String phoneNumber, String email, String address, String photo, Date createdDate, Role role, boolean status) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -173,13 +173,11 @@ public class Employee {
         return role != null ? role.getName() : "ROLE_USER";
     }
 
-    public Boolean isStatus() {
+    public boolean isStatus() {
         return status;
     }
 
-    public void setStatus(Boolean status) {
+    public void setStatus(boolean status) {
         this.status = status;
     }
-
-
 }

@@ -2,68 +2,217 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
 
 <head>
-  <title>Checkout</title>
+    <title>Checkout</title>
+    <style>
+        .info-container {
+            padding: 40px 10px;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .w3-input,
+        .w3-select {
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pay-button {
+            margin-top: 15px;
+            padding: 12px 30px;
+            background-color: #007bff;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .pay-button:hover {
+            background-color: #0056b3;
+        }
+
+        .vn-pay {
+            margin-top: 10px;
+        }
+
+        .vn-pay label {
+            margin-right: 10px;
+        }
+
+        #total-amount {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .shipping-fee {
+            font-size: 16px;
+            color: #666;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="info-container">
-    <div class="info-background">
-      <div style="text-align: center; margin-top: 50px;">
-        <div class="card mb-4">
-          <div class="card-header">
-            <i class="fas fa-table me-1"></i>
-            Sản phẩm mua:
-          </div>
-          <div class="card-body">
-            <div id="checkout-cart-list"></div>
+    <div class="info-container">
+        <div class="info-background">
+            <div style="max-width: 700px; margin: 0 auto;">
 
-          </div>
-        </div>
+                <!-- Danh sách sản phẩm -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-table me-1"></i> Sản phẩm mua:
+                    </div>
+                    <div class="card-body">
+                        <div id="checkout-cart-list"></div>
+                    </div>
+                </div>
 
-        <div class="card mb-4">
-          <form id="order-form" onsubmit="return confirmOrder();">
-            <p class="w3-center">
-              <b>THÔNG TIN ĐƠN HÀNG</b>
-            </p>
-            <input type="hidden" id="username" th:value="${username}">
+                <!-- Form đặt hàng -->
+                <div class="card mb-4">
+                    <form id="order-form" method="post" onsubmit="event.preventDefault(); return confirmOrder();">
+                        <div class="card-body">
+                            <h4 class="w3-center"><b>THÔNG TIN ĐƠN HÀNG</b></h4>
 
-            <p>
-              <label>Số điện thoại</label>
-              <input class="w3-input w3-border w3-round" name="sdt" id="user-sdt" th:value="${phone}" required>
-            </p>
+                            <!-- Họ và tên -->
+                            <p>
+                                <label>Họ và Tên</label>
+                                <input class="w3-input w3-border w3-round" name="fullname" id="user-fullname"
+                                    th:value="${isAuthenticated and fullName != null and fullName != '' ? fullName : ''}"
+                                    th:disabled="${isAuthenticated and fullName != null and fullName != ''}"
+                                    placeholder="Nhập họ và tên">
+                            </p>
 
-            <p>
-              <label>Địa chỉ nhận hàng</label>
-              <input class="w3-input w3-border w3-round" th:value="${address}" id="user-address" name="diachi" required>
-            </p>
+                            <!-- Email -->
+                            <label>Email</label>
+                            <input type="email" class="w3-input w3-border w3-round" name="email" id="user-email"
+                                th:value="${isAuthenticated and email != null and email != '' ? email : ''}"
+                                th:disabled="${isAuthenticated and email != null and email != ''}"
+                                placeholder="Nhập email" required>
 
-            <p>
-              <label>Phương thức thanh toán</label>
-              <select class="w3-select w3-border w3-round" name="option" onchange="changePayMethod(this)" id="payment">
-                <option value="Cash">Thanh toán khi nhận hàng</option>
-                <option value="Transfer">VN Pay</option>
-              </select>
-            </p>
+                            <!-- Số điện thoại -->
+                            <label>Số điện thoại</label>
+                            <input class="w3-input w3-border w3-round" name="sdt" id="user-sdt"
+                                th:value="${isAuthenticated and phone != null and phone != '' ? phone : ''}"
+                                th:disabled="${isAuthenticated and phone != null and phone != ''}" required>
 
-            <p class="vn-pay">
-              <input type="radio" id="ncb" name="bank" value="NCB" checked>
-              <label for="ncb"><img src="/images/ncb.png" style="width: 70px;"></label>
-              <input type="radio" id="eximbank" name="bank" value="EXIMBANK">
-              <label for="eximbank"><img src="/images/eximbank.png" style="width: 70px;"></label>
-            </p>
+                            <!-- Địa chỉ: Tỉnh / Thành phố -->
+                            <label>Tỉnh / Thành phố</label>
+                            <select class="w3-select w3-border w3-round" id="province" required>
+                                <option value="" disabled selected>Chọn tỉnh/thành phố</option>
+                            </select>
 
-            <div>
-              <b id="total-amount">Total: <span id="total-price">0 VND</span></b>
-              <button type="submit" class="pay-button" id="order-btn">Đặt hàng</button>
-              <p id="loading-message" style="display: none; color: red;">Đang xử lý đơn hàng...</p>
+                            <!-- Quận / Huyện -->
+                            <label>Quận / Huyện</label>
+                            <select class="w3-select w3-border w3-round" id="district" required disabled>
+                                <option value="" disabled selected>Chọn quận/huyện</option>
+                            </select>
+
+                            <!-- Phường / Xã -->
+                            <label>Phường / Xã</label>
+                            <select class="w3-select w3-border w3-round" id="ward" required disabled>
+                                <option value="" disabled selected>Chọn phường/xã</option>
+                            </select>
+
+                            <!-- Địa chỉ chi tiết -->
+                            <label>Địa chỉ chi tiết (số nhà, đường...)</label>
+                            <input class="w3-input w3-border w3-round" id="user-address" name="diachi"
+                                th:value="${address}" placeholder="Nhập địa chỉ cụ thể" required
+                                onchange="updateShippingAddress()">
+                            <input type="hidden" id="full-address" name="fullAddress">
+
+                            <!-- Phí vận chuyển -->
+                            <div class="shipping-fee">
+                                <span>Phí vận chuyển: </span>
+                                <span id="shipping-fee">0 VND</span>
+                            </div>
+
+                            <!-- Bảng tóm tắt giá trị đơn hàng -->
+                            <div class="order-summary mt-3">
+                                <table class="table">
+                                    <tr>
+                                        <td>Tiền hàng:</td>
+                                        <td class="text-end"><span id="summary-subtotal">0 VND</span></td>
+                                    </tr>
+                                    <tr id="row-shipping">
+                                        <td>Phí vận chuyển:</td>
+                                        <td class="text-end"><span id="summary-shipping">0 VND</span></td>
+                                    </tr>
+                                    <tr id="row-discount" style="display:none;">
+                                        <td>Giảm giá:</td>
+                                        <td class="text-end text-success">-<span id="summary-discount">0 VND</span></td>
+                                    </tr>
+                                    <tr class="fw-bold">
+                                        <td>Tổng thanh toán:</td>
+                                        <td class="text-end text-primary"><span id="summary-final">0 VND</span></td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Phương thức thanh toán -->
+                            <label>Phương thức thanh toán</label>
+                            <select class="w3-select w3-border w3-round" name="paymentMethod" id="payment-method">
+                                <option value="Cash">Thanh toán khi nhận hàng</option>
+                                <option value="VNPay">Thanh toán qua VNPay</option>
+                            </select>
+
+                            <!-- Ngân hàng VNPay -->
+                            <div class="vn-pay">
+                                <input type="radio" id="ncb" name="bank" value="NCB" checked>
+                                <label for="ncb"><img src="/images/ncb.png" style="width: 70px;"></label>
+                                <input type="radio" id="eximbank" name="bank" value="EXIMBANK">
+                                <label for="eximbank"><img src="/images/eximbank.png" style="width: 70px;"></label>
+                            </div>
+
+                            <!-- Mã khuyến mãi -->
+                            <label>Mã khuyến mãi</label>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+<!--                            <input class="w3-input w3-border w3-round" style="flex: 1;" name="promotionCode" id="promotion-code" placeholder="Nhập mã khuyến mãi">-->
+                                <select class="w3-input w3-border w3-round" style="flex: 1;"
+                                        name="promotionCode" id="promotion-code">
+                                    <option value="" data-discount="0" data-min-value="0">-- Không áp dụng --</option>
+                                    <option th:each="promotion : ${promotions}"
+                                            th:value="${promotion.code}"
+                                            th:data-discount="${promotion.discount}"
+                                            th:data-min-value="${promotion.minOrderValue}"
+                                            th:data-remaining="${promotion.remainingQuantity}"
+                                            th:text="${promotion.name} + ' (-' + ${promotion.discount} + '%) - Tối thiểu ' + ${#numbers.formatDecimal(promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND (' + ${promotion.remainingQuantity} + ' còn lại)'">
+                                    </option>
+                                </select>
+                                <button type="button" class="pay-button" style="padding: 8px 16px; font-size: 14px;" onclick="applyPromotionCode()">Áp dụng</button>
+                            </div>
+                            <div id="promotion-message" style="color: green; font-weight: bold; margin-bottom: 10px;"></div>
+                            <div id="promotion-discount" style="color: #007bff; font-weight: bold; margin-bottom: 10px;"></div>
+
+                            <!-- Tổng tiền -->
+                            <b id="total-amount">Tổng thanh toán: <span id="total-price">0 VND</span></b>
+                            <br>
+
+                            <!-- Nút đặt hàng -->
+                            <button type="submit" class="pay-button" id="order-btn">Đặt hàng</button>
+                            <p id="loading-message" style="display: none; color: red;">Đang xử lý đơn hàng...</p>
+                        </div>
+                    </form>
+                </div>
+
             </div>
-          </form>
         </div>
-      </div>
-
     </div>
 
-  </div>
-  <script th:src="@{/admin/js/cart-r.js}"></script>
+    <!-- JavaScript -->
+    <script th:src="@{/admin/js/cart-r.js}"></script>
+    <script th:src="@{/js/address-handler.js}"></script>
+    <script th:src="@{/js/checkout-handler.js}"></script>
 </body>
+
 </html>

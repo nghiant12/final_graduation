@@ -18,7 +18,12 @@
 	<div class="order-detail-home" th:object="${order}">
 		<div class="order-detail-title">
 			<h4>Mã đặt hàng: [[*{id}]]</h4>
-			<h4>Tổng tiền: [[*{totalAmount}]]</h4>
+			<div class="order-breakdown">
+				<p>Tiền hàng: <b th:text="${#numbers.formatDecimal(order.subTotal, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+				<p>Phí vận chuyển: <b th:text="${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+				<p>Giảm giá: <b class="text-success" th:text="|-${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} VND|"/></p>
+				<p class="fw-bold">Tổng thanh toán: <b class="text-primary" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+			</div>
 		</div>
 		<div>
 			<span>Số điện thoại: [[*{phoneNumber}]]</span><br>

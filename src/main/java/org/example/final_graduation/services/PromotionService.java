@@ -52,4 +52,16 @@ public class PromotionService {
         promotionRepository.deactivateExpiredPromotions();
         System.out.println("Kiểm tra và cập nhật trạng thái khuyến mãi: " + LocalDateTime.now());
     }
+
+    public Optional<Promotion> validatePromotionForUser(String code, java.math.BigDecimal orderTotal) {
+        Promotion promotion = promotionRepository.findByCode(code);
+        if (promotion == null) return Optional.empty();
+        LocalDateTime now = LocalDateTime.now();
+        if (!Boolean.TRUE.equals(promotion.getActive())) return Optional.empty();
+        if (promotion.getRemainingQuantity() == null || promotion.getRemainingQuantity() <= 0) return Optional.empty();
+        if (promotion.getStartDate() != null && now.isBefore(promotion.getStartDate())) return Optional.empty();
+        if (promotion.getEndDate() != null && now.isAfter(promotion.getEndDate())) return Optional.empty();
+        if (promotion.getMinOrderValue() != null && orderTotal.compareTo(promotion.getMinOrderValue()) < 0) return Optional.empty();
+        return Optional.of(promotion);
+    }
 }

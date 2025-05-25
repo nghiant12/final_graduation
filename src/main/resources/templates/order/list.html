@@ -24,7 +24,12 @@
 		<div th:if="${not #lists.isEmpty(orders)}" class="order-detail-home" th:each="order,state : ${orders}">
 			<div class="order-detail-title">
 				<h4>Mã đặt hàng: [[${order.id}]]</h4>
-				<h4>Tổng tiền: [[${order.totalAmount}]]</h4>
+				<h4>Tổng tiền: [[${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')}]] VND</h4>
+				<div th:if="${order.promotion != null}">
+					<small>Mã giảm giá: <b>[[${order.promotion.code}]]</b> ([[${order.promotion.discount}]]%)</small><br>
+					<small>Số tiền giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice * order.promotion.discount / 100, 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small><br>
+					<small>Tổng tiền sau giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice - (order.totalPrice * order.promotion.discount / 100), 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small>
+				</div>
 			</div>
 			<div>
 				<span>Số điện thoại: [[${order.phoneNumber}]]</span><br>
@@ -46,7 +51,12 @@
 			th:each="order,state : ${deliveringOrders}">
 			<div class="order-detail-title">
 				<h4>Mã đặt hàng: [[${order.id}]]</h4>
-				<h4>Tổng tiền: [[${order.totalAmount}]]</h4>
+				<h4>Tổng tiền: [[${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')}]] VND</h4>
+				<div th:if="${order.promotion != null}">
+					<small>Mã giảm giá: <b>[[${order.promotion.code}]]</b> ([[${order.promotion.discount}]]%)</small><br>
+					<small>Số tiền giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice * order.promotion.discount / 100, 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small><br>
+					<small>Tổng tiền sau giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice - (order.totalPrice * order.promotion.discount / 100), 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small>
+				</div>
 			</div>
 			<div>
 				<span>Số điện thoại: [[${order.phoneNumber}]]</span><br>
@@ -68,7 +78,12 @@
 			th:each="order,state : ${completedOrders}">
 			<div class="order-detail-title">
 				<h4>Mã đặt hàng: [[${order.id}]]</h4>
-				<h4>Tổng tiền: [[${order.totalAmount}]]</h4>
+				<h4>Tổng tiền: [[${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')}]] VND</h4>
+				<div th:if="${order.promotion != null}">
+					<small>Mã giảm giá: <b>[[${order.promotion.code}]]</b> ([[${order.promotion.discount}]]%)</small><br>
+					<small>Số tiền giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice * order.promotion.discount / 100, 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small><br>
+					<small>Tổng tiền sau giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice - (order.totalPrice * order.promotion.discount / 100), 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small>
+				</div>
 			</div>
 			<div>
 				<span>Số điện thoại: [[${order.phoneNumber}]]</span><br>
@@ -91,7 +106,12 @@
 		<div th:if="${not #lists.isEmpty(cancelOrders)}" class="order-detail-home" th:each="order,state : ${cancelOrders}">
 			<div class="order-detail-title">
 				<h4>Mã đặt hàng: [[${order.id}]]</h4>
-				<h4>Tổng tiền: [[${order.totalAmount}]]</h4>
+				<h4>Tổng tiền: [[${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')}]] VND</h4>
+				<div th:if="${order.promotion != null}">
+					<small>Mã giảm giá: <b>[[${order.promotion.code}]]</b> ([[${order.promotion.discount}]]%)</small><br>
+					<small>Số tiền giảm: <b th:text="${#numbers.formatDecimal((order.totalPrice / ((100 - order.promotion.discount) / 100))*order.promotion.discount / 100, 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small><br>
+					<small>Tổng tiền sau giảm: <b th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></b></small>
+				</div>
 			</div>
 			<div>
 				<span>Số điện thoại: [[${order.phoneNumber}]]</span><br>

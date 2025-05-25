@@ -1,9 +1,7 @@
 package org.example.final_graduation.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.text.NumberFormat;
+import java.util.*;
 
 import org.example.final_graduation.entities.Category;
 import org.example.final_graduation.entities.ProductDetail;
@@ -87,63 +85,60 @@ public class ProductCtrl {
                         @RequestParam("sortType") Optional<String> sortType,
                         @RequestParam(defaultValue = "1") int pageNo,
                         @RequestParam(defaultValue = "10") int pageSize) {
-        Page<ProductDetail> page;
-        String showCondition = "";
-        String categoryParam = "";
-        Sort sort;
-        if (sortType.isPresent() && sortType.get().equalsIgnoreCase("desc")) {
-            sort = Sort.by(Sort.Direction.DESC, "price");
-            model.addAttribute("sortType", sortType.get());
-        } else if (sortType.isPresent() && sortType.get().equalsIgnoreCase("asc")) {
-            sort = Sort.by(Sort.Direction.ASC, "price");
-            model.addAttribute("sortType", sortType.get());
-        } else {
-            sort = Sort.by(Sort.Direction.ASC, "category.name");
-        }
+
+        // Format giá
+        Locale vn = new Locale("vi", "VN");
+        NumberFormat currencyFormatter = NumberFormat.getInstance(vn);
+        String fromFormatted = currencyFormatter.format(fromPrice.intValue());
+        String toFormatted = currencyFormatter.format(toPrice.intValue());
+
+        // Sắp xếp
+        Sort sort = sortType.map(type -> {
+            if ("desc".equalsIgnoreCase(type)) return Sort.by(Sort.Direction.DESC, "price");
+            if ("asc".equalsIgnoreCase(type)) return Sort.by(Sort.Direction.ASC, "price");
+            return Sort.by(Sort.Direction.ASC, "category.name");
+        }).orElse(Sort.by(Sort.Direction.ASC, "category.name"));
 
         Pageable pageable = PageRequest.of(pageNo - 1, pageSize, sort);
 
+        // Xử lý danh mục
         List<Category> categoryEntities = new ArrayList<>();
+        StringBuilder categoryParamBuilder = new StringBuilder();
+        StringBuilder conditionBuilder = new StringBuilder();
 
         if (categoryIds != null && !categoryIds.isEmpty()) {
-            for (Integer categoryId : categoryIds) {
-                Optional<Category> category = categoryRepo.findById(categoryId);
-
-                categoryParam += "&categoryIds=" + String.valueOf(categoryId);
-
-                if (category != null) {
-                    categoryEntities.add(category.get());
-                }
+            for (Integer id : categoryIds) {
+                categoryRepo.findById(id).ifPresent(category -> {
+                    categoryEntities.add(category);
+                    categoryParamBuilder.append("&categoryIds=").append(id);
+                    conditionBuilder.append(category.getName()).append(", ");
+                });
             }
 
-            model.addAttribute("categoryIds", categoryParam);
-
-            page = productDetailRepo.findByPriceBetweenAndCategoryIn(fromPrice, toPrice, categoryEntities, pageable);
-        } else {
-
-            page = productDetailRepo.findByPriceBetween(fromPrice, toPrice, pageable);
+            model.addAttribute("categoryIds", categoryParamBuilder.toString());
         }
 
-        for (Category category : categoryEntities) {
-            if (category == categoryEntities.get(categoryEntities.size() - 1)) {
-                showCondition += category.getName();
-            } else {
-                showCondition += category.getName() + ", ";
-            }
+        Page<ProductDetail> page = (categoryEntities.isEmpty())
+                ? productDetailRepo.findByPriceBetween(fromPrice, toPrice, pageable)
+                : productDetailRepo.findByPriceBetweenAndCategoryIn(fromPrice, toPrice, categoryEntities, pageable);
+
+        // Hiển thị điều kiện lọc
+        String showCondition = conditionBuilder.toString();
+        if (showCondition.endsWith(", ")) {
+            showCondition = showCondition.substring(0, showCondition.length() - 2);
         }
-        // page.nextPageable();
-        model.addAttribute("fromPrice", String.valueOf(fromPrice.intValue()));
-        model.addAttribute("toPrice", String.valueOf(toPrice.intValue()));
 
-        model.addAttribute("page", page);
-
-        if (categoryIds == null) {
-            model.addAttribute("cname", "$" + fromPrice + " to " + "$" + toPrice);
-        } else if (categoryIds != null && (fromPrice != 0 || toPrice != 5000000)) {
-            model.addAttribute("cname", showCondition + " $" + fromPrice + " to " + "$" + toPrice);
+        if (categoryEntities.isEmpty()) {
+            model.addAttribute("cname", fromFormatted + " ₫ đến " + toFormatted + " ₫");
+        } else if (fromPrice != 0 || toPrice != 5000000) {
+            model.addAttribute("cname", showCondition + ": " + fromFormatted + " ₫ đến " + toFormatted + " ₫");
         } else {
             model.addAttribute("cname", showCondition);
         }
+
+        model.addAttribute("fromPriceFormatted", fromFormatted);
+        model.addAttribute("toPriceFormatted", toFormatted);
+        model.addAttribute("page", page);
 
         return "product/list";
     }

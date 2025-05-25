@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/admin/orders")
 public class APIOrder {
     @Autowired
     private OrderRepository orderRepository;

@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("""
-            select o from Order o where o.status like "Processing" AND o.type like "At the counter"
+            select o from Order o where o.status like "PENDING_CONFIRMATION"
             """)
     List<Order> findAllProcessing();
 
@@ -23,7 +23,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     @Query("""
                 SELECT o FROM Order o
-                WHERE NOT (o.type = 'At the counter' AND o.status = 'Processing')
+                WHERE NOT (o.type = 'At the counter' AND o.status = 'PENDING_CONFIRMATION')
             """)
     List<Order> findAllOrderManager();
 
@@ -31,14 +31,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                 SELECT COUNT(*)
                 FROM Order od
                 WHERE od.type = 'At the counter'
-                AND od.status = 'Processing'
+                AND od.status = 'PENDING_CONFIRMATION'
             """)
     Integer countByTypeStatus();
 
     @Query("""
                 SELECT o FROM Order o
                 WHERE o.createdDate BETWEEN :start AND :end
-                AND NOT (o.type = 'At the counter' AND o.status = 'Processing')
+                AND NOT (o.type = 'At the counter' AND o.status = 'PENDING_CONFIRMATION')
             """)
     List<Order> findByCreatedDateBetween(
             @Param("start") LocalDateTime start,
@@ -47,7 +47,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     @Query("SELECT o FROM Order o WHERE o.createdDate BETWEEN :start AND :end " +
             "AND (:type IS NULL OR o.type = :type) " +
-            "AND NOT (o.type = 'At the counter' AND o.status = 'Processing')")
+            "AND NOT (o.type = 'At the counter' AND o.status = 'PENDING_CONFIRMATION')")
     List<Order> findByCreatedDateBetweenAndType(
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end,
@@ -58,9 +58,19 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("""
                 SELECT o FROM Order o 
                 WHERE o.type = :type
-                AND NOT (o.type = 'At the counter' AND o.status = 'Processing')
+                AND NOT (o.type = 'At the counter' AND o.status = 'PENDING_CONFIRMATION')
             """)
     List<Order> findByType(
             @Param("type") String type
     );
+
+    @Query("""
+    SELECT o FROM Order o 
+    WHERE o.type = 'At the counter' 
+    AND o.status = 'PENDING_CONFIRMATION'
+""")
+    List<Order> findAllProcessingAtTheCounter();
+
+    @Query("SELECT o FROM Order o WHERE o.customer.username = :username ORDER BY o.createdDate DESC")
+    List<Order> findByCustomerUsername(@Param("username") String username);
 }

@@ -70,7 +70,7 @@
           <a th:href="@{|/product/${item.id}|}"><img th:src="${item.image}" alt="Product Image" loading="lazy"></a>
           <div class="product-title">[[${item.product.name}]] - [[${item.color.name}]] - [[${item.size.name}]]</div>
           <div class="product-price">
-            <span>$[[${item.price}]]</span>
+            <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
           </div>
         </div>
       </div>

@@ -46,4 +46,9 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
             """)
     List<Customer> findCustomers(@Param("query") String query);
 
+    @Query("""
+        SELECT COUNT(c) FROM Customer c WHERE c.createdDate BETWEEN :start AND :end
+    """)
+    long countRegisteredBetween(@Param("start") java.time.LocalDateTime start, @Param("end") java.time.LocalDateTime end);
+
 }

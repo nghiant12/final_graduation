@@ -20,4 +20,8 @@ public class CustomerService {
     public Optional<Customer> getCustomerById(Integer id) {
         return customerRepository.findById(id);
     }
+
+    public Customer findByUsername(String username) {
+        return customerRepository.findByUsername(username).orElse(null);
+    }
 }

@@ -56,7 +56,7 @@ public class OrderController {
         Order order = new Order();
 
         // Lấy thông tin nhân viên đang đăng nhập
-       // String username = principal.getName(); // Lấy username từ session đăng nhập
+        // String username = principal.getName(); // Lấy username từ session đăng nhập
         Optional<Employee> currentUser = empolyeeService.findByUsername("staff1"); // Tìm Employee theo username
 
         // Gán nhân viên hiện tại vào đơn hàng nếu tìm thấy
@@ -65,7 +65,7 @@ public class OrderController {
         model.addAttribute("order", order);
         model.addAttribute("productDetails", productDetailRepository.findAll());
 
-        List<Order> orders = orderRepository.findAllProcessing();
+        List<Order> orders = orderRepository.findAllProcessingAtTheCounter();
         model.addAttribute("orders", orders);
 
         // Truyền tên người dùng vào model để hiển thị trên giao diện
@@ -89,6 +89,7 @@ public class OrderController {
             orderService.createNewOrder(); // Lưu hóa đơn
             redirectAttributes.addFlashAttribute("success", "Hóa đơn được tạo thành công!");
         } catch (Exception e) {
+            e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Không thể tạo hóa đơn!");
         }
         return "redirect:/admin/orders"; // Điều hướng lại trang danh sách hóa đơn
@@ -101,7 +102,7 @@ public class OrderController {
         // Lấy danh sách hóa đơn
         model.addAttribute("idOrder", idOrder);
 
-        List<Order> orders = orderRepository.findAllProcessing();
+        List<Order> orders = orderRepository.findAllProcessingAtTheCounter();
         model.addAttribute("orders", orders);
 
         List<ProductDetail> productDetails = productDetailRepository.findALL();
@@ -182,6 +183,24 @@ public class OrderController {
             productDetail.setQuantity(productDetail.getQuantity() - quantity);
             productDetailService.saveProductDetail(productDetail);
 
+            // Tính lại breakdown và cập nhật vào Order
+            Order order = orderRepository.findById(orderId).orElse(null);
+            if (order != null) {
+                java.util.List<OrderDetail> details = orderDetailRepository.findByOrderID(orderId);
+                java.math.BigDecimal subTotal = details.stream().map(od -> od.getPrice()).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                java.math.BigDecimal shippingFee = java.math.BigDecimal.ZERO;
+                java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+                if (order.getPromotion() != null) {
+                    discountAmount = subTotal.multiply(order.getPromotion().getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+                }
+                java.math.BigDecimal totalPrice = subTotal.add(shippingFee).subtract(discountAmount);
+                order.setSubTotal(subTotal);
+                order.setShippingFee(shippingFee);
+                order.setDiscountAmount(discountAmount);
+                order.setTotalPrice(totalPrice.max(java.math.BigDecimal.ZERO));
+                orderRepository.save(order);
+            }
+
             redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào hóa đơn!");
         } catch (Exception e) {
             // Xử lý lỗi nếu có vấn đề xảy ra khi thêm sản phẩm
@@ -259,11 +278,25 @@ public class OrderController {
             // Lưu vào DB
             productDetailService.saveProductDetail(productDetail);
             orderDetailRepository.save(orderDetail);
-            orderService.saveOrder(order);
+
+            // Tính lại breakdown và cập nhật vào Order
+            List<OrderDetail> details = orderDetailRepository.findByOrderID(order.getId());
+            BigDecimal subTotal = details.stream().map(OrderDetail::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal shippingFee = BigDecimal.ZERO;
+            BigDecimal discountAmount = BigDecimal.ZERO;
+            if (order.getPromotion() != null) {
+                discountAmount = subTotal.multiply(order.getPromotion().getDiscount()).divide(BigDecimal.valueOf(100));
+            }
+            BigDecimal totalPriceIf = subTotal.add(shippingFee).subtract(discountAmount);
+            order.setSubTotal(subTotal);
+            order.setShippingFee(shippingFee);
+            order.setDiscountAmount(discountAmount);
+            order.setTotalPrice(totalPriceIf.max(BigDecimal.ZERO));
+            orderRepository.save(order);
 
             // Lưu thông báo thành công vào session
             redirectAttributes.addFlashAttribute("success", "Số lượng đã được cập nhật!");
-            redirectAttributes.addFlashAttribute("totalPrice", totalPrice);
+            redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(orderId));
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi cập nhật số lượng: " + e.getMessage());
@@ -296,6 +329,21 @@ public class OrderController {
                     orderService.saveOrder(order);
                     productDetailService.saveProductDetail(productDetail); // Lưu thay đổi vào database
                     orderDetailRepository.delete(orderDetail); // Xóa OrderDetail khỏi DB
+
+                    // Tính lại breakdown và cập nhật vào Order
+                    java.util.List<OrderDetail> details = orderDetailRepository.findByOrderID(order.getId());
+                    java.math.BigDecimal subTotal = details.stream().map(od -> od.getPrice()).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                    java.math.BigDecimal shippingFee = java.math.BigDecimal.ZERO;
+                    java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+                    if (order.getPromotion() != null) {
+                        discountAmount = subTotal.multiply(order.getPromotion().getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+                    }
+                    java.math.BigDecimal totalPrice = subTotal.add(shippingFee).subtract(discountAmount);
+                    order.setSubTotal(subTotal);
+                    order.setShippingFee(shippingFee);
+                    order.setDiscountAmount(discountAmount);
+                    order.setTotalPrice(totalPrice.max(java.math.BigDecimal.ZERO));
+                    orderRepository.save(order);
 
                     // Thêm thông báo thành công
                     redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được xóa khỏi đơn hàng!");
@@ -355,6 +403,8 @@ public class OrderController {
                 totalPrice = BigDecimal.ZERO;
             }
 
+            BigDecimal discountAmount = BigDecimal.ZERO;
+
             // Áp dụng khuyến mãi nếu hợp lệ
             if (promotionId != null) {
                 Optional<Promotion> optionalPromotion = promotionRepository.findById(promotionId);
@@ -367,7 +417,7 @@ public class OrderController {
                             totalPrice.compareTo(promotion.getMinOrderValue()) >= 0) {
 
                         // Tính số tiền giảm giá
-                        BigDecimal discountAmount = totalPrice.multiply(promotion.getDiscount()).divide(BigDecimal.valueOf(100));
+                        discountAmount = totalPrice.multiply(promotion.getDiscount()).divide(BigDecimal.valueOf(100));
                         totalPrice = totalPrice.subtract(discountAmount);
 
                         // Giảm số lượng mã giảm giá
@@ -381,7 +431,7 @@ public class OrderController {
                     }
                 }
             }
-
+            order.setDiscountAmount(discountAmount);
             order.setTotalPrice(totalPrice);
             order.setStatus("Completed");
             orderService.saveOrder(order);
@@ -465,6 +515,24 @@ public class OrderController {
                 productDetailService.saveProductDetail(productDetail);
             }
 
+            // Tính lại breakdown và cập nhật vào Order
+            Order order = orderRepository.findById(orderId).orElse(null);
+            if (order != null) {
+                java.util.List<OrderDetail> details = orderDetailRepository.findByOrderID(orderId);
+                java.math.BigDecimal subTotal = details.stream().map(od -> od.getPrice()).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+                java.math.BigDecimal shippingFee = java.math.BigDecimal.ZERO;
+                java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+                if (order.getPromotion() != null) {
+                    discountAmount = subTotal.multiply(order.getPromotion().getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+                }
+                java.math.BigDecimal totalPrice = subTotal.add(shippingFee).subtract(discountAmount);
+                order.setSubTotal(subTotal);
+                order.setShippingFee(shippingFee);
+                order.setDiscountAmount(discountAmount);
+                order.setTotalPrice(totalPrice.max(java.math.BigDecimal.ZERO));
+                orderRepository.save(order);
+            }
+
             redirectAttributes.addFlashAttribute("success", "Đã thêm sản phẩm vào hóa đơn!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi khi thêm sản phẩm: " + e.getMessage());
@@ -472,5 +540,48 @@ public class OrderController {
 
         redirectAttributes.addFlashAttribute("totalPrice", orderDetailRepository.tongTien(orderId));
         return "redirect:/admin/orders/detail?idOrder=" + orderId;
+    }
+
+    // API trả về breakdown cho order (AJAX)
+    @ResponseBody
+    @GetMapping("/breakdown")
+    public java.util.Map<String, Object> getOrderBreakdown(@RequestParam Integer idOrder, @RequestParam(required = false) Integer promotionId) {
+        Order order = orderRepository.findById(idOrder).orElseThrow();
+        java.util.List<OrderDetail> details = orderDetailRepository.findByOrderID(idOrder);
+        java.math.BigDecimal subTotal = details.stream().map(od -> od.getPrice()).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        java.math.BigDecimal shippingFee = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+        if (promotionId != null) {
+            Promotion promo = promotionRepository.findById(promotionId).orElse(null);
+            if (promo != null) {
+                discountAmount = subTotal.multiply(promo.getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+            }
+        } else if (order.getPromotion() != null) {
+            discountAmount = subTotal.multiply(order.getPromotion().getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+        }
+        java.math.BigDecimal totalPrice = subTotal.add(shippingFee).subtract(discountAmount);
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("subTotal", subTotal);
+        result.put("shippingFee", shippingFee);
+        result.put("discountAmount", discountAmount);
+        result.put("totalPrice", totalPrice.max(java.math.BigDecimal.ZERO));
+        return result;
+    }
+
+    // Hàm cập nhật breakdown cho order
+    public void updateOrderBreakdown(Order order) {
+        java.util.List<OrderDetail> details = orderDetailRepository.findByOrderID(order.getId());
+        java.math.BigDecimal subTotal = details.stream().map(od -> od.getPrice()).reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        java.math.BigDecimal shippingFee = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal discountAmount = java.math.BigDecimal.ZERO;
+        if (order.getPromotion() != null) {
+            discountAmount = subTotal.multiply(order.getPromotion().getDiscount()).divide(java.math.BigDecimal.valueOf(100));
+        }
+        java.math.BigDecimal totalPrice = subTotal.add(shippingFee).subtract(discountAmount);
+        order.setSubTotal(subTotal);
+        order.setShippingFee(shippingFee);
+        order.setDiscountAmount(discountAmount);
+        order.setTotalPrice(totalPrice.max(java.math.BigDecimal.ZERO));
+        orderRepository.save(order);
     }
 }

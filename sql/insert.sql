@@ -104,11 +104,11 @@ VALUES
 
 -- Bảng orders (5 dòng)
 --INSERT INTO orders (user_id, admin_id, total_price, [type], [status], [address]) VALUES
---(1, 4, 300.00, 'Online', 'Delivered', '123 ABC Street'),
---(2, 4, 150.00, 'In-Store', 'Pending', '456 DEF Street'),
---(3, 4, 200.00, 'Online', 'Processing', '789 GHI Street'),
---(1, 5, 400.00, 'Online', 'Delivered', '123 ABC Street'),
---(2, 5, 250.00, 'In-Store', 'Cancelled', '456 DEF Street');
+--(1, 4, 300.00, 'Online', 'SHIPPING', '123 ABC Street'),
+--(2, 4, 150.00, 'In-Store', 'CONFIRMED', '456 DEF Street'),
+--(3, 4, 200.00, 'Online', 'PENDING_CONFIRMATION', '789 GHI Street'),
+--(1, 5, 400.00, 'Online', 'COMPLETED', '123 ABC Street'),
+--(2, 5, 250.00, 'In-Store', 'CANCELLED', '456 DEF Street');
 
 -- Bảng order_details (10 dòng)
 --INSERT INTO order_details (order_id, product_id, price, quantity) VALUES

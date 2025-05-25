@@ -76,6 +76,13 @@
                                                     </div>
                                                 </div>
 
+                                                <!-- Mã Code -->
+                                                <div class="mb-3">
+                                                    <label class="form-label">Mã Code</label>
+                                                    <input type="text" class="form-control" th:field="*{code}" maxlength="50" placeholder="Để trống để sinh tự động">
+                                                    <div class="invalid-feedback">Mã code không được vượt quá 50 ký tự.</div>
+                                                </div>
+
                                                 <div class="row">
                                                     <!-- Cột 1: Giảm Giá -->
                                                     <div class="col-md-4">
@@ -191,6 +198,7 @@
                             <tr>
                                 <th>STT</th>
                                 <th>Tên khuyến mãi</th>
+                                <th>Mã code</th>
                                 <th>Giá trị giảm(%)</th>
                                 <th>Giá trị hoá đơn tối thiểu</th>
                                 <th>Số lượng</th>
@@ -205,6 +213,7 @@
                             <tr th:each="promotion, stat : ${promotions}">
                                 <td th:text="${stat.index + 1}"></td>
                                 <td th:text="${promotion.name}"></td>
+                                <td th:text="${promotion.code}"></td>
                                 <td th:text="${promotion.discount}"></td>
                                 <td th:text="${promotion.minOrderValue}"></td>
                                 <td th:text="${promotion.remainingQuantity}"></td>
@@ -235,7 +244,8 @@
                                                 data-startDate=${promotion.startDate},
                                                 data-endDate=${promotion.endDate},
                                                 data-minOrderValue=${promotion.minOrderValue},
-                                                data-remainingQuantity=${promotion.remainingQuantity}"
+                                                data-remainingQuantity=${promotion.remainingQuantity},
+                                                data-code=${promotion.code}"
                                        onclick="openEditModal(this)">
                                         <i class="fa-solid fa-pen"></i>
                                     </a>
@@ -270,6 +280,12 @@
                                                             <div class="invalid-feedback">Mô tả không được vượt quá 500
                                                                 ký tự.
                                                             </div>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Mã Code</label>
+                                                            <input type="text" class="form-control" id="editCode" name="code" maxlength="50" placeholder="Để trống để sinh tự động">
+                                                            <div class="invalid-feedback">Mã code không được vượt quá 50 ký tự.</div>
                                                         </div>
 
                                                         <div class="row">
@@ -460,6 +476,7 @@
         document.getElementById("editDiscount").value = button.getAttribute("data-discount");
         document.getElementById("editMinOrderValue").value = button.getAttribute("data-minOrderValue");
         document.getElementById("editRemainingQuantity").value = button.getAttribute("data-remainingQuantity");
+        document.getElementById("editCode").value = button.getAttribute("data-code");
 
         let startDate = button.getAttribute("data-startDate");
         let endDate = button.getAttribute("data-endDate");

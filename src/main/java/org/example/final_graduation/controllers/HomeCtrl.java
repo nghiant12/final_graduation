@@ -1,12 +1,16 @@
 package org.example.final_graduation.controllers;
 
 import org.example.final_graduation.entities.ProductDetail;
+import org.example.final_graduation.repositories.PromotionRepository;
 import org.example.final_graduation.repositories.products.ProductDetailRepository;
 import org.example.final_graduation.repositories.products.ProductRepository;
+import org.example.final_graduation.entities.Customer;
+import org.example.final_graduation.services.CustomerService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,21 +22,25 @@ import java.util.List;
 @Controller
 public class HomeCtrl {
     private final ProductDetailRepository productDetailRepository;
+    private final CustomerService customerService;
+    @Autowired
+    private PromotionRepository promotionRepository;
 
-    public HomeCtrl(ProductDetailRepository productDetailRepository) {
+    public HomeCtrl(ProductDetailRepository productDetailRepository, CustomerService customerService) {
         this.productDetailRepository = productDetailRepository;
+        this.customerService = customerService;
     }
 
     @RequestMapping("/")
-    public String index(Model model) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        boolean isAuthenticated = authentication != null && authentication.isAuthenticated()
-//                && !authentication.getPrincipal().equals("anonymousUser");
+    public String index(Model model, Principal principal) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null && authentication.isAuthenticated()
+                && !authentication.getPrincipal().equals("anonymousUser");
 
-        model.addAttribute("isAuthenticated", false);
+        model.addAttribute("isAuthenticated", isAuthenticated);
 
-        //String username = principal.getName();
-        model.addAttribute("username", "username");
+        String username = principal.getName();
+        model.addAttribute("username", username);
 
         List<ProductDetail> top4Product = productDetailRepository.findTop4Products(PageRequest.of(0, 4));
         model.addAttribute("top4Product", top4Product);
@@ -79,7 +87,32 @@ public class HomeCtrl {
     }
 
     @GetMapping("/checkout")
-    public String checkout() {
+    public String checkout(Model model, Principal principal) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null && authentication.isAuthenticated()
+                && !authentication.getPrincipal().equals("anonymousUser");
+
+        model.addAttribute("isAuthenticated", isAuthenticated);
+
+        if (isAuthenticated && principal != null) {
+            String username = principal.getName();
+            Customer customer = customerService.findByUsername(username);
+
+            if (customer != null) {
+                model.addAttribute("email", customer.getEmail());
+                model.addAttribute("fullName", customer.getFullname());
+                model.addAttribute("phone", customer.getPhoneNumber());
+            } else {
+                model.addAttribute("email", username);
+                model.addAttribute("fullName", "");
+                model.addAttribute("phone", "");
+            }
+        } else {
+            model.addAttribute("email", "");
+            model.addAttribute("fullName", "");
+            model.addAttribute("phone", "");
+        }
+        model.addAttribute("promotions", promotionRepository.findAll());
         return "layout/checkout";
     }
 

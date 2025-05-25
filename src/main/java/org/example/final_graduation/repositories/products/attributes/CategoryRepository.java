@@ -17,8 +17,8 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 
     @Query("""
             SELECT c, COUNT(pd) FROM Category c
-            LEFT JOIN ProductDetail pd on c.id = pd.category.id
-            JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true
+                        LEFT JOIN ProductDetail pd on c.id = pd.category.id
+                        JOIN pd.product p WHERE pd.quantity > 0 AND p.status = true AND pd.available = true
             GROUP BY c""")
     List<Object[]> findAllCategoriesWithProductCount();
 }

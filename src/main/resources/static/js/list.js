@@ -7,57 +7,39 @@ filterTitle.on('click', function (e) {
 
 
 // Initialize slider:
-$(document).ready(function () {
-  // $(".cartR-hover").each(function () {
-  //   const itemId = $(this).attr("item-size-id");
-  //   const url = "/rest/products/size/" + itemId;
+document.addEventListener('DOMContentLoaded', function () {
+    var rangeSlider = document.getElementById('slider-range');
 
-  //   $.ajax({
-  //     url: url,
-  //     type: "GET",
-  //     success: function (response) {
-  //       response.forEach(data => {
-  //         var li = $('<li></li>').text(`Sizes ${data.size} (${data.quantity})` ).attr('ng-click', 'cartR.add(' + itemId + ', \'' + data.size + '\', 1)');
-  //         $(this).append(li);
-  //       })
-  //     }.bind(this),
-  //     error: function (xhr, status, error) {
-  //       console.log(error);
-  //     }
-  //   });
-  // });
+    // Format tiền Việt Nam
+    var moneyFormat = wNumb({
+        decimals: 0,
+        thousand: '.',
+        suffix: ' ₫'
+    });
 
+    // Lấy giá trị mặc định từ input ẩn (nếu có)
+    var defaultFrom = parseInt(document.getElementById('currentFromPrice')?.value) || 0;
+    var defaultTo = parseInt(document.getElementById('currentToPrice')?.value) || 5000000;
 
+    noUiSlider.create(rangeSlider, {
+        start: [defaultFrom, defaultTo],
+        step: 10000,
+        range: {
+            min: [0],
+            max: [5000000]
+        },
+        format: moneyFormat,
+        connect: true
+    });
 
-  $('.noUi-handle').on('click', function () {
-    $(this).width(50);
-  });
-  var rangeSlider = document.getElementById('slider-range');
-  var moneyFormat = wNumb({
-    decimals: 0,
-    thousand: ',',
-    prefix: '$'
-  });
-  noUiSlider.create(rangeSlider, {
-    start: [0, 5000000],
-    step: 10000,
-    range: {
-      'min': [0],
-      'max': [5000000]
-    },
-    format: moneyFormat,
-    connect: true
-  });
+    rangeSlider.noUiSlider.on('update', function (values, handle) {
+        document.getElementById('slider-range-value1').innerHTML = values[0];
+        document.getElementById('slider-range-value2').innerHTML = values[1];
 
-  // Set visual min and max values and also update value hidden form inputs
-  rangeSlider.noUiSlider.on('update', function (values, handle) {
-    document.getElementById('slider-range-value1').innerHTML = values[0];
-    document.getElementById('slider-range-value2').innerHTML = values[1];
-    $('.fromPrice').attr('value', moneyFormat.from(values[0]));
-    $('.toPrice').attr('value', moneyFormat.from(values[1]));
-  });
+        document.querySelector('.fromPrice').value = moneyFormat.from(values[0]);
+        document.querySelector('.toPrice').value = moneyFormat.from(values[1]);
+    });
 });
-
 
 
 // https://refreshless.com/nouislider/

@@ -218,32 +218,21 @@
                                             </select>
                                         </div>
                                         <div class="col-6">
-                                            <!-- Tổng tiền sản phẩm -->
-                                            <p>Tổng số tiền sản phẩm:
-                                                <span class="text-danger fw-bold" id="totalPrice"
-                                                      th:data-total-price="${totalPrice}"
-                                                      th:text="${totalPrice != null ?
-                                              #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') + ' VND' : '0 VND'}"></span>
-                                            </p>
-
-                                            <!-- Tổng số tiền cần thanh toán -->
-                                            <p>Tổng số tiền cần thanh toán:
-                                                <span class="text-danger fw-bold" id="finalPrice"
-                                                      th:text="${(totalPrice != null ? #numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT') : '0')} + ' VND'"></span>
-                                            </p>
-                                            <input type="text" id="customerPaid" class="form-control mt-2 mb-3"
-                                                   placeholder="Tiền khách đưa..." oninput="updateChangeAmount()">
-                                            <span>Tiền thừa: <span id="changeAmount"
-                                                                   class="text-primary fw-bold">0 VND</span></span>
+                                            <div class="order-breakdown" id='order-breakdown'>
+                                                <p>Tiền hàng: <b id="order-subtotal" th:text="${#numbers.formatDecimal((order.subTotal==null?0:order.subTotal), 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+                                                <p>Phí vận chuyển: <b id="order-shipping" th:text="${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+                                                <p>Giảm giá: <b id="order-discount" class="text-success" th:text="|-${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} VND|"/></p>
+                                                <p class="fw-bold">Tổng thanh toán: <b id="order-total" class="text-primary" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+                                            </div>
                                         </div>
                                     </div>
                                     <button class="btn btn-primary w-100 mt-3" id="confirmOrderBtn1"
                                             th:disabled="${order.id == null}">Thanh toán
                                     </button>
 
-<!--                                    <button class="btn btn-secondary w-100 mt-3" onclick="printInvoice()">-->
-<!--                                        In hóa đơn-->
-<!--                                    </button>-->
+                                    <!--                                    <button class="btn btn-secondary w-100 mt-3" onclick="printInvoice()">-->
+                                    <!--                                        In hóa đơn-->
+                                    <!--                                    </button>-->
 
                                     <!-- Nội dung hóa đơn -->
                                     <div id="invoiceContent" style="display: none;">
@@ -270,7 +259,7 @@
                                             <tr th:each="detail : ${order.orderDetails}">
                                                 <td th:text="${detail.productDetail.product.name}"></td>
                                                 <td th:text="${detail.quantity}"></td>
-                                                <td th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT') + ' VND'}"></td>
+                                                <td th:text="${#numbers.formatDecimal(detail.price, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -435,6 +424,43 @@
 <script th:src="@{/admin/js/datatables-simple-demo.js}"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+
+<script>
+    function formatCurrency(amount) {
+        return amount.toLocaleString('vi-VN') + ' VND';
+    }
+    function updateOrderBreakdown() {
+        const orderId = document.querySelector('input[name="orderId"], input[name="idOrder"]').value || (window.location.search.match(/idOrder=(\d+)/) || [])[1];
+        const promotionSelect = document.querySelector('select[name="promotionId"]');
+        const promotionId = promotionSelect ? promotionSelect.value : '';
+        if (!orderId) {
+            document.getElementById('order-breakdown').style.display = 'none';
+            document.getElementById('order-subtotal').textContent = formatCurrency(Number(0));
+            document.getElementById('order-shipping').textContent = formatCurrency(Number(0));
+            document.getElementById('order-discount').textContent = formatCurrency(Number(0));
+            document.getElementById('order-total').textContent = formatCurrency(Number(0));
+            return;
+        }
+        fetch(`/admin/orders/breakdown?idOrder=${orderId}${promotionId ? `&promotionId=${promotionId}` : ''}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('order-subtotal').textContent = formatCurrency(Number(data.subTotal));
+                document.getElementById('order-shipping').textContent = formatCurrency(Number(data.shippingFee));
+                document.getElementById('order-discount').textContent = '-' + formatCurrency(Number(data.discountAmount));
+                document.getElementById('order-total').textContent = formatCurrency(Number(data.totalPrice));
+                document.getElementById('order-breakdown').style.display = '';
+            });
+    }
+    // Gọi khi chọn khuyến mãi
+    const promotionSelect = document.querySelector('select[name="promotionId"]');
+    if (promotionSelect) {
+        promotionSelect.addEventListener('change', updateOrderBreakdown);
+    }
+    // Gọi lại sau mỗi thao tác thêm/xóa/cập nhật sản phẩm (có thể dùng AJAX callback hoặc reload trang)
+    document.addEventListener('DOMContentLoaded', function() {
+        updateOrderBreakdown();
+    });
+</script>
 
 </body>
 </html>

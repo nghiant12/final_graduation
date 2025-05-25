@@ -16,6 +16,9 @@ public class Promotion {
     @Column(name = "name", nullable = false, length = 255)
     private String name;
 
+    @Column(name = "code", nullable = false, unique = true, length = 50)
+    private String code;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
@@ -40,9 +43,10 @@ public class Promotion {
     public Promotion() {
     }
 
-    public Promotion(Integer id, String name, String description, BigDecimal discount, LocalDateTime startDate, LocalDateTime endDate, BigDecimal minOrderValue, Integer remainingQuantity, Boolean isActive) {
+    public Promotion(Integer id, String name, String code, String description, BigDecimal discount, LocalDateTime startDate, LocalDateTime endDate, BigDecimal minOrderValue, Integer remainingQuantity, Boolean isActive) {
         this.id = id;
         this.name = name;
+        this.code = code;
         this.description = description;
         this.discount = discount;
         this.startDate = startDate;
@@ -67,6 +71,14 @@ public class Promotion {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getDescription() {

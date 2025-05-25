@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
@@ -16,8 +17,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -49,9 +49,24 @@ public class Order {
 
     @NotNull
     @ColumnDefault("0")
+    @Column(name = "sub_total", precision = 10, scale = 2)
+    private BigDecimal subTotal;
+
+    @NotNull
+    @ColumnDefault("0")
+    @Column(name = "shipping_fee", precision = 10, scale = 2)
+    private BigDecimal shippingFee;
+
+    @NotNull
+    @ColumnDefault("0")
+    @Column(name = "discount_amount", precision = 10, scale = 2)
+    private BigDecimal discountAmount;
+
+    @NotNull
+    @ColumnDefault("0")
     @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
-
+    
     @Size(max = 50)
     @NotNull
     @Nationalized
@@ -89,110 +104,5 @@ public class Order {
     public void removeOrderDetail(OrderDetail orderDetail) {
         orderDetails.remove(orderDetail);
         orderDetail.setOrder(null);
-    }
-
-    public Order() {
-    }
-
-    public Order(Integer id, Customer customer, Promotion promotion, Employee employee, LocalDateTime createdDate, BigDecimal totalPrice, String type, String status, String address, String paymentMethod, List<OrderDetail> orderDetails) {
-        this.id = id;
-        this.customer = customer;
-        this.promotion = promotion;
-        this.employee = employee;
-        this.createdDate = createdDate;
-        this.totalPrice = totalPrice;
-        this.type = type;
-        this.status = status;
-        this.address = address;
-        this.paymentMethod = paymentMethod;
-        this.orderDetails = orderDetails;
-    }
-
-    public Promotion getPromotion() {
-        return promotion;
-    }
-
-    public void setPromotion(Promotion promotion) {
-        this.promotion = promotion;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public Employee getEmployee() {
-        return employee;
-    }
-
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
-
-    public @NotNull LocalDateTime getCreatedDate() {
-        return createdDate;
-    }
-
-    public void setCreatedDate(@NotNull LocalDateTime createdDate) {
-        this.createdDate = createdDate;
-    }
-
-    public @NotNull BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(@NotNull BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public @Size(max = 50) @NotNull String getType() {
-        return type;
-    }
-
-    public void setType(@Size(max = 50) @NotNull String type) {
-        this.type = type;
-    }
-
-    public @Size(max = 50) @NotNull String getStatus() {
-        return status;
-    }
-
-    public void setStatus(@Size(max = 50) @NotNull String status) {
-        this.status = status;
-    }
-
-    public @Size(max = 255) @NotNull String getAddress() {
-        return address;
-    }
-
-    public void setAddress(@Size(max = 255) @NotNull String address) {
-        this.address = address;
-    }
-
-    public List<OrderDetail> getOrderDetails() {
-        return orderDetails;
-    }
-
-    public void setOrderDetails(List<OrderDetail> orderDetails) {
-        this.orderDetails = orderDetails;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 }

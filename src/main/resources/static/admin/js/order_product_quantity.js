@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 .then(data => {
                     if (data.success) {
                         location.reload(); // Reload để cập nhật giao diện
+                        if (typeof updateOrderBreakdown === 'function') {
+                            setTimeout(updateOrderBreakdown, 300);
+                        }
                     } else {
                         alert("Lỗi: " + data.message);
                     }

@@ -93,19 +93,23 @@
                         DataTable Example
                     </div>
                     <div class="card-body">
-                        <table id="datatablesSimple">
+                        <table id="datatablesSimple" class="table table-bordered table-hover text-center align-middle">
                             <thead>
                             <tr>
                                 <th>STT</th>
                                 <th>Khách hàng</th>
                                 <th>Nhân viên</th>
                                 <th>Ngày tạo</th>
-                                <th>Tổng tiền</th>
+                                <th class="text-end">Tiền hàng</th>
+                                <th class="text-end">Phí ship</th>
+                                <th class="text-end">Giảm giá</th>
+                                <th class="text-end">Tổng thanh toán</th>
+                                <th class="text-end">Tổng tiền sau giảm</th>
                                 <th>Phương thức thanh toán</th>
                                 <th>Loại hóa đơn</th>
-                                <th>Trạng thái</th>
+                                <th class="text-center">Trạng thái</th>
                                 <th>Địa chỉ</th>
-                                <th>Thao tác</th>
+                                <th class="text-center">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -114,12 +118,16 @@
                                 <td th:text="${order.customer != null ? order.customer.fullname : 'Chưa chọn khách hàng'}"></td>
                                 <td th:text="${order.employee != null ? order.employee.fullname : 'Chưa chọn nhân viên'}"></td>
                                 <td th:text="${#temporals.format(order.createdDate, 'dd/MM/yyyy HH:mm:ss')}"></td>
-                                <td th:text="${order.totalPrice}"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.subTotal, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
+                                <td class="text-end" th:text="|-${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} VND|"></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'" ></td>
+                                <td class="text-end" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></td>
                                 <td th:text="${order.paymentMethod}"></td>
                                 <td th:text="${order.type}"></td>
-                                <td th:text="${order.status}"></td>
+                                <td class="text-center" th:text="${order.status}"></td>
                                 <td th:text="${order.address}"></td>
-                                <td>
+                                <td class="text-center">
                                     <a th:href="@{/admin/order-manager/detail(idOrder=${order.id})}"
                                        style="color: black; text-decoration: none">
                                         <i class="fa-solid fa-eye"></i>

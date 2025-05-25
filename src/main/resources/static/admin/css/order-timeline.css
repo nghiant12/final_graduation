@@ -1,0 +1,138 @@
+/* Order Status Timeline CSS */
+.order-status-timeline {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    padding: 20px 0;
+    margin-top: 20px; /* Add some space above the timeline */
+    margin-bottom: 20px; /* Add some space below the timeline */
+}
+
+/* Main connecting line */
+.order-status-timeline::before {
+    content: '';
+    position: absolute;
+    top: 25px; /* Vertically center with icons (icon height/2 - line height/2) */
+    left: 10%; /* Start after a bit of the first step */
+    right: 10%;/* End before a bit of the last step */
+    height: 4px;
+    background-color: #e0e0e0; /* Light grey for inactive line */
+    z-index: 1;
+}
+
+.order-status-timeline .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: 20%; /* Each step takes up 1/5th of the width */
+    position: relative;
+    z-index: 2; /* Icons and text above the line */
+}
+
+.order-status-timeline .step-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #e0e0e0; /* Default icon background (inactive) */
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    margin-bottom: 10px;
+    border: 3px solid #fff; /* Make icon appear on top of the line */
+    box-shadow: 0 0 0 3px #e0e0e0; /* Outer ring for inactive */
+}
+
+.order-status-timeline .step-label {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 5px;
+    min-height: 2.7em; /* Ensure consistent height for labels */
+}
+
+.order-status-timeline .step-date {
+    font-size: 0.8em;
+    color: #888;
+}
+
+/* Active step styling */
+.order-status-timeline .step.active .step-icon {
+    background-color: #007bff; /* Blue for active icon */
+    box-shadow: 0 0 0 3px #007bff; /* Blue outer ring for active */
+}
+
+.order-status-timeline .step.active .step-label {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Styling for the line segments, showing progress */
+.order-status-timeline .step:not(:first-child)::after { /* Line segment before each step (except first) */
+    content: '';
+    position: absolute;
+    top: 25px; /* Align with main line */
+    right: 50%; /* From center of current step to center of previous step */
+    width: 100%;
+    height: 4px;
+    background-color: #e0e0e0; /* Default: inactive */
+    z-index: 1; /* Below icon, but can be covered by active step's own color */
+}
+
+/* Color the line segment blue if the CURRENT step is active */
+/* This makes the line leading TO an active step blue */
+.order-status-timeline .step.active::after {
+    background-color: #007bff;
+}
+
+/* Special handling for the line between two active steps */
+/* If a step is active, and the *next* step is also active, the line connecting them should be blue. */
+/* We also need to ensure the line from an active step to an inactive one remains blue up to the active step */
+
+/* This logic is a bit tricky with ::after on each step. 
+   A simpler way is to have a single progress bar that extends.
+   For now, this setup will color the line segment *leading to* an active step.
+   To make a continuous blue line for all active steps, we'd need JS or more complex CSS.
+   The current CSS will make the line *to* an active step blue.
+*/
+
+/* If the *previous* step was active, this step's connecting line (::after) should be blue. */
+.order-status-timeline .step.active + .step::after {
+     background-color: #007bff;
+}
+
+/* If current step is active, the line segment leading to it is blue */
+/* This is handled by .step.active::after already */
+
+/* Remove the line segment for the very first step as it has no preceding step */
+.order-status-timeline .step:first-child::after {
+    content: none;
+}
+
+/* Dynamic class for steps that are completed (passed) */
+.order-status-timeline .step.completed .step-icon {
+    background-color: #007bff; /* Blue for completed icon */
+    box-shadow: 0 0 0 3px #007bff; /* Blue outer ring for completed */
+}
+.order-status-timeline .step.completed .step-label {
+    color: #007bff; /* Blue for completed label */
+}
+/* Ensure line leading to a completed step is blue */
+.order-status-timeline .step.completed::after {
+    background-color: #007bff;
+}
+/* Ensure line after a completed step (if next is not active/completed) is blue */
+.order-status-timeline .step.completed + .step:not(.active):not(.completed)::after {
+    background-color: #007bff;
+}
+
+/* This is to color the main line up to the last active/completed step */
+/* This is more complex and typically requires a separate element for the progress fill */
+/* For simplicity with this structure, the lines between steps indicate progress. */
+
+/* Example of how to control active/completed status via Thymeleaf:
+   <div class="step" th:classappend="${order.status == 'PAID' || order.status == 'CONFIRMED'} ? 'completed' : ''">...</div>
+   <div class="step" th:classappend="${order.status == 'SHIPPING'} ? 'active' : ''">...</div>
+*/ 

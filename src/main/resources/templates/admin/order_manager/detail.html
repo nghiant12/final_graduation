@@ -8,6 +8,7 @@
     <meta name="author" content=""/>
     <title>Hoá đơn chi tiết</title>
     <link th:href="@{/admin/css/styles.css}" rel="stylesheet" type="text/css">
+    <link th:href="@{/admin/css/order-timeline.css}" rel="stylesheet" type="text/css">
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
 </head>
 <body class="sb-nav-fixed">
@@ -76,11 +77,63 @@
                             </div>
                         </div>
                         <div style="display: flex">
-                            <h4 class="mx-2">Tổng tiền đơn hàng: </h4> <h4 class="text-danger fw-bold"
-                                                                           th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"></h4>
+                            <div class="order-breakdown">
+                                <p>Tiền hàng: <b th:text="${#numbers.formatDecimal(order.subTotal, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+                                <p>Phí vận chuyển: <b th:text="${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+                                <p>Giảm giá: <b class="text-success" th:text="|-${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} VND|"/></p>
+                                <p class="fw-bold">Tổng thanh toán: <b class="text-primary" th:text="${#numbers.formatDecimal(order.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' VND'"/></p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Order Status Timeline -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-bars-progress me-1"></i>
+                        Trạng thái đơn hàng
+                    </div>
+                    <div class="card-body">
+                        <div class="order-status-timeline">
+                            <div class="step" th:classappend="${order.status != 'CANCELLED' ? 'active' : ''}">
+                                <div class="step-icon">
+                                    <i class="fa-solid fa-money-check-dollar"></i>
+                                </div>
+                                <div class="step-label">Đã thanh toán</div>
+                                <div class="step-date" th:if="${order.createdDate != null}" th:text="${#temporals.format(order.createdDate, 'HH:mm dd-MM-yyyy')}"></div>
+                            </div>
+                            <div class="step" th:classappend="${order.status != 'CANCELLED' and (order.status == 'CONFIRMED' or order.status == 'PREPARING' or order.status == 'SHIPPING' or order.status == 'COMPLETED') ? 'active' : ''}">
+                                <div class="step-icon">
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                </div>
+                                <div class="step-label">Đã xác nhận</div>
+                                <div class="step-date" th:if="${order.createdDate != null}" th:text="${#temporals.format(order.createdDate, 'HH:mm dd-MM-yyyy')}"></div>
+                            </div>
+                            <div class="step" th:classappend="${order.status != 'CANCELLED' and (order.status == 'PREPARING' or order.status == 'SHIPPING' or order.status == 'COMPLETED') ? 'active' : ''}">
+                                <div class="step-icon">
+                                    <i class="fa-solid fa-box"></i>
+                                </div>
+                                <div class="step-label">Đang chuẩn bị</div>
+                                <div class="step-date" th:if="${order.createdDate != null}" th:text="${order.status == 'PREPARING' or order.status == 'SHIPPING' or order.status == 'COMPLETED' ? #temporals.format(order.createdDate, 'HH:mm dd-MM-yyyy') : ''}"></div>
+                            </div>
+                            <div class="step" th:classappend="${order.status != 'CANCELLED' and (order.status == 'SHIPPING' or order.status == 'COMPLETED') ? 'active' : ''}">
+                                <div class="step-icon">
+                                    <i class="fa-solid fa-truck"></i>
+                                </div>
+                                <div class="step-label">Đang giao hàng</div>
+                                <div class="step-date" th:if="${order.createdDate != null}" th:text="${order.status == 'SHIPPING' or order.status == 'COMPLETED' ? #temporals.format(order.createdDate, 'HH:mm dd-MM-yyyy') : ''}"></div>
+                            </div>
+                            <div class="step" th:classappend="${order.status != 'CANCELLED' and order.status == 'COMPLETED' ? 'active' : ''}">
+                                <div class="step-icon">
+                                    <i class="fa-solid fa-check-circle"></i>
+                                </div>
+                                <div class="step-label">Hoàn thành</div>
+                                <div class="step-date" th:if="${order.createdDate != null}" th:text="${order.status == 'COMPLETED' ? #temporals.format(order.createdDate, 'HH:mm dd-MM-yyyy') : ''}"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Order Status Timeline -->
 
                 <div class="card mb-4">
                     <div class="card-header">
@@ -113,6 +166,35 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Update Order Status -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fa-solid fa-pen-to-square me-1"></i>
+                        Cập nhật trạng thái đơn hàng
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/order-manager/update-status}" method="post" style="display: flex; gap: 10px;">
+                            <input type="hidden" name="id" th:value="${order.id}"/>
+                            <div>
+                                <th:block th:switch="${order.status}">
+                                    <button th:case="'PENDING_CONFIRMATION'" type="submit" name="status" value="CONFIRMED" class="btn btn-success">Xác nhận đơn</button>
+                                    <button th:case="'CONFIRMED'" type="submit" name="status" value="PREPARING" class="btn btn-warning">Chuyển sang Đang chuẩn bị</button>
+                                    <button th:case="'PREPARING'" type="submit" name="status" value="SHIPPING" class="btn btn-primary">Chuyển sang Đang giao hàng</button>
+                                    <button th:case="'SHIPPING'" type="submit" name="status" value="COMPLETED" class="btn btn-info">Đã giao hàng</button>
+                                </th:block>
+                            </div>
+                            <!-- Nút hủy đơn, chỉ hiện khi chưa hoàn thành hoặc chưa hủy -->
+                            <button type="submit" name="status" value="CANCELLED"
+                                    class="btn btn-danger"
+                                    th:if="${order.status != 'COMPLETED' and order.status != 'CANCELLED'}">
+                                Hủy đơn
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <!-- End Update Order Status -->
+
             </div>
         </main>
 

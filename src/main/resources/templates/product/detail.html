@@ -32,7 +32,7 @@
         <h5 class="product-color">[[${productDetail.color.name}]]</h5>
         <h5 class="product-size">[[${productDetail.size.name}]]</h5>
         <h5 class="product-category">[[${productDetail.category.name}]]</h5>
-        <h1 class="home-product-price w3-text-red">$[[${productDetail.price}]]</h1>
+        <h1 class="home-product-price w3-text-red" th:text="${#numbers.formatDecimal(productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></h1>
         <div>
             <h5>Số lượng: <input type="number" value="1" id="quantity-product" min="1"> </h5>
             <div>

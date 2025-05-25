@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{css/styles.css}" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        .dashboard-card { min-width: 200px; }
+        .dashboard-summary { gap: 20px; }
+    </style>
+</head>
+<body class="sb-nav-fixed">
+<div th:replace="navbar :: navbar"></div>
+<!-- Menu Sidebar -->
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <div th:replace="~{menu :: menu}"></div>
+
+    </div>
+
+    <div id="layoutSidenav_content">
+        <main>
+                <div class="dashboard-page">
+                    <div class="container py-4">
+                        <h2 class="mb-5 text-center fw-bold" style="font-size:2.2rem;">Thống kê tổng quan</h2>
+                        <!-- Bộ lọc ngày -->
+                        <form id="filter-form" class="row g-3 align-items-end mb-4 justify-content-center">
+                            <div class="col-auto">
+                                <label for="startDate" class="form-label">Từ ngày</label>
+                                <input type="date" class="form-control" id="startDate" name="startDate">
+                            </div>
+                            <div class="col-auto">
+                                <label for="endDate" class="form-label">Đến ngày</label>
+                                <input type="date" class="form-control" id="endDate" name="endDate">
+                            </div>
+                            <div class="col-auto">
+                                <button type="button" class="btn btn-primary" onclick="loadDashboard()">Xem thống kê</button>
+                            </div>
+                        </form>
+                        <!-- Card tổng quan -->
+                        <div class="row dashboard-summary mb-4 g-3 justify-content-center">
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="card dashboard-card text-center p-3 shadow-sm border-0">
+                                    <h6 class="text-muted">Tổng đơn</h6>
+                                    <h3 id="total-orders" class="fw-bold text-primary" style="font-size:2rem;">0</h3>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="card dashboard-card text-center p-3 shadow-sm border-0">
+                                    <h6 class="text-muted">Doanh thu</h6>
+                                    <h3 id="total-revenue" class="fw-bold text-success" style="font-size:2rem;">0 VND</h3>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="card dashboard-card text-center p-3 shadow-sm border-0">
+                                    <h6 class="text-muted">Đơn hoàn thành</h6>
+                                    <h3 id="completed-orders" class="fw-bold text-info" style="font-size:2rem;">0</h3>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="card dashboard-card text-center p-3 shadow-sm border-0">
+                                    <h6 class="text-muted">Đơn bị hủy</h6>
+                                    <h3 id="cancelled-orders" class="fw-bold text-danger" style="font-size:2rem;">0</h3>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="card dashboard-card text-center p-3 shadow-sm border-0">
+                                    <h6 class="text-muted">Mã giảm giá đã dùng</h6>
+                                    <h3 id="used-promotions" class="fw-bold text-warning" style="font-size:2rem;">0</h3>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2">
+                                <div class="card dashboard-card text-center p-3 shadow-sm border-0">
+                                    <h6 class="text-muted">Khách hàng mới</h6>
+                                    <h3 id="new-customers" class="fw-bold text-secondary" style="font-size:2rem;">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Biểu đồ -->
+                        <div class="row g-4">
+                            <div class="col-md-7">
+                                <div class="card p-3 shadow-sm h-100">
+                                    <h5 class="mb-3">Biểu đồ doanh thu theo ngày</h5>
+                                    <canvas id="revenueChart" height="120"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="card p-3 shadow-sm h-100">
+                                    <h5 class="mb-3">Trạng thái đơn hàng</h5>
+                                    <canvas id="statusChart" height="120"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Bảng danh sách đơn hàng -->
+                        <div class="card mt-5 shadow-sm">
+                            <div class="card-header bg-white"><b>Danh sách đơn hàng</b></div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover mb-0 align-middle">
+                                        <thead class="table-light">
+                                        <tr class="text-center">
+                                            <th>Mã đơn</th>
+                                            <th>Khách hàng</th>
+                                            <th>Ngày tạo</th>
+                                            <th>Tổng tiền</th>
+                                            <th>Mã giảm giá</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="order-table-body">
+                                        <!-- JS render -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<footer class="py-4 bg-light mt-auto">
+    <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between small">
+            <div class="text-muted">Copyright &copy; Your Website 2023</div>
+            <div>
+                <a href="#">Privacy Policy</a> &middot; <a href="#">Terms &amp; Conditions</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+function formatCurrency(amount) {
+    if (!amount) return '0 VND';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+}
+let revenueChart, statusChart;
+function renderCharts(revenueData, statusData) {
+    // Doanh thu theo ngày
+    const ctx1 = document.getElementById('revenueChart').getContext('2d');
+    if (revenueChart) revenueChart.destroy();
+    revenueChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+            labels: Object.keys(revenueData),
+            datasets: [{ label: 'Doanh thu', data: Object.values(revenueData), borderColor: '#007bff', fill: false }]
+        },
+        options: { responsive: true }
+    });
+    // Trạng thái đơn hàng
+    const ctx2 = document.getElementById('statusChart').getContext('2d');
+    if (statusChart) statusChart.destroy();
+    statusChart = new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(statusData),
+            datasets: [{ data: Object.values(statusData), backgroundColor:['#28a745','#dc3545','#ffc107','#17a2b8','#6c757d'] }]
+        },
+        options: { responsive: true }
+    });
+}
+function renderOrderTable(orders) {
+    const tbody = document.getElementById('order-table-body');
+    tbody.innerHTML = '';
+    orders.forEach(o => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${o.id}</td>
+            <td>${o.customer}</td>
+            <td>${o.createdDate ? new Date(o.createdDate).toLocaleString('vi-VN') : ''}</td>
+            <td>${formatCurrency(o.totalPrice)}</td>
+            <td>${o.promotion ? o.promotion + (o.promotionDiscount ? ' ('+o.promotionDiscount+'%)' : '') : '-'}</td>
+            <td>${o.status}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+async function loadDashboard() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    if (!start || !end) return;
+    const res = await fetch(`/admin/dashboard/stats?startDate=${start}&endDate=${end}`);
+    const data = await res.json();
+    document.getElementById('total-orders').textContent = data.totalOrders;
+    document.getElementById('total-revenue').textContent = formatCurrency(data.totalRevenue);
+    document.getElementById('completed-orders').textContent = data.completedOrders;
+    document.getElementById('cancelled-orders').textContent = data.cancelledOrders;
+    document.getElementById('used-promotions').textContent = data.usedPromotions;
+    document.getElementById('new-customers').textContent = data.newCustomers;
+    renderCharts(data.revenueByDay, data.statusCount);
+    renderOrderTable(data.orders);
+}
+// Auto load dashboard với 7 ngày gần nhất
+window.onload = function() {
+    const today = new Date();
+    const prior = new Date();
+    prior.setDate(today.getDate() - 6);
+    document.getElementById('endDate').value = today.toISOString().slice(0,10);
+    document.getElementById('startDate').value = prior.toISOString().slice(0,10);
+    loadDashboard();
+}
+</script>
+        </main>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+<script th:src="@{js/scripts.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js"
+        crossorigin="anonymous"></script>
+<script th:src="@{js/datatables-simple-demo.js}"></script>
+</body>
+</html>

@@ -90,4 +90,34 @@ public class OrderManagerController {
         model.addAttribute("totalPrice", orderDetailRepository.tongTien(idOrder));
         return "admin/order_manager/detail";
     }
+
+    @PostMapping("/update-status")
+    public String updateOrderStatus(@RequestParam("id") Integer orderId,
+                                    @RequestParam("status") String newStatus,
+                                    Principal principal) {
+        // Check if the user is authenticated (optional, but good practice)
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        try {
+            // Fetch the order
+            Order order = orderRepository.findByID(orderId);
+            if (order == null) {
+                return "redirect:/admin/order-manager?error=notFound";
+            }
+
+            // Update the order's status
+            order.setStatus(newStatus);
+
+            // Save the updated order
+            orderRepository.save(order);
+
+            return "redirect:/admin/order-manager/detail?idOrder=" + orderId;
+        } catch (Exception e) {
+            // Log the error and return with error message
+            e.printStackTrace();
+            return "redirect:/admin/order-manager/detail?idOrder=" + orderId + "&error=updateFailed";
+        }
+    }
 }
