@@ -4,7 +4,6 @@ import org.example.final_graduation.entities.Customer;
 import org.example.final_graduation.entities.Employee;
 import org.example.final_graduation.repositories.CustomerRepository;
 import org.example.final_graduation.repositories.EmployeeRepository;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
-import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

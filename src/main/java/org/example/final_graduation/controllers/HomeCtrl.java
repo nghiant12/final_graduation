@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 public class HomeCtrl {
@@ -96,12 +97,12 @@ public class HomeCtrl {
 
         if (isAuthenticated && principal != null) {
             String username = principal.getName();
-            Customer customer = customerService.findByUsername(username);
+            Optional<Customer> customer = customerService.findByUsername(username);
 
             if (customer != null) {
-                model.addAttribute("email", customer.getEmail());
-                model.addAttribute("fullName", customer.getFullname());
-                model.addAttribute("phone", customer.getPhoneNumber());
+                model.addAttribute("email", customer.get().getEmail());
+                model.addAttribute("fullName", customer.get().getFullname());
+                model.addAttribute("phone", customer.get().getPhoneNumber());
             } else {
                 model.addAttribute("email", username);
                 model.addAttribute("fullName", "");

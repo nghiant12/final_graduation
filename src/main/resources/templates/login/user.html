@@ -1,57 +1,137 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{/layout/layout.html :: dynamic(~{::title},~{::body})}">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My profile</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>My profile</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"/>
 </head>
 
 <body>
-  <form class="w3-container w3-light-grey user-container">
-    <h2>Hồ sơ của tôi</h2>
-    <input type="hidden" id="user-profile" th:value="${username}">
-    <p>
-      <label>Họ và tên</label>
-      <input class="w3-input w3-border w3-round-large" name="last" type="text" ng-model="userHome.fullname">
-    </p>
-    <p>
-      <label>Email</label>
-      <input class="w3-input w3-border w3-round-large" name="last" type="email" ng-model="userHome.email">
-    </p>
-    <p>
-      <label>Số điện thoại</label>
-      <input class="w3-input w3-border w3-round-large" name="last" type="tel" ng-model="userHome.sdt">
-    </p>
-    <p>
-      <label>Địa chỉ</label>
-      <input class="w3-input w3-border w3-round-large" name="last" type="text" ng-model="userHome.address">
-    </p>
-    <p>
-      <label>Password <i class="fa-regular fa-eye-slash" id="eyeIcon"></i></label>
-      <input class="w3-input w3-border w3-round-large" name="last" type="password" id="passwordField"
-        ng-model="userHome.password">
-    </p>
-    <p>
-      <button class="w3-btn w3-round-large w3-green" ng-click="updateUser()">Cập nhật</button>
-    </p>
-  </form>
+<div th:switch="${userType}">
 
-  <script>
-    $(document).ready(function () {
-      $('#eyeIcon').click(function () {
-        var passwordField = $('#passwordField');
-        var eyeIcon = $(this);
-        if (passwordField.attr('type') === 'password') {
-          passwordField.attr('type', 'text');
-          eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
-        } else {
-          passwordField.attr('type', 'password');
-          eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
-        }
-      });
-    });
-  </script>
+    <!-- Form cho employee -->
+    <form class="w3-container w3-light-grey user-container"
+          th:case="'employee'"
+          th:object="${user}"
+          th:action="@{/profile/employee}"
+          method="post">
+        <!-- ADD THIS LINE -->
+        <input type="hidden" th:field="*{username}"/>
+        <input type="hidden" name="userType" th:value="'employee'"/>
+        <h2>Hồ sơ nhân viên</h2>
+        <p th:if="${error}" style="color:red;" th:text="${error}"></p>
+        <p th:if="${success}" style="color:green;" th:text="${success}"></p>
+
+        <p>
+            <label>Họ và tên</label>
+            <input class="w3-input w3-border w3-round-large" type="text" th:field="*{fullname}" required/>
+        </p>
+        <p>
+            <label>Email</label>
+            <input class="w3-input w3-border w3-round-large" type="email" th:field="*{email}" required/>
+        </p>
+        <p>
+            <label>Số điện thoại</label>
+            <input class="w3-input w3-border w3-round-large" type="tel" th:field="*{phoneNumber}" required/>
+        </p>
+        <p>
+            <label>Địa chỉ</label>
+            <input class="w3-input w3-border w3-round-large" type="text" th:field="*{address}"/>
+        </p>
+        <p>
+            <label>Mật khẩu</label>
+        <div style="position: relative;">
+            <input class="w3-input w3-border w3-round-large"
+                   type="password"
+                   th:field="*{password}"
+                   id="employeePasswordField"/>
+            <i class="fa-solid fa-eye"
+               id="employeeTogglePassword"
+               style="position:absolute; top:12px; right:15px; cursor:pointer;"></i>
+        </div>
+        </p>
+
+        <p>
+            <button class="w3-btn w3-round-large w3-green" type="submit">Cập nhật</button>
+        </p>
+    </form>
+
+    <!-- Form cho customer -->
+    <form class="w3-container w3-light-grey user-container"
+          th:case="'customer'"
+          th:object="${user}"
+          th:action="@{/profile/customer}"
+          method="post">
+        <!-- ADD THIS LINE -->
+        <input type="hidden" th:field="*{username}"/>
+        <input type="hidden" name="userType" th:value="'customer'"/>
+        <h2>Hồ sơ khách hàng</h2>
+        <p th:if="${error}" style="color:red;" th:text="${error}"></p>
+        <p th:if="${success}" style="color:green;" th:text="${success}"></p>
+
+        <p>
+            <label>Họ và tên</label>
+            <input class="w3-input w3-border w3-round-large" type="text" th:field="*{fullname}" required/>
+        </p>
+        <p>
+            <label>Email</label>
+            <input class="w3-input w3-border w3-round-large" type="email" th:field="*{email}" required/>
+        </p>
+        <p>
+            <label>Số điện thoại</label>
+            <input class="w3-input w3-border w3-round-large" type="tel" th:field="*{phoneNumber}" required/>
+        </p>
+        <p>
+            <label>Địa chỉ</label>
+            <input class="w3-input w3-border w3-round-large" type="text" th:field="*{address}"/>
+        </p>
+        <p>
+            <label>Mật khẩu</label>
+        <div style="position: relative;">
+            <input class="w3-input w3-border w3-round-large"
+                   type="password"
+                   th:field="*{password}"
+                   id="passwordField"/>
+            <i class="fa-solid fa-eye"
+               id="togglePassword"
+               style="position:absolute; top:12px; right:15px; cursor:pointer;"></i>
+        </div>
+        </p>
+        <p>
+            <button class="w3-btn w3-round-large w3-green" type="submit">Cập nhật</button>
+        </p>
+    </form>
+
+</div>
+<script>
+    // Customer toggle
+    const toggle = document.getElementById("togglePassword");
+    const passwordField = document.getElementById("passwordField");
+
+    if (toggle && passwordField) {
+        toggle.addEventListener("click", function () {
+            const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+            passwordField.setAttribute("type", type);
+            this.classList.toggle("fa-eye");
+            this.classList.toggle("fa-eye-slash");
+        });
+    }
+
+    // Employee toggle
+    const toggleEmp = document.getElementById("employeeTogglePassword");
+    const passwordEmpField = document.getElementById("employeePasswordField");
+
+    if (toggleEmp && passwordEmpField) {
+        toggleEmp.addEventListener("click", function () {
+            const type = passwordEmpField.getAttribute("type") === "password" ? "text" : "password";
+            passwordEmpField.setAttribute("type", type);
+            this.classList.toggle("fa-eye");
+            this.classList.toggle("fa-eye-slash");
+        });
+    }
+</script>
 </body>
-
 </html>

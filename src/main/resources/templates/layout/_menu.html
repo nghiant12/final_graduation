@@ -41,7 +41,7 @@
                             <a class="dropbtn-user"><i class="fa-solid fa-user-tie"></i></a>
                             <div class="dropdown-content-user">
                                 <a href="/order/list"><i class="fa-solid fa-bag-shopping"></i> Đơn hàng</a>
-                                <a href="/my-profile"><i class="fa-regular fa-id-card"></i> Hồ sơ</a>
+                                <a href="/profile"><i class="fa-regular fa-id-card"></i> Hồ sơ</a>
                                 <a th:if="${#authorization.expression('isAuthenticated()')
                                             and #authorization.expression('hasRole(''ADMIN'')')}"
                                             href="/admin/orders">

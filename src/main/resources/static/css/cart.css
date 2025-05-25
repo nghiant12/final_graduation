@@ -21,7 +21,7 @@
 }
 
 .cart-table {
-  width: 70%;
+  width: 80%;
   margin-left: 10px;
 }
 
@@ -57,7 +57,7 @@
 }
 
 .cart-pay {
-  width: 30%;
+  width: 20%;
   margin-right: 10px;
   padding: 10px;
   border-radius: 5px;

@@ -43,6 +43,7 @@ function handleVNPayReturn() {
     const vnp_ResponseCode = urlParams.get('vnp_ResponseCode');
     
     if (vnp_ResponseCode === '00') {
+        localStorage.removeItem("cartR");
         localStorage.removeItem('checkoutCart');
         count();
     }

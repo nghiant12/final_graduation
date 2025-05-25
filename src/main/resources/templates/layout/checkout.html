@@ -186,7 +186,7 @@
                                             th:data-discount="${promotion.discount}"
                                             th:data-min-value="${promotion.minOrderValue}"
                                             th:data-remaining="${promotion.remainingQuantity}"
-                                            th:text="${promotion.name} + ' (-' + ${promotion.discount} + '%) - Tối thiểu ' + ${#numbers.formatDecimal(promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')} + ' VND (' + ${promotion.remainingQuantity} + ' còn lại)'">
+                                            th:text="${promotion.name} + ' (-' + ${promotion.discount} + '%) - Tối thiểu ' + ${#numbers.formatDecimal(promotion.minOrderValue, 0, 'COMMA', 0, 'POINT')}">
                                     </option>
                                 </select>
                                 <button type="button" class="pay-button" style="padding: 8px 16px; font-size: 14px;" onclick="applyPromotionCode()">Áp dụng</button>

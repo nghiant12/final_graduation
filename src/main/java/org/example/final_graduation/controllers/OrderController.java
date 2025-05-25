@@ -28,6 +28,7 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Controller("clientOrderController") // Đổi tên bean ở đây
 @RequestMapping("/api/orders") // Thay đổi đường dẫn API
@@ -66,11 +67,11 @@ public class OrderController {
              return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Vui lòng đăng nhập để đặt hàng."));
         }
 
-        Customer currentCustomer = customerService.findByUsername(principal.getName());
+        Optional<Customer> currentCustomer = customerService.findByUsername(principal.getName());
         if (currentCustomer == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Lỗi: Không tìm thấy thông tin khách hàng đã xác thực."));
         }
-        orderRequest.setCustomerId(currentCustomer.getId());
+        orderRequest.setCustomerId(currentCustomer.get().getId());
 
         if (orderRequest.getEmployeeId() == null) {
             orderRequest.setEmployeeId(1); // Hoặc logic gán employeeId mặc định khác

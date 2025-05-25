@@ -31,7 +31,7 @@ public class OrderController {
     private ProductDetailService productDetailService;
 
     @Autowired
-    private EmpolyeeService empolyeeService;
+    private EmployeeService empolyeeService;
 
     @Autowired
     private OrderRepository orderRepository;
