@@ -70,6 +70,7 @@ public class Order {
     @Size(max = 50)
     @NotNull
     @Nationalized
+    @ColumnDefault("Online")
     @Column(name = "type", nullable = false, length = 50)
     private String type;
 

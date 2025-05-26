@@ -133,6 +133,7 @@ async function confirmOrder() {
     try {
         // Get form data
         const formData = {
+            customerId: document.getElementById('user-id').value,
             fullname: document.getElementById('user-fullname').value,
             email: document.getElementById('user-email').value,
             phone: document.getElementById('user-sdt').value,
@@ -185,6 +186,7 @@ async function confirmOrder() {
 
         // Create order request
         const orderRequest = {
+            customerId: formData.customerId,
             customerName: formData.fullname,
             email: formData.email,
             phone: formData.phone,

@@ -9,6 +9,8 @@ import org.example.final_graduation.services.CustomerService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Controller
@@ -97,18 +101,26 @@ public class HomeCtrl {
 
         if (isAuthenticated && principal != null) {
             String username = principal.getName();
+            Optional<Customer> currentCustomer = customerService.findByUsername(principal.getName());
+            if (currentCustomer.isEmpty()) {
+                    throw new RuntimeException("Không tìm thấy thông tin khách hàng đã xác thực.");
+            }
+            Integer id = currentCustomer.get().getId();
             Optional<Customer> customer = customerService.findByUsername(username);
 
-            if (customer != null) {
+            if (customer.isPresent()) {
+                model.addAttribute("id", customer.get().getId());
                 model.addAttribute("email", customer.get().getEmail());
                 model.addAttribute("fullName", customer.get().getFullname());
                 model.addAttribute("phone", customer.get().getPhoneNumber());
             } else {
+                model.addAttribute("id", id);
                 model.addAttribute("email", username);
                 model.addAttribute("fullName", "");
                 model.addAttribute("phone", "");
             }
         } else {
+            model.addAttribute("id", "");
             model.addAttribute("email", "");
             model.addAttribute("fullName", "");
             model.addAttribute("phone", "");

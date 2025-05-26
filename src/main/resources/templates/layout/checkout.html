@@ -85,6 +85,12 @@
                             <h4 class="w3-center"><b>THÔNG TIN ĐƠN HÀNG</b></h4>
 
                             <!-- Họ và tên -->
+                            <div style="display:none;">
+                                <label>Id</label>
+                                <input class="w3-input w3-border w3-round" name="id" id="user-id"
+                                       th:value="${id}"
+                                       th:disabled="true">
+                            </div>
                             <p>
                                 <label>Họ và Tên</label>
                                 <input class="w3-input w3-border w3-round" name="fullname" id="user-fullname"

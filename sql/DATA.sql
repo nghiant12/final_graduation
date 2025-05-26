@@ -7,12 +7,12 @@ WITH ROLLBACK IMMEDIATE;
 DROP DATABASE final_graduation;
 
 CREATE DATABASE [final_graduation]
- CONTAINMENT = NONE
- ON  PRIMARY 
-( NAME = N'final_graduation', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\final_graduation.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
- LOG ON 
-( NAME = N'final_graduation_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\final_graduation_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
- WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
+-- CONTAINMENT = NONE
+ --ON  PRIMARY 
+--( NAME = N'final_graduation', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\final_graduation.mdf' , SIZE = 8192KB , MAXSIZE = UNLIMITED, FILEGROWTH = 65536KB )
+--LOG ON 
+--( NAME = N'final_graduation_log', FILENAME = N'C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS\MSSQL\DATA\final_graduation_log.ldf' , SIZE = 8192KB , MAXSIZE = 2048GB , FILEGROWTH = 65536KB )
+--WITH CATALOG_COLLATION = DATABASE_DEFAULT, LEDGER = OFF
 GO
 ALTER DATABASE [final_graduation] SET COMPATIBILITY_LEVEL = 160
 GO

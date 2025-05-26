@@ -29,5 +29,20 @@
     </div>
 
 </div>
+<script>
+    // Handle VNPay return
+    function handleVNPayReturn() {
+        localStorage.removeItem("cartR");
+        localStorage.removeItem('checkoutCart');
+        count();
+    }
+
+    // Initialize event listeners when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add VNPay return handler
+        handleVNPayReturn();
+    });
+
+</script>
 </body>
 </html>

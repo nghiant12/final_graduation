@@ -46,6 +46,7 @@ public class LoginCtrl {
         if (employee.isPresent() && passwordEncoder.matches(password, employee.get().getPassword())) {
             session.setAttribute("role", "ADMIN");
             session.setAttribute("loggedInUser", employee.get().getUsername());
+            session.setAttribute("customerId", employee.get().getId());
             redirectAttributes.addFlashAttribute("successMessage", "Đăng nhập thành công!");
             return "admin/orders/order_form";
         }
@@ -53,6 +54,7 @@ public class LoginCtrl {
         // Kiểm tra nếu là Customer (User)
         Optional<Customer> customer = customerRepository.findByUsername(username);
         if (customer.isPresent() && passwordEncoder.matches(password, customer.get().getPassword())) {
+            session.setAttribute("customerId", customer.get().getId());
             session.setAttribute("loggedInUser", customer.get().getFullname());
             session.setAttribute("role", "USER");
             redirectAttributes.addFlashAttribute("successMessage", "Đăng nhập thành công!");

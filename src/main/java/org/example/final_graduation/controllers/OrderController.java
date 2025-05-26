@@ -59,7 +59,6 @@ public class OrderController {
     public ResponseEntity<?> placeOrder(@RequestBody OrderRequest orderRequest, // Nhận toàn bộ request body
                                           Principal principal,
                                           HttpServletRequest httpServletRequest) { // Thêm HttpServletRequest
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         boolean isAuthenticated = authentication != null && authentication.isAuthenticated() && !authentication.getPrincipal().equals("anonymousUser");
         
@@ -132,7 +131,6 @@ public class OrderController {
             if (paymentMethod == null) {
                 return ResponseEntity.badRequest().body(Map.of("message", "Phương thức thanh toán không được để trống"));
             }
-
             if ("VNPay".equalsIgnoreCase(paymentMethod)) {
                 // For VNPay, create payment URL first without creating order
                 String vnpayUrl = vnPayService.createOrder(
