@@ -16,6 +16,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
     Optional<Customer> findByEmail(String email);
 
+    Optional<Customer> findByPhoneNumber(String phoneNumber);
+
     // Kiểm tra username đã tồn tại chưa
     boolean existsByUsername(String username);
 

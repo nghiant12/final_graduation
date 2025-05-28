@@ -1,6 +1,7 @@
 package org.example.final_graduation.controllers;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import org.example.final_graduation.entities.Customer;
 import org.example.final_graduation.entities.Employee;
 import org.example.final_graduation.repositories.CustomerRepository;
@@ -8,6 +9,7 @@ import org.example.final_graduation.repositories.EmployeeRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -28,10 +30,21 @@ public class LoginCtrl {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @GetMapping("/login")
+    public String showLoginForm(Model model,
+                                @RequestParam(value = "showSignupForm", required = false) Boolean showSignupForm) {
+        model.addAttribute("account", new Customer()); // cần thiết để tránh lỗi khi truy cập `th:object`
+        model.addAttribute("showSignupForm", showSignupForm != null && showSignupForm);
+        return "login/loginform-d";
+    }
+
     @GetMapping
     public String loginPage(@RequestParam(value = "error", required = false) String error, Model model) {
         if (error != null) {
             model.addAttribute("message", "Invalid username or password.");
+        }
+        if (!model.containsAttribute("account")) {
+            model.addAttribute("account", new Customer());
         }
         return "login/loginform-d";
     }
@@ -73,29 +86,9 @@ public class LoginCtrl {
         return "redirect:/login";
     }
 
-    @PostMapping("/signup/customer")
-    public String registerCustomer(@ModelAttribute("account") Customer customer,
-                                   @RequestParam("confirmPassword") String confirmPassword,
-                                   RedirectAttributes redirectAttributes) {
-
-        // Kiểm tra username đã tồn tại chưa
-        if (customerRepository.findByUsername(customer.getUsername()).isPresent()) {
-            redirectAttributes.addFlashAttribute("messageSignup", "Username already exists!");
-            return "redirect:/login";
-        }
-
-        // Kiểm tra mật khẩu có trùng khớp không
-        if (!customer.getPassword().equals(confirmPassword)) {
-            redirectAttributes.addFlashAttribute("messageSignup", "Passwords do not match!");
-            return "redirect:/login";
-        }
-
-        // **Mã hóa mật khẩu trước khi lưu**
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
-        customerRepository.save(customer);
-
-        redirectAttributes.addFlashAttribute("messageSignup", "Sign up successful! You can now log in.");
-        return "redirect:/login";
+    @GetMapping("/signup")
+    public String signupPage(Model model) {
+        model.addAttribute("account", new Customer());
+        return "login/loginform-d";
     }
-
 }

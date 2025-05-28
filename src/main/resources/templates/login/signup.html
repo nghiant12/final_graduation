@@ -1,139 +1,209 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
-    <title>Title</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta charset="UTF-8" />
+    <title>Sign up - Sneaker Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: url('https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2020%2F01%2Fsneaker-trends-forecast-year-nike-adidas-1-1.jpg?w=1440&cbr=1&q=90&fit=max') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-    <!-- Bootstrap CSS v5.2.1 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+        .card {
+            background-color: rgba(31, 41, 55, 0.9);
+            border: none;
+            border-radius: 1rem;
+            max-width: 700px;
+            width: 100%;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0,0,0,0.37);
+        }
 
-    <!-- Bootstrap Icons CSS từ CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+        .form-label {
+            color: #f8fafc;
+            font-weight: 500;
+        }
 
+        .form-control {
+            border-radius: 0.5rem;
+            border: 1px solid #334155;
+            background-color: #f1f5f9;
+            color: #000;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 0.2rem rgba(249, 115, 22, 0.25);
+            outline: none;
+        }
+
+        .invalid-feedback {
+            color: #f87171;
+        }
+
+        .btn-primary {
+            background-color: #f97316;
+            border: none;
+            transition: 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #ea580c;
+        }
+
+        .btn-secondary {
+            background-color: #64748b;
+            border: none;
+        }
+
+        h2 {
+            color: white;
+            font-weight: bold;
+        }
+
+        .alert-info {
+            background-color: #22c55e;
+            color: white;
+        }
+    </style>
 </head>
-
 <body>
-    <header>
-        <!-- place navbar here -->
-    </header>
-    <main>
-        <!-- Section: Design Block -->
-        <section class="">
-            <!-- Jumbotron -->
-            <div class="px-4 py-5 px-md-5 text-center text-lg-start" style="background-color: hsl(0, 0%, 96%)">
-                <div class="container">
-                    <div class="row gx-lg-5 align-items-center">
-                        <div class="col-lg-6 mb-5 mb-lg-0">
-                            <h1 class="my-5 display-3 fw-bold ls-tight">
-                                The best offer <br />
-                                <span class="text-primary">for your business</span>
-                            </h1>
-                            <p style="color: hsl(217, 10%, 50.8%)">
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                                Eveniet, itaque accusantium odio, soluta, corrupti aliquam
-                                quibusdam tempora at cupiditate quis eum maiores libero
-                                veritatis? Dicta facilis sint aliquid ipsum atque?
-                            </p>
-                        </div>
+<div class="card shadow">
+    <h2 class="text-center mb-4">Register Account</h2>
 
-                        <div class="col-lg-6 mb-5 mb-lg-0">
-                            <div class="card">
-                                <div class="card-body py-5 px-md-5">
-                                    <form th:action="@{/login/signup}" th:object="${account}" method="post">
+    <form th:action="@{/signup}" th:object="${account}" method="post" novalidate>
+        <div th:if="${message}" class="alert alert-info text-center" th:text="${message}"></div>
 
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="username">Username</label>
-                                            <input type="text" id="username" class="form-control"
-                                                th:field="*{username}" />
-                                        </div>
-                                        <!-- 2 column grid layout with text inputs for the password -->
-                                        <div class="row">
-                                            <div class="col-md-6 mb-4">
-                                                <div class="form-outline">
-                                                    <label class="form-label" for="password">Password</label>
-                                                    <input type="password" id="password" class="form-control"
-                                                        th:field="*{password}" />
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6 mb-4">
-                                                <div class="form-outline">
-                                                    <label class="form-label"
-                                                        for="confirm-password">Confirm-password</label>
-                                                    <input type="password" id="confirm-password" class="form-control"
-                                                        th:field="*{confirmPassword}" />
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Email input -->
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="email">Email address</label>
-                                            <input type="email" id="email" class="form-control" th:field="*{email}" />
-                                        </div>
-
-                                        <!-- phone-number input -->
-                                        <div class="form-outline mb-4">
-                                            <label class="form-label" for="phone-number">phone-number</label>
-                                            <input type="text" id="phone-number" class="form-control"
-                                                th:field="*{sdt}" />
-                                        </div>
-
-                                        <!-- Submit button -->
-                                        <div class="d-grid">
-                                            <button type="submit" class="btn btn-primary btn-block mb-4">
-                                                Sign up
-                                            </button>
-                                        </div>
-
-                                        <!-- Register buttons -->
-                                        <div class="text-center">
-                                            <p>or sign up with:</p>
-                                            <button type="button" class="btn btn-link btn-floating mx-1">
-
-                                                <i class="bi bi-facebook"></i>
-                                            </button>
-
-                                            <button type="button" class="btn btn-link btn-floating mx-1">
-
-                                                <i class="bi bi-google"></i>
-                                            </button>
-
-                                            <button type="button" class="btn btn-link btn-floating mx-1">
-
-                                                <i class="bi bi-twitter-x"></i>
-                                            </button>
-
-                                            <button type="button" class="btn btn-link btn-floating mx-1">
-
-                                                <i class="bi bi-github"></i>
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" th:field="*{username}" name="username" class="form-control" />
+                <div class="invalid-feedback">Username is required and must not exceed 50 characters.</div>
             </div>
-            <!-- Jumbotron -->
-        </section>
-        <!-- Section: Design Block -->
-    </main>
-    <footer>
-        <!-- place footer here -->
-    </footer>
-    <!-- Bootstrap JavaScript Libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
-        crossorigin="anonymous"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
-        integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
-        crossorigin="anonymous"></script>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" th:field="*{email}" name="email" class="form-control" />
+                <div class="invalid-feedback">Enter a valid email address.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" th:field="*{password}" name="password" class="form-control" />
+                <div class="invalid-feedback">Password must be between 6 and 255 characters.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" th:field="*{confirmPassword}" name="confirmPassword" class="form-control" />
+                <div class="invalid-feedback">Passwords do not match.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Full Name</label>
+                <input type="text" th:field="*{fullname}" name="fullname" class="form-control" />
+                <div class="invalid-feedback">Full name is required and must not exceed 100 characters.</div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="text" th:field="*{phoneNumber}" name="phoneNumber" class="form-control" />
+                <div class="invalid-feedback">Phone number must be exactly 10 digits.</div>
+            </div>
+
+            <div class="col-12 mb-3">
+                <label class="form-label">Address</label>
+                <input type="text" th:field="*{address}" name="address" class="form-control" />
+                <div class="invalid-feedback">Address must not exceed 100 characters.</div>
+            </div>
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Sign Up</button>
+            <button type="reset" class="btn btn-secondary">Reset</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+
+        form.addEventListener("submit", function (event) {
+            let isValid = true;
+
+            const username = form.querySelector('[name="username"]');
+            const password = form.querySelector('[name="password"]');
+            const confirmPassword = form.querySelector('[name="confirmPassword"]');
+            const email = form.querySelector('[name="email"]');
+            const fullname = form.querySelector('[name="fullname"]');
+            const phoneNumber = form.querySelector('[name="phoneNumber"]');
+            const address = form.querySelector('[name="address"]');
+
+            [username, password, confirmPassword, email, fullname, phoneNumber, address].forEach(input => {
+                input.classList.remove("is-invalid");
+            });
+
+            if (username.value.trim() === "" || username.value.length > 50) {
+                username.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            if (password.value.length < 6 || password.value.length > 255) {
+                password.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            if (confirmPassword.value !== password.value) {
+                confirmPassword.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value) || email.value.length > 100) {
+                email.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            if (fullname.value.trim() === "" || fullname.value.length > 100) {
+                fullname.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(phoneNumber.value)) {
+                phoneNumber.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            if (address.value.length > 100) {
+                address.classList.add("is-invalid");
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        const messageDiv = document.querySelector(".alert");
+        if (messageDiv && messageDiv.textContent.includes("successful")) {
+            setTimeout(function () {
+                window.location.href = "/login";
+            }, 2000);
+        }
+    });
+</script>
 </body>
-
 </html>
