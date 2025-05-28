@@ -433,7 +433,7 @@ public class OrderController {
             }
             order.setDiscountAmount(discountAmount);
             order.setTotalPrice(totalPrice);
-            order.setStatus("Completed");
+            order.setStatus("COMPLETED");
             orderService.saveOrder(order);
 
             redirectAttributes.addFlashAttribute("success", "Đơn hàng đã hoàn thành!");
