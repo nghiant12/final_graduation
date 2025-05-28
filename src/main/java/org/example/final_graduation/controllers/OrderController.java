@@ -150,11 +150,11 @@ public class OrderController {
                 responseBody.put("shippingFee", shippingFee);
                 responseBody.put("discountAmount", discountAmount);
                 responseBody.put("finalTotal", finalTotal);
-            } else if ("Cash".equalsIgnoreCase(paymentMethod)) {
+            } else if ("COD".equalsIgnoreCase(paymentMethod)) {
                 // For Cash on delivery, create order immediately
                 OrderResponse orderResponse = orderService.createOrder(orderRequest);
                 responseBody.put("order", orderResponse);
-                responseBody.put("paymentMethod", "Cash");
+                responseBody.put("paymentMethod", "COD");
                 responseBody.put("subTotal", subTotal);
                 responseBody.put("shippingFee", shippingFee);
                 responseBody.put("discountAmount", discountAmount);
