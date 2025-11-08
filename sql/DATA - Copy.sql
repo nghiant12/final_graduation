@@ -3,7 +3,7 @@ GO
 ALTER DATABASE final_graduation
 SET SINGLE_USER
 WITH ROLLBACK IMMEDIATE;
-
+-- minh hieu sua vao day cho chi
 DROP DATABASE final_graduation;
 
 CREATE DATABASE [final_graduation]
